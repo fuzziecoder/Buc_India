@@ -70,7 +70,7 @@ const MediaUpload = ({ isOpen, onClose }) => {
       <div className="bg-gray-900 rounded-lg p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-gray-700">
         <div className="flex justify-between items-center mb-6">
           <h3 className="text-2xl font-bold text-white flex items-center">
-            <Upload className="h-6 w-6 text-orange-500 mr-2" />
+            <Upload className="h-6 w-6 text-blue-500 mr-2" />
             Upload Media
           </h3>
           <button
@@ -94,7 +94,7 @@ const MediaUpload = ({ isOpen, onClose }) => {
             
             <div
               onClick={() => fileInputRef.current?.click()}
-              className="border-2 border-dashed border-gray-600 rounded-lg p-8 text-center cursor-pointer hover:border-orange-500 transition-colors"
+              className="border-2 border-dashed border-gray-600 rounded-lg p-8 text-center cursor-pointer hover:border-blue-500 transition-colors"
             >
               <Upload className="h-12 w-12 text-gray-400 mx-auto mb-4" />
               <h4 className="text-lg font-semibold text-white mb-2">Select Photos & Videos</h4>
@@ -119,7 +119,7 @@ const MediaUpload = ({ isOpen, onClose }) => {
                       {file.type.startsWith('image/') ? (
                         <Image className="h-6 w-6 text-blue-500" />
                       ) : (
-                        <Video className="h-6 w-6 text-red-500" />
+                        <Video className="h-6 w-6 text-indigo-500" />
                       )}
                       <div>
                         <p className="text-white font-medium">{file.name}</p>
@@ -128,7 +128,7 @@ const MediaUpload = ({ isOpen, onClose }) => {
                     </div>
                     <button
                       onClick={() => removeFile(index)}
-                      className="text-gray-400 hover:text-red-500 transition-colors"
+                      className="text-gray-400 hover:text-indigo-500 transition-colors"
                     >
                       <X className="h-5 w-5" />
                     </button>
@@ -142,7 +142,7 @@ const MediaUpload = ({ isOpen, onClose }) => {
             <button
               onClick={handleUpload}
               disabled={selectedFiles.length === 0 || isUploading}
-              className="bg-gradient-to-r from-orange-500 to-red-600 text-white px-8 py-3 rounded-lg font-semibold hover:from-orange-600 hover:to-red-700 transition-all duration-200 flex items-center space-x-2 mx-auto disabled:opacity-50 disabled:cursor-not-allowed"
+              className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white px-8 py-3 rounded-lg font-semibold hover:from-blue-600 hover:to-indigo-700 transition-all duration-200 flex items-center space-x-2 mx-auto disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isUploading ? (
                 <>

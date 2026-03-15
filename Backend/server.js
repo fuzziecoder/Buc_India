@@ -14,6 +14,8 @@ import galleryRoutes from "./routes/galleryRoutes.js";
 import clubRoutes from "./routes/clubRoutes.js";
 import clubMembershipRoutes from "./routes/clubMembershipRoutes.js";
 import certificateRoutes from "./routes/certificateRoutes.js";
+import otpRoutes from "./routes/otpRoutes.js";
+import userAuthRoutes from "./routes/userAuthRoutes.js";
 
 const app = express();
 
@@ -34,11 +36,15 @@ app.use(
         "https://bucindia.com",
         "https://www.bucindia.com",
       ].filter(Boolean);
-      
+
       // Allow requests with no origin (like mobile apps or curl requests)
       if (!origin) return callback(null, true);
-      
-      if (allowedOrigins.indexOf(origin) !== -1 || origin.includes("onrender.com") || origin.includes("vercel.app")) {
+
+      if (
+        allowedOrigins.indexOf(origin) !== -1 ||
+        origin.includes("onrender.com") ||
+        origin.includes("vercel.app")
+      ) {
         callback(null, true);
       } else {
         // In production, you might want to be stricter, but for now let's allow it to fix the login issue
@@ -114,6 +120,8 @@ app.use("/api/gallery", galleryRoutes);
 app.use("/api/clubs", clubRoutes);
 app.use("/api/club-memberships", clubMembershipRoutes);
 app.use("/api/certificates", certificateRoutes);
+app.use("/api/otp", otpRoutes);
+app.use("/api/user-auth", userAuthRoutes);
 
 // Error handler
 app.use((err, req, res, next) => {

@@ -1,52 +1,20 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import {
-  Users,
+  AlertCircle,
+  Handshake,
   Shield,
-  PlusCircle,
   CheckCircle,
-  XCircle,
+  Users,
   Calendar,
   ArrowRight,
-  Handshake,
-  AlertCircle,
+  XCircle,
 } from "lucide-react";
 import { clubMembershipService, clubService } from "../../services/api";
-import "./Clubs.css";
-
-/* ── Single-Club Popup ── */
-const SingleClubPopup = ({ onClose }) => (
-  <div className="clubs-popup-overlay" onClick={onClose}>
-    <div className="clubs-popup" onClick={(e) => e.stopPropagation()}>
-      <div className="clubs-popup-icon">
-        <AlertCircle size={32} />
-      </div>
-      <h3>One Club Per Rider</h3>
-      <p>
-        You're already a member of a club. BUC allows only one active club
-        membership per rider to keep the community focused and fair.
-      </p>
-      <p className="clubs-popup-sub">
-        Leave your current club first if you'd like to join a different one.
-      </p>
-      <button className="clubs-popup-close" onClick={onClose}>
-        Got it
-      </button>
-    </div>
-  </div>
-);
-
-const generateSlug = (name) =>
-  name
-    .toLowerCase()
-    .replace(/[^a-z0-9\s-]/g, "")
-    .trim()
-    .replace(/\s+/g, "-");
 
 const Clubs = () => {
   const navigate = useNavigate();
-
   const [clubs, setClubs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [membership, setMembership] = useState(null);
@@ -75,7 +43,6 @@ const Clubs = () => {
       setClubs(clubList);
       setMembership(myClub.membership || null);
     } catch (error) {
-      console.error("Failed to load clubs:", error);
       toast.error("Failed to load clubs. Please try again.");
     } finally {
       setLoading(false);
@@ -95,11 +62,10 @@ const Clubs = () => {
     setJoining(true);
     try {
       await clubMembershipService.join(clubId, userEmail, userPhone);
-      toast.success("You have joined the club!");
+      toast.success("Joined the brotherhood!");
       await loadData();
     } catch (error) {
-      console.error("Join club error:", error);
-      toast.error(error.response?.data?.message || "Unable to join club");
+      toast.error(error.response?.data?.message || "Unable to join");
     } finally {
       setJoining(false);
     }
@@ -108,7 +74,7 @@ const Clubs = () => {
   const handleLeave = async () => {
     if (!membership || !membership.clubId) return;
     if (!leaveReason.trim()) {
-      toast.error("Please share a short reason before leaving the club.");
+      toast.error("Please provide a reason to leave.");
       return;
     }
     setLeaving(true);
@@ -117,174 +83,96 @@ const Clubs = () => {
         membership.clubId._id || membership.clubId,
         userEmail,
         userPhone,
-        leaveReason.trim()
+        leaveReason.trim(),
       );
-      toast.success("You have left the club.");
+      toast.success("Left the club.");
       setLeaveReason("");
       await loadData();
     } catch (error) {
-      console.error("Leave club error:", error);
-      toast.error(error.response?.data?.message || "Unable to leave club");
+      toast.error(error.response?.data?.message || "Unable to leave");
     } finally {
       setLeaving(false);
     }
   };
 
   const goToClub = (club) => {
-    const slug = club.slug || generateSlug(club.name);
+    const slug = club.slug || club.name.toLowerCase().replace(/ /g, "-");
     navigate(`/clubs/${slug}`, { state: { club } });
   };
 
-  const handleCollaborate = () => {
-    if (!isLoggedIn) {
-      toast.info("Please login / sign up to collaborate with BUC.");
-      navigate("/login");
-      return;
-    }
-    navigate("/clubs/collaborate");
-  };
-
   return (
-    <section id="clubs" className="clubs-section">
-      {showSingleClubPopup && (
-        <SingleClubPopup onClose={() => setShowSingleClubPopup(false)} />
-      )}
-
-      {/* ─── Hero ─── */}
-      <div className="clubs-page-header">
-        <div className="clubs-page-header-inner">
-          <div className="clubs-page-heading-wrap">
-            <h2 className="clubs-page-heading">
-              Partner{" "}
-              <span className="clubs-page-heading-accent">Riding Clubs</span>
-            </h2>
-            <div className="clubs-hero-badges">
-              <div className="clubs-hero-badge">
-                <Users size={15} />
-                <span>One club per rider, many rides together.</span>
-              </div>
-              <div className="clubs-hero-badge">
-                <Shield size={15} />
-                <span>BUC-approved, safety-first communities.</span>
-              </div>
-            </div>
+    <section id="clubs" className="section-container py-24 bg-carbon text-white">
+      <div className="max-w-7xl mx-auto px-6">
+        <div className="flex flex-col md:flex-row justify-between items-end gap-8 mb-16">
+          <div>
+            <span className="text-copper font-body tracking-ultra text-xs md:text-sm uppercase mb-2 block font-bold">The network</span>
+            <h2 className="font-heading text-6xl md:text-8xl uppercase leading-none">Global <span className="text-transparent outline-title">Chapters</span></h2>
           </div>
-
-          {/* Collaborate CTA */}
-          <button className="clubs-collab-btn" onClick={handleCollaborate}>
+          
+          <button 
+            onClick={() => navigate("/clubs/collaborate")}
+            className="flex items-center gap-4 bg-white text-carbon px-8 py-4 font-heading text-lg uppercase hover:bg-copper transition-all duration-500"
+          >
             <Handshake size={20} />
-            <span className="clubs-collab-btn-main">Collaborate with BUC</span>
-            <span className="clubs-collab-btn-sub">Join as a Partner Club</span>
+            Partner With BUC
           </button>
         </div>
-      </div>
 
-      {/* ─── Club Cards Grid ─── */}
-      <div className="clubs-content">
         {loading ? (
-          <div className="clubs-loading-grid">
-            {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="clubs-card-skeleton" />
-            ))}
-          </div>
-        ) : clubs.length === 0 ? (
-          <div className="clubs-empty-state">
-            <Shield size={48} />
-            <h3>No partner clubs yet</h3>
-            <p>Be the first to collaborate with BUC!</p>
+          <div className="flex justify-center py-20">
+            <div className="w-12 h-12 border-4 border-copper/30 border-t-copper rounded-full animate-spin"></div>
           </div>
         ) : (
-          <div className="clubs-product-grid">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-24">
             {clubs.map((club) => {
-              const isMyClub =
-                membership &&
-                membership.clubId &&
-                (membership.clubId._id || membership.clubId) === club.id;
-
-              const joinDate = club.startedOn
-                ? new Date(club.startedOn).toLocaleDateString("en-IN", {
-                    year: "numeric",
-                    month: "short",
-                  })
-                : "N/A";
-
+              const isMyClub = membership?.clubId && (membership.clubId._id || membership.clubId) === club.id;
+              
               return (
-                <div
-                  key={club.id}
-                  className="club-product-card"
-                  onClick={() => goToClub(club)}
-                  role="button"
-                  tabIndex={0}
-                  onKeyDown={(e) => e.key === "Enter" && goToClub(club)}
-                >
-                  {/* Logo / Image */}
-                  <div className="club-card-image-wrap">
-                    {club.logoUrl ? (
-                      <img
-                        src={club.logoUrl}
-                        alt={club.name}
-                        className="club-card-logo-img"
-                      />
-                    ) : (
-                      <div className="club-card-logo-fallback">
-                        <span>{club.name.charAt(0)}</span>
-                      </div>
-                    )}
-                    {isMyClub && (
-                      <div className="club-card-my-badge">
-                        <CheckCircle size={12} /> Your Club
-                      </div>
-                    )}
+                <div key={club.id} className="group border border-white/5 bg-carbon-light p-8 hover:border-copper/30 transition-all duration-500">
+                  <div className="relative w-24 h-24 mb-8 grayscale group-hover:grayscale-0 transition-all duration-500">
+                     {club.logoUrl ? (
+                       <img src={club.logoUrl} alt={club.name} className="w-full h-full object-contain" />
+                     ) : (
+                       <div className="w-full h-full border border-white/10 flex items-center justify-center font-heading text-4xl text-white/10">
+                         {club.name.charAt(0)}
+                       </div>
+                     )}
+                  </div>
+                  
+                  <h3 className="font-heading text-3xl uppercase mb-2 group-hover:text-copper transition-colors">{club.name}</h3>
+                  <p className="font-text text-steel-dim text-sm italic mb-8">"{club.moto || "Brotherhood on wheels."}"</p>
+                  
+                  <div className="flex gap-6 mb-8">
+                     <div className="flex items-center gap-2">
+                        <Users size={14} className="text-copper" />
+                        <span className="font-body text-[10px] uppercase tracking-widest text-steel-dim">{club.participantCount || 0} RIDERS</span>
+                     </div>
+                     <div className="flex items-center gap-2">
+                        <Calendar size={14} className="text-copper" />
+                        <span className="font-body text-[10px] uppercase tracking-widest text-steel-dim">EST. {club.startedOn ? new Date(club.startedOn).getFullYear() : "2024"}</span>
+                     </div>
                   </div>
 
-                  {/* Body */}
-                  <div className="club-card-body">
-                    <h3 className="club-card-name">{club.name}</h3>
-                    {club.moto && (
-                      <p className="club-card-moto">"{club.moto}"</p>
-                    )}
-                    <div className="club-card-stats">
-                      <div className="club-card-stat">
-                        <Users size={13} />
-                        <span>{club.participantCount || 0} Members</span>
-                      </div>
-                      <div className="club-card-stat">
-                        <Calendar size={13} />
-                        <span>Since {joinDate}</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Actions */}
-                  <div
-                    className="club-card-actions"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    {isMyClub ? (
-                      <button className="club-btn club-btn-joined" disabled>
-                        <CheckCircle size={13} />
-                        Joined
-                      </button>
-                    ) : (
-                      <button
-                        className="club-btn club-btn-join"
-                        onClick={(e) => handleJoin(e, club.id)}
-                        disabled={joining}
-                      >
-                        <PlusCircle size={13} />
-                        Join Club
-                      </button>
-                    )}
-                    <button
-                      className="club-btn club-btn-view"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        goToClub(club);
-                      }}
-                    >
-                      View More
-                      <ArrowRight size={13} />
-                    </button>
+                  <div className="flex gap-4">
+                     {isMyClub ? (
+                       <button className="flex-1 py-4 border border-copper/50 text-copper font-body text-[10px] uppercase tracking-widest bg-copper/5">
+                         JOINED
+                       </button>
+                     ) : (
+                       <button 
+                         onClick={(e) => handleJoin(e, club.id)}
+                         disabled={joining}
+                         className="flex-1 py-4 bg-white text-carbon font-body text-[10px] uppercase tracking-widest hover:bg-copper transition-all duration-500"
+                       >
+                         {joining ? "..." : "JOIN CLUB"}
+                       </button>
+                     )}
+                     <button 
+                       onClick={() => goToClub(club)}
+                       className="px-6 py-4 border border-white/10 text-white hover:bg-white/5 transition-colors"
+                     >
+                       <ArrowRight size={18} />
+                     </button>
                   </div>
                 </div>
               );
@@ -292,41 +180,61 @@ const Clubs = () => {
           </div>
         )}
 
-        {/* Your active membership (leave option) */}
+        {/* Current Membership Bar */}
         {isLoggedIn && membership && membership.clubId && (
-          <div className="clubs-membership-bar">
-            <div className="clubs-membership-bar-inner">
-              <div className="clubs-membership-info">
-                <CheckCircle size={16} className="clubs-membership-check" />
-                <div>
-                  <span className="clubs-membership-label">Your Club</span>
-                  <span className="clubs-membership-name">
-                    {membership.clubId.name || "Partner Club"}
-                  </span>
+          <div className="fixed bottom-0 left-0 right-0 z-[1000] p-6 bg-carbon/90 backdrop-blur-2xl border-t border-white/5 animate-slide-up">
+             <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
+                <div className="flex items-center gap-6">
+                   <div className="w-12 h-12 bg-copper/10 border border-copper/30 flex items-center justify-center rounded-full">
+                      <CheckCircle size={20} className="text-copper" />
+                   </div>
+                   <div>
+                      <span className="block font-body text-[10px] text-steel-dim uppercase tracking-[0.2em]">Active Membership</span>
+                      <span className="block font-heading text-2xl uppercase">{membership.clubId.name}</span>
+                   </div>
                 </div>
-              </div>
-              <div className="clubs-membership-leave">
-                <textarea
-                  rows={1}
-                  className="clubs-leave-input"
-                  placeholder="Reason for leaving…"
-                  value={leaveReason}
-                  onChange={(e) => setLeaveReason(e.target.value)}
-                />
-                <button
-                  type="button"
-                  className="clubs-leave-btn"
-                  onClick={handleLeave}
-                  disabled={leaving}
-                >
-                  <XCircle size={14} />
-                  {leaving ? "Leaving…" : "Leave Club"}
-                </button>
-              </div>
-            </div>
+
+                <div className="flex w-full md:w-auto gap-4">
+                   <input 
+                     type="text" 
+                     placeholder="Share reason to leave..."
+                     value={leaveReason}
+                     onChange={(e) => setLeaveReason(e.target.value)}
+                     className="flex-1 md:w-64 bg-transparent border border-white/10 px-6 py-3 font-body text-xs focus:border-red-500/50 outline-none transition-colors"
+                   />
+                   <button 
+                     onClick={handleLeave}
+                     disabled={leaving}
+                     className="px-8 py-3 border border-red-500/30 text-red-500 font-body text-[10px] uppercase tracking-widest hover:bg-red-500 hover:text-white transition-all duration-500"
+                   >
+                     {leaving ? "..." : "LEAVE CLUB"}
+                   </button>
+                </div>
+             </div>
           </div>
         )}
       </div>
+
+      {/* One Club Popup */}
+      {showSingleClubPopup && (
+        <div className="fixed inset-0 z-[2000] flex items-center justify-center p-4 bg-carbon/95 backdrop-blur-xl">
+           <div className="max-w-md w-full bg-carbon-light border border-white/10 p-10 text-center">
+              <div className="w-20 h-20 bg-copper/10 border border-copper/30 flex items-center justify-center rounded-full mx-auto mb-8">
+                 <AlertCircle size={32} className="text-copper" />
+              </div>
+              <h3 className="font-heading text-3xl uppercase mb-4">ONE CLUB LIMIT</h3>
+              <p className="font-text text-steel-dim mb-10">
+                To keep the community focused, BUC allows only one active club membership per rider. Leave your current chapter before joining a new one.
+              </p>
+              <button 
+                onClick={() => setShowSingleClubPopup(false)}
+                className="w-full py-4 bg-copper text-carbon font-heading text-lg uppercase hover:bg-white transition-all duration-500"
+              >
+                Got It
+              </button>
+           </div>
+        </div>
+      )}
     </section>
   );
 };

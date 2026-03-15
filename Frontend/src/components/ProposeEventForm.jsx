@@ -133,7 +133,7 @@ Event proposal submitted successfully!`;
       <div className="bg-gray-900 rounded-lg p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-gray-700">
         <div className="flex justify-between items-center mb-6">
           <h3 className="text-2xl font-bold text-white flex items-center">
-            <Calendar className="h-6 w-6 text-orange-500 mr-2" />
+            <Calendar className="h-6 w-6 text-blue-500 mr-2" />
             Propose New Event
           </h3>
           <button
@@ -157,7 +157,7 @@ Event proposal submitted successfully!`;
           </div>
           <div>
             <h4 className="text-lg font-semibold text-white mb-4 flex items-center">
-              <Calendar className="h-5 w-5 text-orange-500 mr-2" />
+              <Calendar className="h-5 w-5 text-blue-500 mr-2" />
               Event Information
             </h4>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -167,7 +167,7 @@ Event proposal submitted successfully!`;
                 placeholder="Event Title"
                 value={formData.eventTitle}
                 onChange={handleInputChange}
-                className="md:col-span-2 bg-gray-800 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:border-orange-500 focus:outline-none"
+                className="md:col-span-2 bg-gray-800 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:border-blue-500 focus:outline-none"
                 required
               />
               <input
@@ -175,7 +175,7 @@ Event proposal submitted successfully!`;
                 name="eventDate"
                 value={formData.eventDate}
                 onChange={handleInputChange}
-                className="bg-gray-800 border border-gray-600 rounded-lg px-4 py-3 text-white focus:border-orange-500 focus:outline-none"
+                className="bg-gray-800 border border-gray-600 rounded-lg px-4 py-3 text-white focus:border-blue-500 focus:outline-none"
                 required
               />
               <input
@@ -183,7 +183,7 @@ Event proposal submitted successfully!`;
                 name="eventTime"
                 value={formData.eventTime}
                 onChange={handleInputChange}
-                className="bg-gray-800 border border-gray-600 rounded-lg px-4 py-3 text-white focus:border-orange-500 focus:outline-none"
+                className="bg-gray-800 border border-gray-600 rounded-lg px-4 py-3 text-white focus:border-blue-500 focus:outline-none"
                 required
               />
               <input
@@ -192,7 +192,7 @@ Event proposal submitted successfully!`;
                 placeholder="Event Location"
                 value={formData.location}
                 onChange={handleInputChange}
-                className="bg-gray-800 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:border-orange-500 focus:outline-none"
+                className="bg-gray-800 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:border-blue-500 focus:outline-none"
                 required
               />
               <input
@@ -201,14 +201,14 @@ Event proposal submitted successfully!`;
                 placeholder="Meeting Point"
                 value={formData.meetingPoint}
                 onChange={handleInputChange}
-                className="bg-gray-800 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:border-orange-500 focus:outline-none"
+                className="bg-gray-800 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:border-blue-500 focus:outline-none"
                 required
               />
               <select
                 name="eventType"
                 value={formData.eventType}
                 onChange={handleInputChange}
-                className="bg-gray-800 border border-gray-600 rounded-lg px-4 py-3 text-white focus:border-orange-500 focus:outline-none"
+                className="bg-gray-800 border border-gray-600 rounded-lg px-4 py-3 text-white focus:border-blue-500 focus:outline-none"
                 required
               >
                 <option value="">Select Event Type</option>
@@ -224,7 +224,7 @@ Event proposal submitted successfully!`;
 
           <div>
             <h4 className="text-lg font-semibold text-white mb-4 flex items-center">
-              <FileText className="h-5 w-5 text-orange-500 mr-2" />
+              <FileText className="h-5 w-5 text-blue-500 mr-2" />
               Event Details
             </h4>
             <div className="space-y-4">
@@ -234,7 +234,7 @@ Event proposal submitted successfully!`;
                 value={formData.description}
                 onChange={handleInputChange}
                 rows={4}
-                className="w-full bg-gray-800 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:border-orange-500 focus:outline-none"
+                className="w-full bg-gray-800 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:border-blue-500 focus:outline-none"
                 required
               />
               <input
@@ -243,7 +243,7 @@ Event proposal submitted successfully!`;
                 placeholder="Expected Number of Attendees"
                 value={formData.expectedAttendees}
                 onChange={handleInputChange}
-                className="w-full bg-gray-800 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:border-orange-500 focus:outline-none"
+                className="w-full bg-gray-800 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:border-blue-500 focus:outline-none"
                 required
               />
               <textarea
@@ -252,14 +252,14 @@ Event proposal submitted successfully!`;
                 value={formData.requirements}
                 onChange={handleInputChange}
                 rows={3}
-                className="w-full bg-gray-800 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:border-orange-500 focus:outline-none"
+                className="w-full bg-gray-800 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:border-blue-500 focus:outline-none"
               />
             </div>
           </div>
 
           <div>
             <h4 className="text-lg font-semibold text-white mb-4 flex items-center">
-              <Users className="h-5 w-5 text-orange-500 mr-2" />
+              <Users className="h-5 w-5 text-blue-500 mr-2" />
               Organizer Information
             </h4>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -269,7 +269,7 @@ Event proposal submitted successfully!`;
                 placeholder="Your Name"
                 value={formData.organizerName}
                 onChange={handleInputChange}
-                className="bg-gray-800 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:border-orange-500 focus:outline-none"
+                className="bg-gray-800 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:border-blue-500 focus:outline-none"
                 required
               />
               <input
@@ -278,7 +278,7 @@ Event proposal submitted successfully!`;
                 placeholder="Your Phone"
                 value={formData.organizerPhone}
                 onChange={handleInputChange}
-                className="bg-gray-800 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:border-orange-500 focus:outline-none"
+                className="bg-gray-800 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:border-blue-500 focus:outline-none"
                 required
               />
               <input
@@ -287,7 +287,7 @@ Event proposal submitted successfully!`;
                 placeholder="Your Email"
                 value={formData.organizerEmail}
                 onChange={handleInputChange}
-                className="bg-gray-800 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:border-orange-500 focus:outline-none"
+                className="bg-gray-800 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:border-blue-500 focus:outline-none"
                 required
               />
             </div>
@@ -297,7 +297,7 @@ Event proposal submitted successfully!`;
             <button
               type="submit"
               disabled={isSubmitting}
-              className="bg-gradient-to-r from-orange-500 to-red-600 text-white px-12 py-4 rounded-lg font-semibold text-lg hover:from-orange-600 hover:to-red-700 transition-all duration-200 transform hover:scale-105 flex items-center space-x-2 mx-auto disabled:opacity-50 disabled:cursor-not-allowed"
+              className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white px-12 py-4 rounded-lg font-semibold text-lg hover:from-blue-600 hover:to-indigo-700 transition-all duration-200 transform hover:scale-105 flex items-center space-x-2 mx-auto disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isSubmitting ? (
                 <>

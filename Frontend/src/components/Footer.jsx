@@ -1,334 +1,268 @@
-import React from "react";
-import {
-  Bike,
-  Mail,
-  Phone,
-  MapPin,
-  Facebook,
-  Instagram,
-  Twitter,
-  Youtube,
-  Globe,
-  ArrowRight,
+import React, { useRef } from "react";
+import { motion, useScroll, useTransform, useSpring } from "framer-motion";
+import { 
+  Instagram, 
+  Youtube, 
+  Facebook, 
+  Twitter, 
+  Globe, 
+  Mail, 
+  Phone, 
+  MapPin, 
+  ArrowUpRight,
+  ShieldAlert,
+  AlertTriangle,
+  HeartPulse,
+  Baby
 } from "lucide-react";
 import gsap from "gsap";
 import { ScrollToPlugin } from "gsap/ScrollToPlugin";
-import { motion } from "framer-motion";
-import cortexLogo from "../assets/gallery/cortexlogo.png";
 
 gsap.registerPlugin(ScrollToPlugin);
 
-const Footer = () => {
-  const quickLinks = [
-    { name: "About Us", href: "#about" },
-    { name: "Events", href: "/events" },
-    { name: "Membership", href: "#membership" },
-    { name: "Gallery", href: "/gallery" },
-    { name: "Contact", href: "#contact" },
-  ];
+const buclogo = "/logo.jpg";
 
-  const emergencyContacts = [
-    { name: "Child Abuse & Safety", number: "1098" },
-    { name: "Emergency Response", number: "112" },
-    { name: "Ambulance", number: "102" },
-  ];
+const MagneticLink = ({ children, href, className = "" }) => {
+  const ref = useRef(null);
+  const [position, setPosition] = React.useState({ x: 0, y: 0 });
 
-  const scrollToSection = (e, href) => {
-    e.preventDefault();
-    if (href === "#contact") {
-      gsap.to(window, {
-        duration: 1,
-        scrollTo: { y: "max" },
-        ease: "power3.inOut",
-      });
-      return;
-    }
-    const target = href.startsWith("#") ? href : `#${href}`;
-    const element = document.querySelector(target);
-    if (element) {
-      gsap.to(window, {
-        duration: 1,
-        scrollTo: { y: target, offsetY: 80 },
-        ease: "power3.inOut",
-      });
-    }
+  const handleMouse = (e) => {
+    const { clientX, clientY } = e;
+    const { height, width, left, top } = ref.current.getBoundingClientRect();
+    const middleX = clientX - (left + width / 2);
+    const middleY = clientY - (top + height / 2);
+    setPosition({ x: middleX, y: middleY });
   };
 
-  const fadeIn = {
-    hidden: { opacity: 0, y: 20 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: { duration: 0.6, ease: "easeOut" },
-    },
+  const reset = () => {
+    setPosition({ x: 0, y: 0 });
   };
 
-  const staggerContainer = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1,
-      },
-    },
-  };
+  const { x, y } = position;
 
   return (
-    <footer className="bg-slate-950 border-t border-slate-800">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <motion.div
-          variants={staggerContainer}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true }}
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12"
-        >
-          <motion.div variants={fadeIn} className="lg:col-span-2">
-            <div className="mb-10">
-              <div className="flex items-center space-x-4 mb-8">
-                <motion.div
-                  whileHover={{ rotate: 360 }}
-                  transition={{ duration: 0.8 }}
-                  className="relative w-14 h-14"
-                >
-                  <img
-                    src="/logo copy copy.jpg"
-                    alt="Bikers Unity Calls Logo"
-                    className="w-14 h-14 rounded-full object-cover border-2 border-orange-500/50 shadow-lg shadow-orange-500/10"
-                  />
-                </motion.div>
+    <motion.a
+      ref={ref}
+      href={href}
+      onMouseMove={handleMouse}
+      onMouseLeave={reset}
+      animate={{ x, y }}
+      transition={{ type: "spring", stiffness: 150, damping: 15, mass: 0.1 }}
+      className={`relative inline-block ${className}`}
+    >
+      {children}
+    </motion.a>
+  );
+};
+
+const FooterSection = ({ title, links }) => (
+  <div className="flex flex-col gap-6">
+    <div className="flex items-center gap-4">
+      <div className="w-8 h-[1px] bg-copper/50"></div>
+      <h4 className="font-heading text-xs tracking-widest text-steel-dim uppercase font-bold">
+        {title}
+      </h4>
+    </div>
+    <ul className="flex flex-col gap-3">
+      {links.map((link) => (
+        <li key={link.name}>
+          <a
+            href={link.href}
+            className="group relative flex items-center gap-2 text-white/50 hover:text-white transition-colors duration-300 font-text text-[13px] tracking-widest uppercase"
+          >
+            {link.name}
+            <span className="absolute -bottom-1 left-0 w-0 h-[1px] bg-copper group-hover:w-full transition-all duration-500 ease-[cubic-bezier(0.7,0,0.3,1)] shadow-[0_0_8px_rgba(193,154,107,0.5)]"></span>
+          </a>
+        </li>
+      ))}
+    </ul>
+  </div>
+);
+
+const Footer = () => {
+  const containerRef = useRef(null);
+  const { scrollYProgress } = useScroll({
+    target: containerRef,
+    offset: ["start end", "end end"]
+  });
+
+  const x1 = useTransform(scrollYProgress, [0, 1], [0, -200]);
+  const x2 = useTransform(scrollYProgress, [0, 1], [0, 200]);
+
+  const scrollToTop = () => {
+    gsap.to(window, { duration: 1.5, scrollTo: 0, ease: "power4.inOut" });
+  };
+
+  const emergencyContacts = [
+    { name: "Emergency", number: "112", icon: AlertTriangle, color: "text-red-500" },
+    { name: "Medical", number: "108", icon: HeartPulse, color: "text-rose-400" },
+    { name: "Child Info", number: "1098", icon: Baby, color: "text-sky-400" },
+    { name: "Unity Core", number: "+91 88677 18080", icon: ShieldAlert, color: "text-copper" },
+  ];
+
+  const navigationLinks = [
+    { name: "HOME", href: "/" },
+    { name: "EVENTS", href: "/events" },
+    { name: "GALLERY", href: "/gallery" },
+    { name: "MEMBERS", href: "/members" },
+    { name: "FORUM", href: "/forum" },
+    { name: "CLUBS", href: "/clubs" },
+    { name: "INTERNATIONAL", href: "/international" },
+    { name: "JOIN BROTHERHOOD", href: "/signup" },
+    { name: "LOGIN", href: "/login" },
+  ];
+
+  return (
+    <footer 
+      ref={containerRef}
+      className="relative bg-[#050505] pt-32 pb-12 overflow-hidden border-t border-white/5"
+    >
+      <div className="max-w-7xl mx-auto px-6 relative z-10">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 mb-24">
+          {/* Brand Column */}
+          <div className="lg:col-span-4 space-y-12">
+            <div>
+              <div className="flex items-center gap-4 mb-6">
+                <img src={buclogo} alt="BUC" className="w-16 h-16 rounded-full border border-copper/30 p-1" />
                 <div>
-                  <h3 className="text-2xl font-bold text-white tracking-tight">
-                    Bikers Unity Calls
-                  </h3>
-                  <p className="text-sm text-orange-500 font-medium tracking-wide">
-                    Ride Together, Stand Together
-                  </p>
+                  <h3 className="font-heading text-3xl text-white leading-none">BUC <span className="text-copper">INDIA</span></h3>
+                  <p className="text-steel-dim text-[10px] tracking-[0.3em] uppercase mt-1">Premier Riding Community</p>
                 </div>
               </div>
-              <p className="text-gray-400 mb-8 max-w-md leading-relaxed text-lg">
-                Founded in 2025, we're India's largest group of motorcycle
-                community dedicated to safe riding, brotherhood, and Inspiring
-                change for a better tomorrow.
+              <p className="text-steel-dim text-sm leading-relaxed max-w-sm">
+                A brotherhood forged in steel and spirit. Dedicated to the open road, safe miles, and the pursuit of nomadic excellence.
               </p>
-              <div className="flex space-x-4 mb-10">
+            </div>
+
+            {/* Humanity Calls Sub-Brand */}
+            <div className="p-6 border border-white/5 bg-carbon/50 backdrop-blur-sm group hover:border-copper/20 transition-colors duration-500">
+              <div className="flex items-center gap-4 mb-4">
+                <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center p-1.5 grayscale group-hover:grayscale-0 transition-all duration-700">
+                  <img src="https://static.wixstatic.com/media/2d0007_ccad2163f88540659e8212ff5138666c~mv2.png/v1/fit/w_2500,h_1330,al_c/2d0007_ccad2163f88540659e8212ff5138666c~mv2.png" alt="Humanity Calls" className="w-full h-full object-contain" />
+                </div>
+                <div>
+                  <h4 className="font-heading text-sm text-white uppercase tracking-wider">Humanity Calls</h4>
+                  <p className="text-info text-[9px] uppercase font-bold tracking-widest">Compassion & Action</p>
+                </div>
+              </div>
+              <p className="text-steel-dim text-xs leading-relaxed mb-4">
+                Our social foundation committed to uplifting lives beyond the horizon.
+              </p>
+              <div className="flex gap-6">
                 {[
-                  { icon: Facebook, href: "#", name: "Facebook" },
-                  {
-                    icon: Instagram,
-                    href: "https://www.instagram.com/buc_india",
-                    name: "Instagram",
-                  },
-                  {
-                    icon: Twitter,
-                    href: "https://x.com/Buc_India",
-                    name: "Twitter",
-                  },
-                  {
-                    icon: Youtube,
-                    href: "https://www.youtube.com/@BucIndia",
-                    name: "YouTube",
-                  },
-                ].map((social) => (
-                  <motion.a
-                    key={`buc-${social.name}`}
-                    href={social.href}
-                    whileHover={{
-                      scale: 1.1,
-                      backgroundColor: "rgba(249, 115, 22, 1)",
-                      color: "white",
-                    }}
-                    whileTap={{ scale: 0.9 }}
-                    className="bg-gray-900 p-3.5 rounded-xl text-gray-400 transition-all duration-300 border border-gray-800"
-                    aria-label={`BUC ${social.name}`}
-                  >
-                    <social.icon className="h-5 w-5" />
-                  </motion.a>
+                  { Icon: Facebook, href: "https://www.facebook.com/HumanityGcalls/" },
+                  { Icon: Instagram, href: "https://www.instagram.com/humanitycalls_/" },
+                  { Icon: Globe, href: "https://www.humanitycalls.org" }
+                ].map((item, i) => (
+                  <MagneticLink key={i} href={item.href} className="text-white/40 hover:text-copper transition-colors">
+                    <item.Icon size={18} />
+                  </MagneticLink>
                 ))}
               </div>
-            </div>
-
-            <motion.div variants={fadeIn}>
-              <div className="flex items-center space-x-4 mb-8">
-                <div className="relative w-14 h-14">
-                  <div className="w-14 h-14 rounded-full bg-white p-2.5 flex items-center justify-center shadow-lg border border-white/10">
-                    <img
-                      src="https://static.wixstatic.com/media/2d0007_ccad2163f88540659e8212ff5138666c~mv2.png/v1/fit/w_2500,h_1330,al_c/2d0007_ccad2163f88540659e8212ff5138666c~mv2.png"
-                      alt="Humanity Calls Logo"
-                      className="w-full h-full object-contain rounded-full"
-                    />
-                  </div>
-                </div>
-                <div>
-                  <h3 className="text-2xl font-bold text-white tracking-tight">
-                    Humanity Calls
-                  </h3>
-                  <p className="text-sm text-blue-500 font-medium tracking-wide">
-                    Compassion & Action
-                  </p>
-                </div>
-              </div>
-              <p className="text-gray-400 mb-8 max-w-md leading-relaxed">
-                Founded in 2020, Humanity Calls is a non-profit initiative built
-                on the belief that service to humanity is the highest form of
-                responsibility.
-              </p>
-              <div className="flex space-x-4">
-                {[
-                  {
-                    icon: Facebook,
-                    href: "https://www.facebook.com/HumanityGcalls/",
-                    name: "Facebook",
-                  },
-                  {
-                    icon: Instagram,
-                    href: "https://www.instagram.com/humanitycalls_?igshid=MXBmb2d5MDFudm9waw%3D%3D",
-                    name: "Instagram",
-                  },
-                  {
-                    icon: Twitter,
-                    href: "https://x.com/Humanitycalls1",
-                    name: "Twitter",
-                  },
-                  {
-                    icon: Youtube,
-                    href: "https://www.youtube.com/@humanitycalls",
-                    name: "YouTube",
-                  },
-                  {
-                    icon: Globe,
-                    href: "https://www.humanitycalls.org",
-                    name: "Website",
-                  },
-                ].map((social) => (
-                  <motion.a
-                    key={`hc-${social.name}`}
-                    href={social.href}
-                    whileHover={{
-                      scale: 1.1,
-                      backgroundColor: "rgba(59, 130, 246, 1)",
-                      color: "white",
-                    }}
-                    whileTap={{ scale: 0.9 }}
-                    className="bg-gray-900 p-3.5 rounded-xl text-gray-400 transition-all duration-300 border border-gray-800"
-                    aria-label={`Humanity Calls ${social.name}`}
-                  >
-                    <social.icon className="h-5 w-5" />
-                  </motion.a>
-                ))}
-              </div>
-            </motion.div>
-          </motion.div>
-
-          <motion.div variants={fadeIn}>
-            <h4 className="text-xl font-bold text-white mb-8 pb-3 border-b-2 border-orange-500 w-fit">
-              Quick Links
-            </h4>
-            <ul className="space-y-4">
-              {quickLinks.map((link) => (
-                <li key={link.name}>
-                  <motion.a
-                    href={link.href}
-                    whileHover={{ x: 10 }}
-                    onClick={(e) => scrollToSection(e, link.href)}
-                    className="group flex items-center text-gray-400 hover:text-orange-500 transition-all duration-300 font-medium"
-                  >
-                    <ArrowRight className="h-4 w-4 mr-0 group-hover:mr-2 opacity-0 group-hover:opacity-100 transition-all duration-300" />
-                    {link.name}
-                  </motion.a>
-                </li>
-              ))}
-            </ul>
-          </motion.div>
-
-          <motion.div variants={fadeIn}>
-            <h4 className="text-xl font-bold text-white mb-8 pb-3 border-b-2 border-orange-500 w-fit">
-              Contact Us
-            </h4>
-            <div className="space-y-6">
-              <motion.div
-                whileHover={{ x: 5 }}
-                className="flex items-start space-x-4 text-gray-400 group"
-              >
-                <MapPin className="h-6 w-6 text-orange-500 flex-shrink-0 mt-0.5" />
-                <span className="text-sm leading-relaxed group-hover:text-white transition-colors">
-                  Bengaluru, Karnataka
-                  <br />
-                  India 560001
-                </span>
-              </motion.div>
-              <motion.div
-                whileHover={{ x: 5 }}
-                className="flex items-center space-x-4 text-gray-400 group"
-              >
-                <Phone className="h-5 w-5 text-orange-500 flex-shrink-0" />
-                <span className="text-sm group-hover:text-white transition-colors">
-                  +91 88677 18080
-                </span>
-              </motion.div>
-              <motion.div
-                whileHover={{ x: 5 }}
-                className="flex items-center space-x-4 text-gray-400 group"
-              >
-                <Mail className="h-5 w-5 text-orange-500 flex-shrink-0" />
-                <span className="text-sm truncate group-hover:text-white transition-colors">
-                  bikersunitycallsindia@gmail.com
-                </span>
-              </motion.div>
-            </div>
-
-            <h4 className="text-xl font-bold text-white mt-12 mb-6 pb-3 border-b-2 border-red-500 w-fit">
-              Emergency
-            </h4>
-            <div className="space-y-5">
-              {emergencyContacts.map((contact) => (
-                <div key={contact.name} className="flex flex-col space-y-1.5">
-                  <span className="text-xs text-gray-500 uppercase tracking-widest font-bold">
-                    {contact.name}
-                  </span>
-                  <motion.a
-                    href={`tel:${contact.number}`}
-                    whileHover={{ scale: 1.05, x: 5 }}
-                    className="text-orange-500 font-black text-2xl hover:text-red-500 transition-colors flex items-center gap-3 tracking-tighter"
-                  >
-                    <Phone className="h-5 w-5" />
-                    {contact.number}
-                  </motion.a>
-                </div>
-              ))}
-            </div>
-          </motion.div>
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-          transition={{ delay: 0.5 }}
-          className="border-t border-gray-900 mt-20 pt-10"
-        >
-          <div className="flex flex-col md:flex-row justify-between items-center space-y-8 md:space-y-0">
-            <div className="flex flex-col items-center md:items-start space-y-4">
-              <p className="text-gray-500 text-sm font-medium">
-                © 2026 Bikers Unity Calls. All rights reserved.
-              </p>
-            </div>
-            <div className="flex flex-wrap justify-center gap-8">
-              {["Privacy Policy", "Terms of Service", "Code of Conduct"].map(
-                (item) => (
-                  <motion.a
-                    key={item}
-                    href="#"
-                    whileHover={{ y: -2, color: "rgba(249, 115, 22, 1)" }}
-                    className="text-gray-500 hover:text-orange-500 text-sm font-bold transition-all duration-200"
-                  >
-                    {item}
-                  </motion.a>
-                ),
-              )}
             </div>
           </div>
-        </motion.div>
+
+          {/* Links Grid */}
+          <div className="lg:col-span-5 flex flex-col items-center lg:items-start">
+            <FooterSection 
+              title="Navigation" 
+              links={navigationLinks} 
+            />
+          </div>
+
+          {/* Contact Column */}
+          <div className="lg:col-span-3 space-y-8">
+            <div className="flex flex-col gap-6">
+              <div className="flex items-center gap-4">
+                <div className="w-8 h-[1px] bg-copper/50"></div>
+                <h4 className="font-heading text-xs tracking-widest text-steel-dim uppercase font-bold">Connect</h4>
+              </div>
+              <div className="space-y-8">
+                <div className="flex flex-col gap-2">
+                  <span className="text-[11px] text-copper font-bold tracking-[0.2em]">EMAIL</span>
+                  <a href="mailto:bikersunitycallsindia@gmail.com" className="group text-steel-dim hover:text-white transition-colors text-[14px] tracking-wider break-all">
+                    bikersunitycallsindia@gmail.com
+                  </a>
+                </div>
+                <div className="flex flex-col gap-2">
+                  <span className="text-[11px] text-copper font-bold tracking-[0.2em]">CONTACT</span>
+                  <a href="tel:+918867718080" className="group text-steel-dim hover:text-white transition-colors text-[16px] font-heading tracking-wider">
+                    +91 88677 18080
+                  </a>
+                </div>
+                <div className="flex flex-col gap-2">
+                  <span className="text-[11px] text-copper font-bold tracking-[0.2em]">BASE</span>
+                  <div className="text-steel-dim text-[14px] tracking-wider uppercase leading-relaxed">
+                    Bengaluru, Karnataka<br />India 560001
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex gap-4">
+              {[Instagram, Twitter, Youtube, Facebook].map((Icon, i) => (
+                <MagneticLink 
+                  key={i} 
+                  href="#" 
+                  className="w-10 h-10 border border-white/10 flex items-center justify-center rounded-sm bg-carbon/30 hover:bg-copper/10 hover:border-copper/40 transition-all duration-300"
+                >
+                  <Icon size={18} className="text-white/60 group-hover:text-copper" />
+                </MagneticLink>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Strategic Emergency Manifest */}
+        <div className="p-8 border border-white/5 bg-carbon/80 backdrop-blur-md rounded-sm grid grid-cols-2 lg:grid-cols-4 gap-8 relative overflow-hidden group">
+          <div className="absolute top-0 left-0 w-[2px] h-0 bg-copper group-hover:h-full transition-all duration-700"></div>
+          {emergencyContacts.map((contact, i) => (
+            <a 
+              key={i} 
+              href={`tel:${contact.number.replace(/\s/g, "")}`} 
+              className="flex flex-col gap-2 group/call"
+            >
+              <div className="flex items-center gap-2">
+                <contact.icon size={14} className={contact.color} />
+                <span className="text-[10px] font-bold text-steel-dim uppercase tracking-tighter">{contact.name}</span>
+              </div>
+              <div className="text-xl font-heading text-white group-hover/call:text-copper transition-colors flex items-center gap-2">
+                {contact.number}
+                <ArrowUpRight size={14} className="opacity-0 group-hover/call:opacity-100 -translate-x-2 group-hover/call:translate-x-0 transition-all" />
+              </div>
+            </a>
+          ))}
+        </div>
+
+        {/* Bottom Bar */}
+        <div className="mt-20 pt-8 border-t border-white/5 flex flex-col items-center gap-10">
+          <p className="text-[10px] text-steel-dim uppercase tracking-[0.2em] opacity-40">
+            © {new Date().getFullYear()} BUC INDIA. FORGED IN BROTHERHOOD.
+          </p>
+          
+          <div className="flex gap-12 items-center justify-center">
+             {["Privacy Policy", "Terms of Service", "Conduct Code"].map((legal) => (
+               <a 
+                 key={legal} 
+                 href="#" 
+                 className="group relative text-[10px] text-steel-dim hover:text-white transition-colors uppercase tracking-[0.3em]"
+               >
+                 {legal}
+                 <span className="absolute -bottom-1 left-0 w-0 h-[1px] bg-copper/40 group-hover:w-full transition-all duration-500"></span>
+               </a>
+             ))}
+          </div>
+
+          <button 
+            onClick={scrollToTop}
+            className="group flex flex-col items-center gap-3 text-xs font-heading text-white/30 hover:text-copper transition-colors uppercase tracking-widest pt-4"
+          >
+            <div className="w-12 h-12 border border-white/5 flex items-center justify-center rounded-full group-hover:border-copper group-hover:-translate-y-2 transition-all duration-500">
+              <ArrowUpRight size={16} />
+            </div>
+            <span className="text-[9px] tracking-[0.4em]">Back to Top</span>
+          </button>
+        </div>
       </div>
     </footer>
   );

@@ -49,14 +49,14 @@
   height: 34px;
   border-radius: 999px;
   overflow: hidden;
-  background: radial-gradient(circle at 30% 0%, #facc15 0%, #f97316 35%, #b91c1c 100%);
+  background: radial-gradient(circle at 30% 0%, #facc15 0%, #3B82F6 35%, #b91c1c 100%);
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 800;
   font-size: 15px;
   color: #111827;
-  border: 2px solid rgba(249, 115, 22, 0.8);
+  border: 2px solid rgba(59, 130, 246, 0.8);
 }
 
 .club-logo-small img {
@@ -199,7 +199,7 @@
 }
 
 .exit-reason strong {
-  color: #f97316;
+  color: #3B82F6;
   margin-right: 4px;
 }
 

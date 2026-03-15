@@ -1,7 +1,10 @@
 import axios from "axios";
 
-const API_URL = import.meta.env.VITE_API_URL || 
-  (import.meta.env.DEV ? "http://localhost:5000/api" : "https://buc-india-backend.onrender.com/api");
+const API_URL =
+  import.meta.env.VITE_API_URL ||
+  (import.meta.env.DEV
+    ? "http://localhost:5000/api"
+    : "https://buc-india-backend.onrender.com/api");
 
 const api = axios.create({
   baseURL: API_URL,
@@ -128,16 +131,20 @@ export const profileService = {
     const response = await api.get("/profile", { params });
     return response.data;
   },
-  createOrUpdate: async (formData) => {
-    const response = await api.post("/profile", formData, {
+  signup: async (formData) => {
+    const response = await api.post("/profile/signup", formData, {
       headers: {
         "Content-Type": "multipart/form-data",
       },
     });
     return response.data;
   },
+  login: async (email, password) => {
+    const response = await api.post("/profile/login", { email, password });
+    return response.data;
+  },
   update: async (formData) => {
-    const response = await api.put("/profile", formData, {
+    const response = await api.put("/profile/update", formData, {
       headers: {
         "Content-Type": "multipart/form-data",
       },
@@ -195,12 +202,35 @@ export const clubMembershipService = {
   },
 };
 
+export const otpService = {
+  send: async (email, type) => {
+    const response = await api.post("/otp/send", { email, type });
+    return response.data;
+  },
+  verify: async (email, otp, type) => {
+    const response = await api.post("/otp/verify", { email, otp, type });
+    return response.data;
+  },
+};
+
+export const userAuthService = {
+  resetPassword: async (email, otp, newPassword) => {
+    const response = await api.post("/user-auth/reset-password", {
+      email,
+      otp,
+      newPassword,
+    });
+    return response.data;
+  },
+};
+
 export const certificateService = {
-  getAll: async (eventId, userEmail) => {
-    const params = {};
-    if (eventId) params.eventId = eventId;
-    if (userEmail) params.userEmail = userEmail;
-    const response = await api.get("/certificates", { params });
+  getAll: async () => {
+    const response = await api.get("/certificates");
+    return response.data;
+  },
+  getStats: async () => {
+    const response = await api.get("/certificates/stats");
     return response.data;
   },
 };

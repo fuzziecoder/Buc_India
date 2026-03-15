@@ -1,339 +1,427 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import {
-  Menu,
-  X,
-  Bike,
-  Calendar,
-  Users,
-  Camera,
-  MessageSquare,
-  User,
-  LogOut,
-} from "lucide-react";
-import RegistrationForm from "./RegistrationForm.jsx";
-import buclogo from "../../public/logo.jpg";
-import { profileService } from "../services/api";
+import gsap from "gsap";
+import GlareHover from "./animations/GlareHover";
+
+const navigation = [
+  { name: "HOME", path: "/", label: "WELCOME" },
+  { name: "EVENTS", path: "/events", label: "EXPERIENCE" },
+  { name: "GALLERY", path: "/gallery", label: "VISUALS" },
+  { name: "MEMBERS", path: "/members", label: "BROTHERHOOD" },
+  { name: "FORUM", path: "/forum", label: "COMMUNITY" },
+  { name: "CLUBS", path: "/clubs", label: "NETWORK" },
+  { name: "INTERNATIONAL", path: "/international", label: "GLOBAL" },
+];
+
+const ExhaustParticles = ({ x, y, angle, isHovered }) => {
+  const particleCount = isHovered ? 30 : 6;
+  return [...Array(particleCount)].map((_, i) => (
+    <motion.circle
+      key={i}
+      cx={x}
+      cy={y}
+      r={isHovered ? 1.2 : 0.8}
+      fill={isHovered ? (i % 2 === 0 ? "#FF8C00" : "#FFD700") : "#A1A1AA"}
+      initial={{ opacity: 0, scale: 0 }}
+      animate={{
+        opacity: [0, 1, 0],
+        scale: [0, isHovered ? 2 : 1.2, 0.2],
+        x: [0, Math.cos(angle) * (isHovered ? 60 : 25)],
+        y: [0, Math.sin(angle) * (isHovered ? 60 : 25)],
+      }}
+      transition={{
+        duration: isHovered ? 0.5 : 0.8,
+        repeat: Infinity,
+        delay: i * (isHovered ? 0.01 : 0.12),
+        ease: "easeOut",
+      }}
+    />
+  ));
+};
 
 const Header = () => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [showRegistrationForm, setShowRegistrationForm] = useState(false);
+  const menuRef = useRef(null);
+  const linksRef = useRef([]);
 
-  const [isLoggedIn, setIsLoggedIn] = useState(
-    sessionStorage.getItem("userLoggedIn") === "true",
-  );
-  const [userProfile, setUserProfile] = useState(null);
+  const toggleMenu = () => setIsOpen(!isOpen);
 
   useEffect(() => {
-    const handler = () => setShowRegistrationForm(true);
-    const loginHandler = () => {
-      const loggedIn = sessionStorage.getItem("userLoggedIn") === "true";
-      setIsLoggedIn(loggedIn);
-      if (loggedIn) {
-        fetchProfile();
-      } else {
-        setUserProfile(null);
-      }
-    };
-
-    window.addEventListener("open-registration", handler);
-    window.addEventListener("user-login-change", loginHandler);
-
-    if (isLoggedIn) {
-      fetchProfile();
+    if (isOpen) {
+      document.body.style.overflow = "hidden";
+      // GSAP Staggered Animation for Links
+      gsap.fromTo(
+        linksRef.current,
+        { y: 100, opacity: 0 },
+        {
+          y: 0,
+          opacity: 1,
+          duration: 0.8,
+          stagger: 0.1,
+          ease: "power4.out",
+          delay: 0.3,
+        },
+      );
+    } else {
+      document.body.style.overflow = "auto";
     }
+  }, [isOpen]);
 
-    return () => {
-      window.removeEventListener("open-registration", handler);
-      window.removeEventListener("user-login-change", loginHandler);
-    };
-  }, [isLoggedIn]);
-
-  const fetchProfile = async () => {
-    try {
-      const email = sessionStorage.getItem("userEmail");
-      const phone = sessionStorage.getItem("userPhone");
-      if (email || phone) {
-        const profile = await profileService.get(email, phone);
-        setUserProfile(profile);
-      }
-    } catch (error) {
-      console.error("Failed to fetch profile", error);
-    }
-  };
-
-  const handleLogout = () => {
-    sessionStorage.removeItem("userLoggedIn");
-    sessionStorage.removeItem("userEmail");
-    sessionStorage.removeItem("userPhone");
-    window.dispatchEvent(new Event("user-login-change"));
-    navigate("/");
-    setIsMenuOpen(false);
-  };
-
-  const handleNavigation = (path) => {
+  const handleNavigate = (path) => {
+    setIsOpen(false);
     navigate(path);
-    setIsMenuOpen(false);
-  };
-
-  const navigation = [
-    { name: "Home", path: "/", icon: Bike },
-    { name: "Events", path: "/events", icon: Calendar },
-    { name: "Gallery", path: "/gallery", icon: Camera },
-    { name: "Clubs", path: "/clubs", icon: Users },
-    { name: "Members", path: "/members", icon: Users },
-    { name: "Forum", path: "/forum", icon: MessageSquare },
-    ...(isLoggedIn
-      ? [{ name: "Your Events", path: "/your-events", icon: Calendar }]
-      : []),
-  ];
-
-  const getInitials = (name) => {
-    if (!name) return "U";
-    return name.charAt(0).toUpperCase();
   };
 
   return (
-    <header className="bg-gradient-to-r from-slate-950/90 via-slate-900/90 to-orange-900/80 backdrop-blur-md fixed w-full z-[100] border-b border-orange-500/30 shadow-lg shadow-orange-500/10">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center py-3 sm:py-4">
-          {/* Logo and Name Redesign */}
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5, ease: "easeOut" }}
-            className="flex items-center space-x-3 cursor-pointer group"
-            onClick={() => handleNavigation("/")}
-          >
-            <div className="relative">
-              <div className="absolute -inset-1 bg-gradient-to-r from-orange-500 to-red-600 rounded-full blur opacity-25 group-hover:opacity-75 transition duration-500 group-hover:duration-200"></div>
-              <motion.img
-                whileHover={{ scale: 1.05, rotate: 5 }}
-                className="relative rounded-full h-12 w-12 sm:h-14 sm:w-14 border-2 border-orange-500/50 object-cover"
-                src={buclogo}
-                alt="BUC India"
-              />
-            </div>
-            <div className="flex flex-col">
-              <h1 className="text-xl sm:text-2xl font-bold tracking-tighter text-white leading-none">
-                Buc_India
-              </h1>
-              <motion.p 
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.3 }}
-                className="text-sm text-gray-400"
-              >
-                Ride Together, Stand Together
-              </motion.p>
-            </div>
-          </motion.div>
-
-          {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-1 lg:space-x-4">
-            {navigation.map((item, index) => (
-              <motion.button
-                key={item.name}
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3, delay: index * 0.1 }}
-                whileHover={{ scale: 1.05, y: -2 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => handleNavigation(item.path)}
-                className={`relative px-4 py-2 rounded-full text-sm font-bold transition-all duration-300 ${
-                  location.pathname === item.path
-                    ? "text-orange-500"
-                    : "text-gray-300 hover:text-white"
-                }`}
-              >
-                <span className="relative z-10">{item.name}</span>
-                {location.pathname === item.path && (
-                  <>
-                    <motion.div
-                      layoutId="nav-bg"
-                      className="absolute inset-0 bg-orange-500/10 rounded-full"
-                      transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
-                    />
-                    <motion.div
-                      layoutId="nav-underline"
-                      className="absolute bottom-0 left-0 right-0 h-0.5 bg-orange-500 mx-4 rounded-full"
-                      transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
-                    />
-                  </>
-                )}
-              </motion.button>
-            ))}
-
-            <div className="h-6 w-[1px] bg-gray-800 mx-2"></div>
-
-            {isLoggedIn ? (
-              <motion.button
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                whileHover={{ scale: 1.02 }}
-                type="button"
-                onClick={() => handleNavigation("/profile")}
-                className="flex items-center space-x-3 pl-2 group"
-              >
-                <div className="flex flex-col items-end mr-1">
-                  <span className="text-xs font-bold text-white group-hover:text-orange-500 transition-colors">
-                    {userProfile?.fullName || "Member"}
-                  </span>
-                  <span className="text-[10px] text-gray-500 font-medium">
-                    View Profile
-                  </span>
-                </div>
-                <div className="h-10 w-10 rounded-full bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center text-white font-bold border-2 border-white/10 overflow-hidden group-hover:border-orange-500 transition-all duration-300 shadow-inner">
-                  {userProfile?.profileImage ? (
-                    <img
-                      src={userProfile.profileImage}
-                      alt="Profile"
-                      className="h-full w-full object-cover"
-                    />
-                  ) : (
-                    <span>{getInitials(userProfile?.fullName)}</span>
-                  )}
-                </div>
-              </motion.button>
-            ) : (
-              <motion.button
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                whileHover={{ scale: 1.05, shadow: "0px 0px 20px rgba(249, 115, 22, 0.4)" }}
-                whileTap={{ scale: 0.95 }}
-                type="button"
-                className="bg-gradient-to-r from-orange-500 to-red-600 text-white px-6 py-2 rounded-full font-bold text-sm transition-all duration-300"
-                onClick={() => handleNavigation("/signup")}
-              >
-                JOIN NOW
-              </motion.button>
-            )}
-          </nav>
-
-          <button
-            className="md:hidden text-white bg-white/5 hover:bg-white/10 p-2 rounded-xl border border-white/10 transition-colors"
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-            aria-label="Toggle menu"
-          >
-            {isMenuOpen ? (
-              <X className="h-6 w-6 text-orange-500" />
-            ) : (
-              <Menu className="h-6 w-6" />
-            )}
-          </button>
-        </div>
+    <>
+      {/* Logo */}
+      <div
+        onClick={() => navigate("/")}
+        className="fixed top-5 left-5 z-[1001] cursor-pointer group interactive-item"
+      >
+        <img
+          src="/bucpng.png"
+          alt="BUC India"
+          className="h-20 w-auto brightness-0 invert opacity-100 group-hover:opacity-100 transition-opacity duration-500"
+        />
       </div>
 
-      {/* Mobile Menu */}
+      {/* Premium Menu Trigger Wrapper */}
+      <div className="fixed top-10 right-10 z-[1001] flex items-center gap-6">
+        {/* Hover Side Label */}
+        <AnimatePresence>
+          {isHovered && (
+            <motion.span
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 20 }}
+              className="font-heading text-sm tracking-[0.5em] text-copper uppercase select-none hidden md:block"
+            >
+              {isOpen ? "CLOSE" : "NAVIGATION"}
+            </motion.span>
+          )}
+        </AnimatePresence>
+
+        {/* Premium Menu Trigger */}
+        <button
+          onClick={toggleMenu}
+          onMouseEnter={() => setIsHovered(true)}
+          onMouseLeave={() => setIsHovered(false)}
+          className={`p-2 flex flex-col items-center justify-center transition-all duration-500 group relative interactive-item ${
+            isOpen ? "text-copper" : "text-white"
+          }`}
+          aria-label="Toggle Menu"
+        >
+          {/* L Corners */}
+          <div className="absolute -inset-2">
+            <span
+              className={`absolute top-0 left-0 w-4 h-4 border-t-2 border-l-2 transition-colors duration-500 ${isOpen ? "border-copper" : "border-copper/40 group-hover:border-copper"}`}
+            ></span>
+            <span
+              className={`absolute top-0 right-0 w-4 h-4 border-t-2 border-r-2 transition-colors duration-500 ${isOpen ? "border-copper" : "border-copper/40 group-hover:border-copper"}`}
+            ></span>
+            <span
+              className={`absolute bottom-0 left-0 w-4 h-4 border-b-2 border-l-2 transition-colors duration-500 ${isOpen ? "border-copper" : "border-copper/40 group-hover:border-copper"}`}
+            ></span>
+            <span
+              className={`absolute bottom-0 right-0 w-4 h-4 border-b-2 border-r-2 transition-colors duration-500 ${isOpen ? "border-copper" : "border-copper/40 group-hover:border-copper"}`}
+            ></span>
+          </div>
+
+          {/* Animated Bike Component Icon (V-Twin Engine) */}
+          <div className="relative w-16 h-16 flex items-center justify-center shadow-2xl rounded-full bg-carbon-light/20 backdrop-blur-sm border border-white/5 transition-transform duration-500 group-hover:scale-110">
+            <motion.svg
+              viewBox="0 0 100 100"
+              className="w-12 h-12"
+              animate={{ rotate: isOpen ? 180 : 0 }}
+              transition={{ duration: 0.8, ease: "anticipate" }}
+            >
+              {/* Engine Block / Crankcase */}
+              <circle
+                cx="50"
+                cy="70"
+                r="12"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+              />
+              <motion.circle
+                cx="50"
+                cy="70"
+                r="4"
+                fill="currentColor"
+                animate={
+                  isHovered
+                    ? {
+                        scale: [1, 1.8, 1],
+                        opacity: [0.8, 1, 0.8],
+                      }
+                    : {}
+                }
+                transition={{ duration: 0.1, repeat: Infinity }}
+              />
+
+              {/* Exhaust Particles Injection */}
+              <ExhaustParticles
+                x={35}
+                y={15}
+                angle={Math.PI * 1.2}
+                isHovered={isHovered}
+              />
+              <ExhaustParticles
+                x={65}
+                y={15}
+                angle={Math.PI * 1.8}
+                isHovered={isHovered}
+              />
+
+              {/* Left Cylinder */}
+              <g transform="rotate(-30 50 70)">
+                <rect
+                  x="35"
+                  y="20"
+                  width="30"
+                  height="40"
+                  rx="1"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={isHovered ? 3 : 2}
+                  className="transition-all duration-300"
+                />
+                {/* Cooling Fins */}
+                {[...Array(5)].map((_, i) => (
+                  <line
+                    key={`l-fin-${i}`}
+                    x1="32"
+                    y1={25 + i * 7}
+                    x2="68"
+                    y2={25 + i * 7}
+                    stroke="currentColor"
+                    strokeWidth="1"
+                    opacity="0.5"
+                  />
+                ))}
+                {/* Piston */}
+                <motion.rect
+                  x="38"
+                  y="22"
+                  width="24"
+                  height="10"
+                  rx="1"
+                  fill="currentColor"
+                  animate={{ y: [0, 20, 0] }}
+                  transition={{
+                    duration: isHovered ? 0.1 : 1.2,
+                    repeat: Infinity,
+                    ease: "easeInOut",
+                  }}
+                />
+              </g>
+
+              {/* Right Cylinder */}
+              <g transform="rotate(30 50 70)">
+                <rect
+                  x="35"
+                  y="20"
+                  width="30"
+                  height="40"
+                  rx="1"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={isHovered ? 3 : 2}
+                  className="transition-all duration-300"
+                />
+                {/* Cooling Fins */}
+                {[...Array(5)].map((_, i) => (
+                  <line
+                    key={`r-fin-${i}`}
+                    x1="32"
+                    y1={25 + i * 7}
+                    x2="68"
+                    y2={25 + i * 7}
+                    stroke="currentColor"
+                    strokeWidth="1"
+                    opacity="0.5"
+                  />
+                ))}
+                {/* Piston */}
+                <motion.rect
+                  x="38"
+                  y="22"
+                  width="24"
+                  height="10"
+                  rx="1"
+                  fill="currentColor"
+                  animate={{ y: [20, 0, 20] }}
+                  transition={{
+                    duration: isHovered ? 0.1 : 1.2,
+                    repeat: Infinity,
+                    ease: "easeInOut",
+                  }}
+                />
+              </g>
+            </motion.svg>
+          </div>
+        </button>
+      </div>
+
+      {/* Nav Overlay */}
       <AnimatePresence>
-        {isMenuOpen && (
+        {isOpen && (
           <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.4, ease: [0.04, 0.62, 0.23, 0.98] }}
-            className="md:hidden bg-black/95 border-b border-orange-500/30 overflow-hidden"
+            initial={{ y: "-100%" }}
+            animate={{ y: 0 }}
+            exit={{ y: "-100%" }}
+            transition={{ duration: 0.8, ease: [0.7, 0, 0.3, 1] }}
+            className="fixed inset-0 bg-carbon z-[1000] flex items-center justify-center overflow-hidden"
           >
-            <div className="px-4 py-6 space-y-4">
-              {navigation.map((item, index) => (
-                <motion.button
-                  key={item.name}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: index * 0.1 }}
-                  onClick={() => handleNavigation(item.path)}
-                  className={`flex items-center space-x-3 w-full px-4 py-3 rounded-xl text-base font-bold transition-all duration-300 ${
-                    location.pathname === item.path
-                      ? "text-orange-500 bg-orange-500/10"
-                      : "text-gray-300 hover:text-white hover:bg-white/5"
-                  }`}
-                >
-                  <item.icon className="h-5 w-5" />
-                  <span>{item.name}</span>
-                </motion.button>
-              ))}
+            {/* Background Ghost Text */}
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none overflow-hidden select-none">
+              <span className="font-heading text-[25vw] text-white/[0.02] leading-none whitespace-nowrap">
+                BUC INDIA
+              </span>
+              <div className="absolute bottom-[10%] right-[-2%] font-heading text-[6vw] text-white/[0.1]">
+                RIDE
+              </div>
+            </div>
 
-              <motion.div 
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: navigation.length * 0.1 }}
-                className="h-[1px] bg-gray-800 my-4"
-              ></motion.div>
+            {/* Accent Elements */}
+            <div className="absolute left-[clamp(40px,6vw,80px)] top-0 bottom-0 w-[1px] bg-copper/10 hidden md:block" />
+            <div className="absolute left-[clamp(40px,6vw,80px)] top-1/2 -translate-y-1/2 w-1.5 h-1.5 bg-copper/40 rotate-45 hidden md:block" />
+            <div className="absolute top-0 left-0 w-32 h-32 border-t border-l border-copper/20" />
+            <div className="absolute bottom-0 right-0 w-32 h-32 border-b border-r border-copper/20" />
 
-              {isLoggedIn ? (
-                <div className="space-y-3">
-                  <motion.button
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: (navigation.length + 1) * 0.1 }}
-                    onClick={() => handleNavigation("/profile")}
-                    className="flex items-center space-x-3 w-full px-4 py-3 rounded-xl text-gray-300 hover:text-white hover:bg-white/5 transition-all"
+            {/* Premium Animations Style */}
+            <style>{`
+              .nav-link-btn {
+                position: relative;
+                padding: 0.5rem 0;
+                transition: color 0.4s ease;
+              }
+              .nav-link-btn::before {
+                content: '';
+                position: absolute;
+                bottom: 0;
+                left: 0;
+                width: 0;
+                height: 1px;
+                background: #C19A6B;
+                transition: width 0.6s cubic-bezier(0.7, 0, 0.3, 1);
+              }
+              .nav-link-btn:hover::before, .nav-link-btn.active::before {
+                width: 100%;
+              }
+              .nav-link-btn.active {
+                text-shadow: 0 0 20px rgba(193, 154, 107, 0.3);
+              }
+            `}</style>
+
+            {/* Main Menu Grid */}
+            <div className="relative z-10 w-full max-w-7xl mx-auto px-10 grid grid-cols-1 md:grid-cols-12 gap-12 items-center">
+              {/* Navigation Links (Left Pane) */}
+              <nav className="md:col-span-7 flex flex-col items-start gap-4">
+                {navigation.map((item, index) => (
+                  <div
+                    key={item.name}
+                    ref={(el) => (linksRef.current[index] = el)}
+                    className="overflow-hidden"
                   >
-                    <div className="h-10 w-10 rounded-full bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center text-white font-bold border-2 border-white/10 overflow-hidden">
-                      {userProfile?.profileImage ? (
-                        <img
-                          src={userProfile.profileImage}
-                          alt="Profile"
-                          className="h-full w-full object-cover"
-                        />
-                      ) : (
-                        <span>{getInitials(userProfile?.fullName)}</span>
-                      )}
-                    </div>
-                    <div className="flex flex-col items-start">
-                      <span className="text-sm font-bold text-white">
-                        {userProfile?.fullName || "Member"}
+                    <button
+                      onClick={() => handleNavigate(item.path)}
+                      className={`nav-link-btn group flex items-center gap-12 interactive-item ${
+                        location.pathname === item.path ? "active" : ""
+                      }`}
+                    >
+                      <span
+                        className={`font-heading text-5xl md:text-7xl transition-all duration-500 ease-[cubic-bezier(0.7,0,0.3,1)] ${
+                          location.pathname === item.path
+                            ? "text-copper tracking-[0.2em]"
+                            : "text-white/20 group-hover:text-white group-hover:tracking-[0.2em]"
+                        }`}
+                      >
+                        {item.name}
                       </span>
-                      <span className="text-xs text-gray-500">View Profile</span>
-                    </div>
-                  </motion.button>
-                  <motion.button
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: (navigation.length + 2) * 0.1 }}
-                    onClick={handleLogout}
-                    className="flex items-center space-x-3 w-full px-4 py-3 rounded-xl text-red-500 hover:bg-red-500/10 transition-all font-bold"
-                  >
-                    <LogOut className="h-5 w-5" />
-                    <span>Logout</span>
-                  </motion.button>
-                </div>
-              ) : (
-                <motion.div 
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: (navigation.length + 1) * 0.1 }}
-                  className="grid grid-cols-2 gap-4"
-                >
+                      {/* Hover reveal sub-text */}
+                      <span className="opacity-0 group-hover:opacity-100 transition-all duration-300 font-body text-[10px] tracking-[0.3em] text-copper uppercase">
+                        {item.label}
+                      </span>
+                    </button>
+                  </div>
+                ))}
+              </nav>
+
+              {/* Right Pane: Auth & Social */}
+              <div className="md:col-span-5 flex flex-col items-start md:items-end gap-12">
+                {/* Auth Section */}
+                <div className="flex flex-col items-start md:items-end gap-10 w-full mb-8">
                   <button
-                    onClick={() => handleNavigation("/login")}
-                    className="px-4 py-3 rounded-xl text-center text-gray-300 font-bold border border-gray-800 hover:bg-white/5"
+                    onClick={() => handleNavigate("/login")}
+                    className="group relative flex items-center gap-4 font-body text-xs tracking-ultra text-white/40 hover:text-white transition-colors py-2"
                   >
                     LOGIN
+                    <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-[1px] bg-copper group-hover:w-full transition-all duration-500"></span>
                   </button>
-                  <button
-                    onClick={() => handleNavigation("/signup")}
-                    className="px-4 py-3 rounded-xl text-center bg-gradient-to-r from-orange-500 to-red-600 text-white font-bold"
-                  >
-                    SIGN UP
-                  </button>
-                </motion.div>
-              )}
+
+                  <div className="relative group">
+                    <GlareHover>
+                      <button
+                        onClick={() => handleNavigate("/signup")}
+                        className="px-10 py-4 bg-transparent border border-copper/30 text-copper font-heading text-xl tracking-widest relative overflow-hidden group/btn hover:border-copper transition-colors duration-500 interactive-item"
+                      >
+                        <span className="relative z-10 transition-colors duration-500 group-hover/btn:text-carbon">
+                          JOIN BROTHERHOOD
+                        </span>
+                        <div className="absolute inset-0 bg-copper translate-x-[-100%] group-hover/btn:translate-x-0 transition-transform duration-500 ease-[cubic-bezier(0.7,0,0.3,1)] -z-0"></div>
+                      </button>
+                    </GlareHover>
+                  </div>
+                </div>
+
+                {/* Social Section */}
+                <div className="flex flex-col items-start md:items-end gap-6 w-full pt-12 border-t border-white/5">
+                  <span className="font-body text-[10px] tracking-[0.5em] text-white/20 uppercase">
+                    FOLLOW US
+                  </span>
+                  <div className="flex flex-col items-start md:items-end gap-3">
+                    {[
+                      { name: "INSTAGRAM", url: "#" },
+                      { name: "FACEBOOK", url: "#" },
+                      { name: "TWITTER", url: "#" },
+                      { name: "YOUTUBE", url: "#" },
+                    ].map((social) => (
+                      <a
+                        key={social.name}
+                        href={social.url}
+                        className="group relative font-heading text-lg text-white/30 hover:text-copper transition-all hover:tracking-widest py-1"
+                      >
+                        {social.name}
+                        <span className="absolute bottom-0 right-0 w-0 h-[1px] bg-copper/40 group-hover:w-full transition-all duration-500"></span>
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Bottom Quote */}
+            <div className="absolute bottom-10 left-0 w-full text-center px-6">
+              <div className="flex flex-col gap-2">
+                <div className="text-copper font-body tracking-[0.4em] text-[10px] uppercase opacity-60">
+                  Ride Together • Stand Together • BUC India
+                </div>
+                <div className="text-white/10 font-heading text-xs tracking-widest uppercase">
+                  Where Passion Meets the Pavement
+                </div>
+              </div>
             </div>
           </motion.div>
         )}
       </AnimatePresence>
-
-      <RegistrationForm
-        isOpen={showRegistrationForm}
-        onClose={() => setShowRegistrationForm(false)}
-        type="community"
-      />
-    </header>
-
+    </>
   );
 };
 

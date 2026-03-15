@@ -4,11 +4,19 @@ const galleryItemSchema = new mongoose.Schema(
   {
     imageUrl: {
       type: String,
-      required: true,
+      default: '',
     },
     imagePublicId: {
       type: String,
-      required: true,
+      default: '',
+    },
+    videoUrl: {
+      type: String,
+      default: '',
+    },
+    videoPublicId: {
+      type: String,
+      default: '',
     },
     eventName: {
       type: String,
@@ -21,7 +29,7 @@ const galleryItemSchema = new mongoose.Schema(
     },
     category: {
       type: String,
-      enum: ['all', 'rides', 'events', 'bikes', 'rallies'],
+      enum: ['all', 'rides', 'events', 'bikes', 'rallies', 'highlights'],
       default: 'all',
     },
   },

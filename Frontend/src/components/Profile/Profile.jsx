@@ -57,6 +57,11 @@ const Profile = () => {
     emergencyContactPhone: "",
     profileImage: "",
     licenseImage: "",
+    facebookUrl: "",
+    instagramUrl: "",
+    twitterUrl: "",
+    youtubeUrl: "",
+    websiteUrl: "",
   });
 
   const [originalData, setOriginalData] = useState({});
@@ -191,6 +196,11 @@ const Profile = () => {
       formData.append("licenseNumber", profileData.licenseNumber || "");
       formData.append("emergencyContactName", profileData.emergencyContactName || "");
       formData.append("emergencyContactPhone", profileData.emergencyContactPhone || "");
+      formData.append("facebookUrl", profileData.facebookUrl || "");
+      formData.append("instagramUrl", profileData.instagramUrl || "");
+      formData.append("twitterUrl", profileData.twitterUrl || "");
+      formData.append("youtubeUrl", profileData.youtubeUrl || "");
+      formData.append("websiteUrl", profileData.websiteUrl || "");
 
       if (profileImage) {
         formData.append("profileImage", profileImage);
@@ -242,7 +252,7 @@ const Profile = () => {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
         <div className="text-center">
-          <Loader2 className="w-12 h-12 text-orange-500 animate-spin mx-auto mb-4" />
+          <Loader2 className="w-12 h-12 text-blue-500 animate-spin mx-auto mb-4" />
           <p className="text-gray-400">Loading profile...</p>
         </div>
       </div>
@@ -275,7 +285,7 @@ const Profile = () => {
               <div className="flex flex-col sm:flex-row items-center sm:items-center gap-5">
                 {/* Profile Image */}
                 <div className="relative">
-                  <div className="w-24 h-24 md:w-28 md:h-28 rounded-full bg-gradient-to-br from-orange-500 to-red-600 p-1 shadow-lg">
+                  <div className="w-24 h-24 md:w-28 md:h-28 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 p-1 shadow-lg">
                     {profileImagePreview ? (
                       <img
                         src={profileImagePreview}
@@ -291,7 +301,7 @@ const Profile = () => {
                     )}
                   </div>
                   {isEditing && (
-                    <label className="absolute bottom-0 right-0 bg-orange-500 hover:bg-orange-600 text-white p-3 rounded-full cursor-pointer shadow-lg transition-all duration-200 transform hover:scale-110">
+                    <label className="absolute bottom-0 right-0 bg-blue-500 hover:bg-blue-600 text-white p-3 rounded-full cursor-pointer shadow-lg transition-all duration-200 transform hover:scale-110">
                       <Camera className="w-5 h-5" />
                       <input
                         type="file"
@@ -314,13 +324,13 @@ const Profile = () => {
                   <div className="flex flex-wrap gap-2 justify-center sm:justify-start text-xs">
                     {profileData.phone && (
                       <div className="flex items-center space-x-2 text-gray-300 bg-white/5 px-3 py-1.5 rounded-md">
-                        <Phone className="w-3 h-3 text-orange-500" />
+                        <Phone className="w-3 h-3 text-blue-500" />
                         <span>{profileData.phone}</span>
                       </div>
                     )}
                     {profileData.city && (
                       <div className="flex items-center space-x-2 text-gray-300 bg-white/5 px-3 py-1.5 rounded-md">
-                        <MapPin className="w-3 h-3 text-orange-500" />
+                        <MapPin className="w-3 h-3 text-blue-500" />
                         <span>{profileData.city}, {profileData.state}</span>
                       </div>
                     )}
@@ -333,14 +343,14 @@ const Profile = () => {
                     <>
                       <button
                         onClick={() => setIsEditing(true)}
-                        className="flex items-center justify-center space-x-2 bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200"
+                        className="flex items-center justify-center space-x-2 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200"
                       >
                         <Edit2 className="w-4 h-4" />
                         <span>Edit</span>
                       </button>
                       <button
                         onClick={handleLogout}
-                        className="flex items-center justify-center space-x-2 bg-red-600/20 hover:bg-red-600 text-red-500 hover:text-white px-4 py-2 rounded-lg text-sm font-medium border border-red-600/30 transition-all duration-200"
+                        className="flex items-center justify-center space-x-2 bg-indigo-600/20 hover:bg-indigo-600 text-indigo-500 hover:text-white px-4 py-2 rounded-lg text-sm font-medium border border-indigo-600/30 transition-all duration-200"
                       >
                         <LogOut className="w-4 h-4" />
                         <span>Logout</span>
@@ -384,7 +394,7 @@ const Profile = () => {
               {/* Personal Information Card */}
               <div className="bg-white/5 backdrop-blur-md rounded-2xl border border-white/10 p-6 md:p-8 shadow-xl">
                 <div className="flex items-center space-x-3 mb-6">
-                  <div className="p-3 bg-gradient-to-r from-orange-500 to-red-600 rounded-xl">
+                  <div className="p-3 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl">
                     <User className="w-6 h-6 text-white" />
                   </div>
                   <h2 className="text-2xl font-bold text-white">Personal Information</h2>
@@ -445,7 +455,7 @@ const Profile = () => {
               {/* Address Information Card */}
               <div className="bg-white/5 backdrop-blur-md rounded-2xl border border-white/10 p-6 md:p-8 shadow-xl">
                 <div className="flex items-center space-x-3 mb-6">
-                  <div className="p-3 bg-gradient-to-r from-orange-500 to-red-600 rounded-xl">
+                  <div className="p-3 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl">
                     <MapPin className="w-6 h-6 text-white" />
                   </div>
                   <h2 className="text-2xl font-bold text-white">Address Information</h2>
@@ -494,7 +504,7 @@ const Profile = () => {
               {/* Bike Information Card */}
               <div className="bg-white/5 backdrop-blur-md rounded-2xl border border-white/10 p-6 md:p-8 shadow-xl">
                 <div className="flex items-center space-x-3 mb-6">
-                  <div className="p-3 bg-gradient-to-r from-orange-500 to-red-600 rounded-xl">
+                  <div className="p-3 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl">
                     <Bike className="w-6 h-6 text-white" />
                   </div>
                   <h2 className="text-2xl font-bold text-white">Bike Information</h2>
@@ -530,7 +540,7 @@ const Profile = () => {
                   />
                   <div className="md:col-span-2">
                     <label className="flex items-center text-gray-300 mb-2 text-sm font-medium">
-                      <ImageIcon className="w-4 h-4 mr-2 text-orange-500" />
+                      <ImageIcon className="w-4 h-4 mr-2 text-blue-500" />
                       Driving License Image
                     </label>
                     {isEditing ? (
@@ -564,7 +574,7 @@ const Profile = () => {
                                 setLicenseImage(null);
                                 setLicenseImagePreview(null);
                               }}
-                              className="absolute top-2 right-2 p-1.5 bg-red-600 text-white rounded-full hover:bg-red-700 transition-colors"
+                              className="absolute top-2 right-2 p-1.5 bg-indigo-600 text-white rounded-full hover:bg-indigo-700 transition-colors"
                             >
                               <X className="w-4 h-4" />
                             </button>
@@ -584,7 +594,7 @@ const Profile = () => {
                               href={licenseImagePreview} 
                               target="_blank" 
                               rel="noopener noreferrer"
-                              className="text-orange-500 hover:text-orange-400 text-sm font-medium flex items-center"
+                              className="text-blue-500 hover:text-blue-400 text-sm font-medium flex items-center"
                             >
                               <Eye className="w-4 h-4 mr-1.5" />
                               View Full Image
@@ -602,7 +612,7 @@ const Profile = () => {
               {/* Emergency Contact Card */}
               <div className="bg-white/5 backdrop-blur-md rounded-2xl border border-white/10 p-6 md:p-8 shadow-xl">
                 <div className="flex items-center space-x-3 mb-6">
-                  <div className="p-3 bg-gradient-to-r from-red-500 to-orange-600 rounded-xl">
+                  <div className="p-3 bg-gradient-to-r from-indigo-500 to-blue-600 rounded-xl">
                     <AlertCircle className="w-6 h-6 text-white" />
                   </div>
                   <h2 className="text-2xl font-bold text-white">Emergency Contact</h2>
@@ -630,10 +640,71 @@ const Profile = () => {
                 </div>
               </div>
 
+              {/* Social Media Links Card */}
+              <div className="bg-white/5 backdrop-blur-md rounded-2xl border border-white/10 p-6 md:p-8 shadow-xl">
+                <div className="flex items-center space-x-3 mb-6">
+                  <div className="p-3 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl">
+                    <Shield className="w-6 h-6 text-white" />
+                  </div>
+                  <h2 className="text-2xl font-bold text-white">Social Presence</h2>
+                </div>
+                <p className="text-sm text-gray-400 mb-4">
+                  Add your social media handles so fellow BUC riders can discover your rides and stories.
+                </p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <ProfileField
+                    label="Facebook"
+                    icon={Mail}
+                    name="facebookUrl"
+                    value={profileData.facebookUrl}
+                    onChange={handleInputChange}
+                    isEditing={isEditing}
+                    placeholder="https://facebook.com/your-profile"
+                  />
+                  <ProfileField
+                    label="Instagram"
+                    icon={ImageIcon}
+                    name="instagramUrl"
+                    value={profileData.instagramUrl}
+                    onChange={handleInputChange}
+                    isEditing={isEditing}
+                    placeholder="https://instagram.com/your-handle"
+                  />
+                  <ProfileField
+                    label="Twitter / X"
+                    icon={Mail}
+                    name="twitterUrl"
+                    value={profileData.twitterUrl}
+                    onChange={handleInputChange}
+                    isEditing={isEditing}
+                    placeholder="https://x.com/your-handle"
+                  />
+                  <ProfileField
+                    label="YouTube"
+                    icon={ImageIcon}
+                    name="youtubeUrl"
+                    value={profileData.youtubeUrl}
+                    onChange={handleInputChange}
+                    isEditing={isEditing}
+                    placeholder="https://youtube.com/@your-channel"
+                  />
+                  <ProfileField
+                    label="Personal Website"
+                    icon={MapPin}
+                    name="websiteUrl"
+                    value={profileData.websiteUrl}
+                    onChange={handleInputChange}
+                    isEditing={isEditing}
+                    placeholder="https://your-website.com"
+                    fullWidth
+                  />
+                </div>
+              </div>
+
               {/* Registered Events Card */}
               <div className="bg-white/5 backdrop-blur-md rounded-2xl border border-white/10 p-6 md:p-8 shadow-xl">
                 <div className="flex items-center space-x-3 mb-6">
-                  <div className="p-3 bg-gradient-to-r from-orange-500 to-red-600 rounded-xl">
+                  <div className="p-3 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl">
                     <Calendar className="w-6 h-6 text-white" />
                   </div>
                   <h2 className="text-2xl font-bold text-white">My Registered Events</h2>
@@ -641,15 +712,15 @@ const Profile = () => {
                 
                 {loadingEvents ? (
                   <div className="flex justify-center py-8">
-                    <Loader2 className="w-8 h-8 text-orange-500 animate-spin" />
+                    <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
                   </div>
                 ) : registeredEvents.length > 0 ? (
                   <div className="grid grid-cols-1 gap-4">
                     {registeredEvents.map((reg) => (
-                      <div key={reg._id} className="bg-white/5 border border-white/10 rounded-xl p-4 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:border-orange-500/50 transition-all group">
+                      <div key={reg._id} className="bg-white/5 border border-white/10 rounded-xl p-4 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:border-blue-500/50 transition-all group">
                         <div className="flex items-center space-x-4">
-                          <div className="p-3 bg-orange-500/10 rounded-lg group-hover:bg-orange-500/20 transition-colors">
-                            <Bike className="w-6 h-6 text-orange-500" />
+                          <div className="p-3 bg-blue-500/10 rounded-lg group-hover:bg-blue-500/20 transition-colors">
+                            <Bike className="w-6 h-6 text-blue-500" />
                           </div>
                           <div>
                             <h3 className="text-lg font-bold text-white">
@@ -657,12 +728,12 @@ const Profile = () => {
                             </h3>
                             <div className="flex flex-wrap gap-x-4 gap-y-1 mt-1">
                               <div className="flex items-center text-gray-400 text-sm">
-                                <Calendar className="w-3.5 h-3.5 mr-1.5 text-orange-500" />
+                                <Calendar className="w-3.5 h-3.5 mr-1.5 text-blue-500" />
                                 <span>{reg.eventId?.eventDate ? new Date(reg.eventId.eventDate).toLocaleDateString() : new Date(reg.registeredAt).toLocaleDateString()}</span>
                               </div>
                               {reg.bikeModel && (
                                 <div className="flex items-center text-gray-400 text-sm">
-                                  <Bike className="w-3.5 h-3.5 mr-1.5 text-orange-500" />
+                                  <Bike className="w-3.5 h-3.5 mr-1.5 text-blue-500" />
                                   <span>{reg.bikeModel}</span>
                                 </div>
                               )}
@@ -689,7 +760,7 @@ const Profile = () => {
                     <p className="text-gray-400">No events registered yet.</p>
                     <button 
                       onClick={() => navigate("/events")}
-                      className="mt-4 text-orange-500 hover:text-orange-400 font-semibold"
+                      className="mt-4 text-blue-500 hover:text-blue-400 font-semibold"
                     >
                       Explore Events
                     </button>
@@ -719,7 +790,7 @@ const ProfileField = ({
   return (
     <div className={fullWidth ? "md:col-span-2" : ""}>
       <label className="flex items-center text-gray-300 mb-2 text-sm font-medium">
-        {Icon && <Icon className="w-4 h-4 mr-2 text-orange-500" />}
+        {Icon && <Icon className="w-4 h-4 mr-2 text-blue-500" />}
         {label}
       </label>
       {isEditing && !readOnly ? (
@@ -729,7 +800,7 @@ const ProfileField = ({
             value={value || ""}
             onChange={onChange}
             rows="3"
-            className="w-full bg-gray-800/50 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500/20 transition-all"
+            className="w-full bg-gray-800/50 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all"
             placeholder={placeholder}
           />
         ) : type === "select" ? (
@@ -737,7 +808,7 @@ const ProfileField = ({
             name={name}
             value={value || ""}
             onChange={onChange}
-            className="w-full bg-gray-800/50 border border-gray-600 rounded-lg px-4 py-3 text-white focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500/20 transition-all"
+            className="w-full bg-gray-800/50 border border-gray-600 rounded-lg px-4 py-3 text-white focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all"
           >
             <option value="">Select {label}</option>
             {options?.map((opt) => (
@@ -752,7 +823,7 @@ const ProfileField = ({
             name={name}
             value={value || ""}
             onChange={onChange}
-            className="w-full bg-gray-800/50 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500/20 transition-all"
+            className="w-full bg-gray-800/50 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all"
             placeholder={placeholder}
           />
         )

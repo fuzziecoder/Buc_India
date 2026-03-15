@@ -716,7 +716,7 @@ const ViewRegistrations = () => {
         <div className="delete-modal-overlay">
           <div className="delete-modal-content">
             <div className="delete-modal-icon">
-              <AlertTriangle size={48} color="#f97316" />
+              <AlertTriangle size={48} color="#3B82F6" />
             </div>
             <h2>Confirm Delete</h2>
             <p>Are you sure you want to delete this registration? This action cannot be undone.</p>
@@ -805,7 +805,7 @@ const ViewRegistrations = () => {
             onClick={(e) => e.stopPropagation()}
           >
             <div className="delete-modal-icon">
-              <Download size={36} color="#f97316" />
+              <Download size={36} color="#3B82F6" />
             </div>
             <h2>Scan to Download Certificate</h2>
             <p className="mb-4 text-sm text-gray-300">

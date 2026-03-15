@@ -7,9 +7,14 @@ import {
   ArrowLeft,
   Handshake,
   Upload,
+  User,
+  Mail,
+  Phone,
+  Calendar,
+  Zap,
+  Trash2
 } from "lucide-react";
 import { clubService } from "../../services/api";
-import "./ClubCollaborate.css";
 
 const initialRequestState = {
   name: "",
@@ -99,12 +104,11 @@ const ClubCollaborate = () => {
 
       await clubService.createRequest(data);
       toast.success(
-        "Collaboration request submitted! BUC admin will review and respond shortly."
+        "Request submitted! BUC admin will review and respond shortly."
       );
       setRequestForm(initialRequestState);
       navigate("/clubs");
     } catch (error) {
-      console.error("Collaboration request error:", error);
       toast.error(
         error.response?.data?.message ||
           "Unable to submit request. Please try again."
@@ -115,345 +119,227 @@ const ClubCollaborate = () => {
   };
 
   return (
-    <div className="collab-page">
-      {/* ── Page Header ── */}
-      <div className="collab-header">
-        <div className="collab-header-inner">
+    <div className="min-h-screen bg-carbon text-white pt-32 pb-24 px-6 md:px-12">
+      <div className="max-w-4xl mx-auto">
+        {/* Header */}
+        <div className="mb-16">
           <button
-            className="collab-back-btn"
             onClick={() => navigate("/clubs")}
+            className="flex items-center gap-2 font-body text-[10px] tracking-widest uppercase text-steel-dim hover:text-copper transition-colors mb-8"
           >
-            <ArrowLeft size={17} />
+            <ArrowLeft size={14} />
             Back to Clubs
           </button>
-
-          <div className="collab-header-icon">
-            <Handshake size={32} />
+          
+          <div className="flex items-end gap-6 mb-4">
+             <div className="w-16 h-16 bg-copper/10 border border-copper/30 flex items-center justify-center rounded-full">
+                <Handshake size={32} className="text-copper" />
+             </div>
+             <div>
+                <span className="text-copper font-body text-xs tracking-widest uppercase mb-1 block">Partnership</span>
+                <h1 className="font-heading text-5xl md:text-7xl uppercase">Collaborate <span className="text-transparent outline-title">With BUC</span></h1>
+             </div>
           </div>
-          <h1 className="collab-heading">
-            Collaborate{" "}
-            <span className="collab-heading-accent">with BUC</span>
-          </h1>
-          <p className="collab-subheading">
-            Submit your club's details below. Once approved by BUC admins,
-            you'll receive a dedicated partner dashboard and a public club page.
+          
+          <p className="font-text text-steel-dim text-lg max-w-2xl leading-relaxed">
+            Unify your brotherhood with the national network. Approved partners gain access to administrative tools, exclusive events, and a dedicated public presence.
           </p>
-
-          {!isLoggedIn && (
-            <div className="collab-auth-warning">
-              <Shield size={15} />
-              <span>
-                You need to{" "}
-                <a href="/login" className="collab-login-link">
-                  sign in
-                </a>{" "}
-                before submitting this form.
-              </span>
-            </div>
-          )}
         </div>
-      </div>
 
-      {/* ── Form ── */}
-      <div className="collab-body">
-        <form className="collab-form" onSubmit={handleSubmit}>
-          {/* Club Info */}
-          <div className="collab-card">
-            <h2 className="collab-card-title">Club Information</h2>
-
-            <div className="collab-field-group">
-              <label className="collab-label">
-                Club Name <span className="collab-required">*</span>
-              </label>
-              <input
-                type="text"
-                className="collab-input"
-                value={requestForm.name}
-                onChange={(e) => updateField("name", e.target.value)}
-                placeholder="e.g. Royal Riders Pune"
-                required
-              />
-            </div>
-
-            <div className="collab-field-row">
-              <div className="collab-field-group">
-                <label className="collab-label">When did the club start?</label>
-                <input
-                  type="date"
-                  className="collab-input"
-                  value={requestForm.startedOn}
-                  onChange={(e) => updateField("startedOn", e.target.value)}
-                />
-              </div>
-              <div className="collab-field-group">
-                <label className="collab-label">Club Moto / Tagline</label>
+        <form onSubmit={handleSubmit} className="space-y-12">
+          {/* Section: Club Information */}
+          <div className="bg-carbon-light border border-white/5 p-8 md:p-12">
+            <h2 className="font-heading text-3xl uppercase mb-8 flex items-center gap-4">
+               <Zap size={24} className="text-copper" />
+               Club Identity
+            </h2>
+            
+            <div className="grid grid-cols-1 gap-8">
+              <div className="space-y-2">
+                <label className="font-body text-[10px] uppercase tracking-widest text-steel-dim">Club Name *</label>
                 <input
                   type="text"
-                  className="collab-input"
-                  value={requestForm.moto}
-                  onChange={(e) => updateField("moto", e.target.value)}
-                  placeholder="e.g. Ride free, ride safe"
+                  className="w-full bg-carbon border border-white/10 px-6 py-4 font-body text-sm outline-none focus:border-copper transition-colors"
+                  value={requestForm.name}
+                  onChange={(e) => updateField("name", e.target.value)}
+                  placeholder="e.g. DARK RIDERS PUNE"
+                  required
                 />
               </div>
-            </div>
 
-            <div className="collab-field-group">
-              <label className="collab-label">
-                What do you want to showcase through BUC?
-              </label>
-              <textarea
-                rows={4}
-                className="collab-textarea"
-                value={requestForm.showcaseText}
-                onChange={(e) => updateField("showcaseText", e.target.value)}
-                placeholder="Tell BUC about your club's mission, values, and what you'd like to achieve together…"
-              />
-            </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="space-y-2">
+                  <label className="font-body text-[10px] uppercase tracking-widest text-steel-dim">Est. Date</label>
+                  <input
+                    type="date"
+                    className="w-full bg-carbon border border-white/10 px-6 py-4 font-body text-sm outline-none focus:border-copper transition-colors"
+                    value={requestForm.startedOn}
+                    onChange={(e) => updateField("startedOn", e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="font-body text-[10px] uppercase tracking-widest text-steel-dim">Moto / Tagline</label>
+                  <input
+                    type="text"
+                    className="w-full bg-carbon border border-white/10 px-6 py-4 font-body text-sm outline-none focus:border-copper transition-colors"
+                    value={requestForm.moto}
+                    onChange={(e) => updateField("moto", e.target.value)}
+                    placeholder="e.g. HONOR OVER SPEED"
+                  />
+                </div>
+              </div>
 
-            <div className="collab-field-group">
-              <label className="collab-label">
-                Government ID / Club Registration Number
-              </label>
-              <input
-                type="text"
-                className="collab-input"
-                value={requestForm.governmentIdNumber}
-                onChange={(e) =>
-                  updateField("governmentIdNumber", e.target.value)
-                }
-                placeholder="Optional but recommended"
-              />
+              <div className="space-y-2">
+                <label className="font-body text-[10px] uppercase tracking-widest text-steel-dim">Mission Statement</label>
+                <textarea
+                  rows={4}
+                   className="w-full bg-carbon border border-white/10 px-6 py-4 font-body text-sm outline-none focus:border-copper transition-colors resize-none"
+                  value={requestForm.showcaseText}
+                  onChange={(e) => updateField("showcaseText", e.target.value)}
+                  placeholder="What does your brotherhood stand for?"
+                />
+              </div>
             </div>
           </div>
 
-          {/* Founder Details */}
-          <div className="collab-card">
-            <h2 className="collab-card-title">Founder Details</h2>
+          {/* Section: Founder & Leadership */}
+          <div className="bg-carbon-light border border-white/5 p-8 md:p-12">
+            <h2 className="font-heading text-3xl uppercase mb-8 flex items-center gap-4">
+               <User size={24} className="text-copper" />
+               Command & Control
+            </h2>
 
-            <div className="collab-field-row">
-              <div className="collab-field-group">
-                <label className="collab-label">Founder Name</label>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+              <div className="space-y-2">
+                <label className="font-body text-[10px] uppercase tracking-widest text-steel-dim">Founder Name</label>
                 <input
                   type="text"
-                  className="collab-input"
+                  className="w-full bg-carbon border border-white/10 px-6 py-4 font-body text-sm outline-none focus:border-copper transition-colors"
                   value={requestForm.founderName}
                   onChange={(e) => updateField("founderName", e.target.value)}
-                  placeholder="Full name"
+                  placeholder="Lead Founder"
                 />
               </div>
-              <div className="collab-field-group">
-                <label className="collab-label">Founder Role</label>
+              <div className="space-y-2">
+                <label className="font-body text-[10px] uppercase tracking-widest text-steel-dim">Designation</label>
                 <select
-                  className="collab-input"
+                  className="w-full bg-carbon border border-white/10 px-6 py-4 font-body text-sm outline-none focus:border-copper transition-colors appearance-none"
                   value={requestForm.founderRole}
                   onChange={(e) => updateField("founderRole", e.target.value)}
                 >
-                  <option value="founder">Founder</option>
-                  <option value="co-founder">Co-Founder</option>
-                  <option value="admin">Admin</option>
+                  <option value="founder">FOUNDER</option>
+                  <option value="co-founder">CO-FOUNDER</option>
+                  <option value="lead-admin">LEAD ADMIN</option>
                 </select>
               </div>
             </div>
 
-            <div className="collab-field-row">
-              <div className="collab-field-group">
-                <label className="collab-label">Founder Email</label>
-                <input
-                  type="email"
-                  className="collab-input"
-                  value={requestForm.founderEmail}
-                  onChange={(e) => updateField("founderEmail", e.target.value)}
-                />
-              </div>
-              <div className="collab-field-group">
-                <label className="collab-label">Founder Phone</label>
-                <input
-                  type="tel"
-                  className="collab-input"
-                  value={requestForm.founderPhone}
-                  onChange={(e) => updateField("founderPhone", e.target.value)}
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Admins */}
-          <div className="collab-card">
-            <h2 className="collab-card-title">Club Admins / Leadership</h2>
-            <p className="collab-card-subtitle">
-              Add co-founders, admins, or co-admins who will help manage the club.
-            </p>
-
-            <div className="collab-admin-list">
+            <h3 className="font-body text-[10px] uppercase tracking-[0.3em] text-copper mb-6">Additional Leadership</h3>
+            <div className="space-y-4 mb-8">
               {requestForm.admins.map((admin, index) => (
-                <div key={index} className="collab-admin-row">
+                <div key={index} className="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 border border-white/5 bg-carbon/50 relative group">
                   <input
                     type="text"
-                    className="collab-input"
-                    placeholder="Full name"
+                    className="w-full bg-carbon border border-white/10 px-4 py-3 font-body text-xs outline-none focus:border-copper"
+                    placeholder="NAME"
                     value={admin.name}
-                    onChange={(e) =>
-                      updateAdminField(index, "name", e.target.value)
-                    }
+                    onChange={(e) => updateAdminField(index, "name", e.target.value)}
                   />
                   <select
-                    className="collab-input"
+                    className="w-full bg-carbon border border-white/10 px-4 py-3 font-body text-xs outline-none focus:border-copper"
                     value={admin.role}
-                    onChange={(e) =>
-                      updateAdminField(index, "role", e.target.value)
-                    }
+                    onChange={(e) => updateAdminField(index, "role", e.target.value)}
                   >
-                    <option value="admin">Admin</option>
-                    <option value="co-admin">Co-Admin</option>
-                    <option value="co-founder">Co-Founder</option>
+                    <option value="admin">ADMIN</option>
+                    <option value="co-founder">CO-FOUNDER</option>
                   </select>
-                  <input
+                   <input
                     type="email"
-                    className="collab-input"
-                    placeholder="Email"
+                    className="w-full bg-carbon border border-white/10 px-4 py-3 font-body text-xs outline-none focus:border-copper"
+                    placeholder="EMAIL"
                     value={admin.email}
-                    onChange={(e) =>
-                      updateAdminField(index, "email", e.target.value)
-                    }
+                    onChange={(e) => updateAdminField(index, "email", e.target.value)}
                   />
                   <input
                     type="tel"
-                    className="collab-input"
-                    placeholder="Phone"
+                    className="w-full bg-carbon border border-white/10 px-4 py-3 font-body text-xs outline-none focus:border-copper"
+                    placeholder="PHONE"
                     value={admin.phone}
-                    onChange={(e) =>
-                      updateAdminField(index, "phone", e.target.value)
-                    }
+                    onChange={(e) => updateAdminField(index, "phone", e.target.value)}
                   />
                   {requestForm.admins.length > 1 && (
                     <button
                       type="button"
-                      className="collab-admin-remove"
                       onClick={() => removeAdminRow(index)}
+                      className="absolute -right-3 -top-3 w-8 h-8 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
                     >
-                      Remove
+                      <Trash2 size={14} />
                     </button>
                   )}
                 </div>
               ))}
-              <button
-                type="button"
-                className="collab-add-admin-btn"
-                onClick={addAdminRow}
-              >
-                <PlusCircle size={15} />
-                Add another admin
-              </button>
             </div>
+            <button
+              type="button"
+              onClick={addAdminRow}
+              className="flex items-center gap-2 text-copper font-body text-[10px] uppercase tracking-widest hover:text-white transition-colors"
+            >
+              <PlusCircle size={14} />
+              Enlist More Leaders
+            </button>
           </div>
 
-          {/* Uploads */}
-          <div className="collab-card">
-            <h2 className="collab-card-title">
-              <Upload size={18} />
-              Documents & Photos
+          {/* Section: Assets & Verification */}
+          <div className="bg-carbon-light border border-white/5 p-8 md:p-12">
+            <h2 className="font-heading text-3xl uppercase mb-8 flex items-center gap-4">
+               <Upload size={24} className="text-copper" />
+               Visual Assets
             </h2>
-            <p className="collab-card-subtitle">
-              Upload your club's logo, first ride photo, government ID, and founder's passport photo.
-            </p>
 
-            <div className="collab-upload-grid">
-              <label className="collab-upload-tile">
-                <div className="collab-upload-icon">
-                  <Upload size={18} />
-                </div>
-                <span className="collab-upload-label">Club Logo</span>
-                <span className="collab-upload-filename">
-                  {requestForm.logo ? requestForm.logo.name : "Choose file"}
-                </span>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) =>
-                    handleFileChange("logo", e.target.files?.[0])
-                  }
-                />
-              </label>
-              <label className="collab-upload-tile">
-                <div className="collab-upload-icon">
-                  <Upload size={18} />
-                </div>
-                <span className="collab-upload-label">First Ride Photo</span>
-                <span className="collab-upload-filename">
-                  {requestForm.firstRideImage
-                    ? requestForm.firstRideImage.name
-                    : "Choose file"}
-                </span>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) =>
-                    handleFileChange("firstRideImage", e.target.files?.[0])
-                  }
-                />
-              </label>
-              <label className="collab-upload-tile">
-                <div className="collab-upload-icon">
-                  <Upload size={18} />
-                </div>
-                <span className="collab-upload-label">
-                  Government ID / Registration
-                </span>
-                <span className="collab-upload-filename">
-                  {requestForm.governmentIdImage
-                    ? requestForm.governmentIdImage.name
-                    : "Choose file"}
-                </span>
-                <input
-                  type="file"
-                  accept="image/*,.pdf"
-                  onChange={(e) =>
-                    handleFileChange("governmentIdImage", e.target.files?.[0])
-                  }
-                />
-              </label>
-              <label className="collab-upload-tile">
-                <div className="collab-upload-icon">
-                  <Upload size={18} />
-                </div>
-                <span className="collab-upload-label">
-                  Founder Passport Photo
-                </span>
-                <span className="collab-upload-filename">
-                  {requestForm.founderPassport
-                    ? requestForm.founderPassport.name
-                    : "Choose file"}
-                </span>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) =>
-                    handleFileChange("founderPassport", e.target.files?.[0])
-                  }
-                />
-              </label>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+               {[
+                 { label: "Club Insignia (Logo)", field: "logo", icon: <Shield size={20} /> },
+                 { label: "Brotherhood Moment (Ride Photo)", field: "firstRideImage", icon: <Zap size={20} /> },
+                 { label: "Institutional ID (Reg. Doc)", field: "governmentIdImage", icon: <Calendar size={20} /> },
+                 { label: "Founder Verification (Passport)", field: "founderPassport", icon: <User size={20} /> },
+               ].map((item) => (
+                 <label key={item.field} className="group cursor-pointer">
+                    <div className="border border-dashed border-white/10 p-8 flex flex-col items-center justify-center text-center group-hover:border-copper/50 transition-all duration-500 bg-carbon/30">
+                       <div className="w-12 h-12 bg-white/5 flex items-center justify-center rounded-full mb-4 text-steel-dim group-hover:text-copper group-hover:bg-copper/10 transition-all">
+                          {item.icon}
+                       </div>
+                       <span className="font-body text-[10px] uppercase tracking-widest text-steel-dim mb-1 group-hover:text-white">{item.label}</span>
+                       <span className="font-text text-[9px] text-white/20 truncate max-w-[150px]">
+                          {requestForm[item.field] ? requestForm[item.field].name : "Deploy File (IMG, PDF)"}
+                       </span>
+                    </div>
+                    <input
+                      type="file"
+                      className="hidden"
+                      onChange={(e) => handleFileChange(item.field, e.target.files?.[0])}
+                    />
+                 </label>
+               ))}
             </div>
           </div>
 
-          {/* Submit */}
-          <button
-            type="submit"
-            className="collab-submit-btn"
-            disabled={submitting || !isLoggedIn}
-          >
-            <Shield size={19} />
-            {submitting ? "Submitting…" : "Submit Collaboration Request"}
-          </button>
-
-          {!isLoggedIn && (
-            <p className="collab-submit-note">
-              You must be{" "}
-              <a href="/login" className="collab-login-link">
-                signed in
-              </a>{" "}
-              to submit.
-            </p>
-          )}
+          {/* Action */}
+          <div className="flex flex-col md:flex-row items-center gap-12 pt-8">
+            <button
+              type="submit"
+              disabled={submitting || !isLoggedIn}
+              className="w-full md:w-auto px-16 py-6 bg-copper text-carbon font-heading text-2xl uppercase hover:bg-white transition-all duration-500 disabled:opacity-50"
+            >
+              {submitting ? "Processing..." : "Submit Collaboration Request"}
+            </button>
+            
+            {!isLoggedIn && (
+               <div className="flex items-center gap-4 text-red-500 animate-pulse">
+                  <Shield size={20} />
+                  <span className="font-body text-xs tracking-widest uppercase">AUTHENTICATION REQUIRED</span>
+               </div>
+            )}
+          </div>
         </form>
       </div>
     </div>

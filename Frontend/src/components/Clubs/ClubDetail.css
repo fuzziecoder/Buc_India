@@ -21,7 +21,7 @@
 
 .cd-spin {
   animation: cd-spin 1s linear infinite;
-  color: #f97316;
+  color: #3B82F6;
 }
 
 @keyframes cd-spin {
@@ -58,7 +58,7 @@
 .cd-banner-gradient {
   position: absolute;
   inset: 0;
-  background: radial-gradient(circle at 30% 0%, #facc15, #f97316 40%, #b91c1c);
+  background: radial-gradient(circle at 30% 0%, #facc15, #3B82F6 40%, #b91c1c);
 }
 
 .cd-banner-overlay {
@@ -114,9 +114,9 @@
   height: 88px;
   border-radius: 50%;
   overflow: hidden;
-  border: 3px solid rgba(249, 115, 22, 0.9);
-  box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.15), 0 12px 30px rgba(0,0,0,0.5);
-  background: radial-gradient(circle at 30% 0%, #facc15, #f97316 40%, #b91c1c);
+  border: 3px solid rgba(59, 130, 246, 0.9);
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15), 0 12px 30px rgba(0,0,0,0.5);
+  background: radial-gradient(circle at 30% 0%, #facc15, #3B82F6 40%, #b91c1c);
   margin-bottom: 1rem;
   flex-shrink: 0;
 }
@@ -190,8 +190,8 @@
 .cd-meta-pill svg { color: #fbbf24; }
 
 .cd-meta-pill--approved {
-  background: rgba(249, 115, 22, 0.2);
-  border-color: rgba(249, 115, 22, 0.45);
+  background: rgba(59, 130, 246, 0.2);
+  border-color: rgba(59, 130, 246, 0.45);
 }
 
 /* ══════════════════════════
@@ -218,14 +218,14 @@
   flex-direction: column;
   align-items: center;
   gap: 0.4rem;
-  background: rgba(249, 115, 22, 0.07);
-  border: 1px solid rgba(249, 115, 22, 0.18);
+  background: rgba(59, 130, 246, 0.07);
+  border: 1px solid rgba(59, 130, 246, 0.18);
   border-radius: 1.2rem;
   padding: 1.5rem 1rem;
   text-align: center;
 }
 
-.cd-stat-card svg { color: #f97316; }
+.cd-stat-card svg { color: #3B82F6; }
 
 .cd-stat-num {
   font-size: 1.6rem;
@@ -260,7 +260,7 @@
   gap: 0.5rem;
 }
 
-.cd-section-icon { color: #f97316; }
+.cd-section-icon { color: #3B82F6; }
 
 /* ── About ── */
 .cd-description {
@@ -294,8 +294,8 @@
 
 /* Founder styling gets an accent */
 .cd-leader-card--founder {
-  border-color: rgba(249, 115, 22, 0.25);
-  background: rgba(249, 115, 22, 0.06);
+  border-color: rgba(59, 130, 246, 0.25);
+  background: rgba(59, 130, 246, 0.06);
 }
 
 /* ── Avatar ── */
@@ -303,16 +303,16 @@
   width: 48px;
   height: 48px;
   border-radius: 50%;
-  background: radial-gradient(circle at 30% 0%, #facc15, #f97316 40%, #b91c1c);
+  background: radial-gradient(circle at 30% 0%, #facc15, #3B82F6 40%, #b91c1c);
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  border: 2px solid rgba(249, 115, 22, 0.5);
+  border: 2px solid rgba(59, 130, 246, 0.5);
 }
 
 .cd-leader-avatar--founder {
-  border-color: #f97316;
+  border-color: #3B82F6;
   box-shadow: 0 0 0 3px rgba(249,115,22,0.18);
 }
 
@@ -362,7 +362,7 @@
   margin-bottom: 0.5rem;
 }
 
-.cd-gallery-header svg { color: #f97316; }
+.cd-gallery-header svg { color: #3B82F6; }
 
 .cd-gallery-header .cd-section-title { margin-bottom: 0; }
 

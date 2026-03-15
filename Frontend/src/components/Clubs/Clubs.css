@@ -52,7 +52,7 @@
 }
 
 .clubs-page-heading-accent {
-  background: linear-gradient(to right, #f97316, #dc2626);
+  background: linear-gradient(to right, #3B82F6, #dc2626);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -79,7 +79,7 @@
 }
 
 .clubs-hero-badge svg {
-  color: #f97316;
+  color: #3B82F6;
   flex-shrink: 0;
 }
 
@@ -91,14 +91,14 @@
   flex-direction: column;
   align-items: center;
   gap: 0.15rem;
-  background: linear-gradient(135deg, #f97316, #dc2626);
+  background: linear-gradient(135deg, #3B82F6, #dc2626);
   border: none;
   border-radius: 1rem;
   padding: 0.85rem 1.4rem;
   cursor: pointer;
   color: #fff;
   transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
-  box-shadow: 0 8px 30px rgba(249, 115, 22, 0.35);
+  box-shadow: 0 8px 30px rgba(59, 130, 246, 0.35);
   flex-shrink: 0;
   min-width: 170px;
 }
@@ -106,7 +106,7 @@
 .clubs-collab-btn:hover {
   transform: translateY(-3px);
   filter: brightness(1.08);
-  box-shadow: 0 14px 38px rgba(249, 115, 22, 0.45);
+  box-shadow: 0 14px 38px rgba(59, 130, 246, 0.45);
 }
 
 .clubs-collab-btn svg {
@@ -172,7 +172,7 @@
 .clubs-empty-state svg {
   margin: 0 auto 1rem;
   opacity: 0.3;
-  color: #f97316;
+  color: #3B82F6;
 }
 
 .clubs-empty-state h3 {
@@ -226,12 +226,12 @@
 .club-product-card:hover {
   transform: translateY(-6px);
   box-shadow: 0 20px 50px rgba(15, 23, 42, 0.28),
-    0 0 0 1px rgba(249, 115, 22, 0.25);
+    0 0 0 1px rgba(59, 130, 246, 0.25);
 }
 
 .club-product-card:focus {
   outline: none;
-  box-shadow: 0 20px 50px rgba(15, 23, 42, 0.28), 0 0 0 2px #f97316;
+  box-shadow: 0 20px 50px rgba(15, 23, 42, 0.28), 0 0 0 2px #3B82F6;
 }
 
 /* ── Card Image / Logo ── */
@@ -241,7 +241,7 @@
   background: radial-gradient(
     circle at 30% 0%,
     #facc15 0%,
-    #f97316 40%,
+    #3B82F6 40%,
     #b91c1c 100%
   );
   display: flex;
@@ -333,7 +333,7 @@
 }
 
 .club-card-stat svg {
-  color: #f97316;
+  color: #3B82F6;
 }
 
 /* ── Card Actions ── */
@@ -361,13 +361,13 @@
 }
 
 .club-btn-join {
-  background: linear-gradient(135deg, #f97316, #ea580c);
+  background: linear-gradient(135deg, #3B82F6, #ea580c);
   color: #fff;
 }
 
 .club-btn-join:hover:not(:disabled) {
   filter: brightness(1.08);
-  box-shadow: 0 6px 20px rgba(249, 115, 22, 0.4);
+  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
   transform: translateY(-1px);
 }
 
@@ -386,7 +386,7 @@
 
 .club-btn-view:hover {
   background: rgba(15, 23, 42, 0.13);
-  border-color: rgba(249, 115, 22, 0.5);
+  border-color: rgba(59, 130, 246, 0.5);
   color: #ea580c;
 }
 
@@ -439,13 +439,13 @@
   width: 64px;
   height: 64px;
   border-radius: 50%;
-  background: rgba(249, 115, 22, 0.1);
-  border: 2px solid rgba(249, 115, 22, 0.3);
+  background: rgba(59, 130, 246, 0.1);
+  border: 2px solid rgba(59, 130, 246, 0.3);
   display: flex;
   align-items: center;
   justify-content: center;
   margin: 0 auto 1.25rem;
-  color: #f97316;
+  color: #3B82F6;
 }
 
 .clubs-popup h3 {
@@ -469,7 +469,7 @@
 
 .clubs-popup-close {
   margin-top: 1.25rem;
-  background: linear-gradient(135deg, #f97316, #ea580c);
+  background: linear-gradient(135deg, #3B82F6, #ea580c);
   color: #fff;
   border: none;
   border-radius: 999px;
@@ -527,7 +527,7 @@
 }
 
 .clubs-myclub-card {
-  border-left: 4px solid #f97316;
+  border-left: 4px solid #3B82F6;
 }
 
 .clubs-myclub-name {
@@ -544,8 +544,8 @@
 }
 
 .clubs-admin-highlight {
-  background: rgba(249, 115, 22, 0.06);
-  border: 1px solid rgba(249, 115, 22, 0.2);
+  background: rgba(59, 130, 246, 0.06);
+  border: 1px solid rgba(59, 130, 246, 0.2);
   border-radius: 0.85rem;
   padding: 0.75rem 1rem;
   margin: 0.75rem 0 1rem;
@@ -579,12 +579,12 @@
 }
 
 .clubs-login-note svg {
-  color: #f97316;
+  color: #3B82F6;
   flex-shrink: 0;
 }
 
 .clubs-login-link {
-  color: #f97316;
+  color: #3B82F6;
   font-weight: 700;
   text-decoration: underline;
 }
@@ -623,7 +623,7 @@
   margin-bottom: 0.3rem;
 }
 
-.clubs-required {
+.clubs-requiindigo {
   color: #fb7185;
   margin-left: 0.1rem;
 }
@@ -646,8 +646,8 @@
 .clubs-input:focus,
 .clubs-textarea:focus,
 .clubs-select:focus {
-  border-color: #f97316;
-  box-shadow: 0 0 0 2px rgba(249, 115, 22, 0.25);
+  border-color: #3B82F6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.25);
   background: #fff;
 }
 
@@ -708,7 +708,7 @@
   padding: 0.6rem 0.85rem;
   border-radius: 0.9rem;
   background: #fffbeb;
-  border: 1px dashed rgba(249, 115, 22, 0.7);
+  border: 1px dashed rgba(59, 130, 246, 0.7);
   cursor: pointer;
   font-weight: 600;
 }
@@ -737,7 +737,7 @@
 }
 
 .clubs-button-primary {
-  background: linear-gradient(135deg, #f97316, #ea580c);
+  background: linear-gradient(135deg, #3B82F6, #ea580c);
   color: #fff;
   padding: 0.48rem 1rem;
 }
@@ -745,7 +745,7 @@
 .clubs-button-primary:hover:not(:disabled) {
   filter: brightness(1.06);
   transform: translateY(-1px);
-  box-shadow: 0 10px 24px rgba(249, 115, 22, 0.35);
+  box-shadow: 0 10px 24px rgba(59, 130, 246, 0.35);
 }
 
 .clubs-button-secondary {
@@ -757,7 +757,7 @@
 
 .clubs-button-secondary:hover:not(:disabled) {
   background: rgba(15, 23, 42, 1);
-  border-color: rgba(249, 115, 22, 0.8);
+  border-color: rgba(59, 130, 246, 0.8);
 }
 
 .clubs-button-danger {

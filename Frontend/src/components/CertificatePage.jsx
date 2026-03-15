@@ -35,9 +35,9 @@ const CertificatePage = () => {
 
   return (
     <section className="min-h-[calc(100vh-5rem)] flex items-center justify-center bg-gradient-to-br from-slate-950 via-slate-900 to-black py-24 px-4">
-      <div className="max-w-2xl w-full bg-black/60 border border-orange-500/30 rounded-3xl p-8 sm:p-10 shadow-[0_0_70px_rgba(249,115,22,0.3)] backdrop-blur-md">
+      <div className="max-w-2xl w-full bg-black/60 border border-blue-500/30 rounded-3xl p-8 sm:p-10 shadow-[0_0_70px_rgba(249,115,22,0.3)] backdrop-blur-md">
         <div className="mb-6">
-          <p className="text-xs font-semibold tracking-[0.25em] uppercase text-orange-400 mb-2">
+          <p className="text-xs font-semibold tracking-[0.25em] uppercase text-blue-400 mb-2">
             BUC India • E‑Certificate
           </p>
           <h1 className="text-3xl sm:text-4xl font-bold text-white">
@@ -56,7 +56,7 @@ const CertificatePage = () => {
               </div>
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
                 <span className="text-gray-400">Event</span>
-                <span className="font-semibold text-orange-400 text-right">
+                <span className="font-semibold text-blue-400 text-right">
                   {eventTitle}
                 </span>
               </div>
@@ -81,7 +81,7 @@ const CertificatePage = () => {
             <button
               type="button"
               onClick={handleDownload}
-              className="w-full inline-flex items-center justify-center gap-2 bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-white font-semibold py-3.5 rounded-2xl shadow-lg shadow-orange-500/30 transition-all duration-300"
+              className="w-full inline-flex items-center justify-center gap-2 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white font-semibold py-3.5 rounded-2xl shadow-lg shadow-blue-500/30 transition-all duration-300"
             >
               <Download className="w-5 h-5" />
               <span>Download Certificate (PDF)</span>
@@ -100,15 +100,15 @@ const CertificatePage = () => {
             </p>
             <p className="text-gray-400 text-sm">
               Please access this link from the{" "}
-              <span className="font-semibold text-orange-400">
+              <span className="font-semibold text-blue-400">
                 admin registrations panel
               </span>{" "}
               or from your{" "}
-              <span className="font-semibold text-orange-400">Your Events</span>{" "}
+              <span className="font-semibold text-blue-400">Your Events</span>{" "}
               dashboard to download a valid certificate.
             </p>
             <div className="flex items-center gap-2 text-xs text-gray-500">
-              <ArrowRight className="w-4 h-4 text-orange-500" />
+              <ArrowRight className="w-4 h-4 text-blue-500" />
               <span>
                 If you believe you should have access, please request the
                 certificate link or QR code from the ride admin.

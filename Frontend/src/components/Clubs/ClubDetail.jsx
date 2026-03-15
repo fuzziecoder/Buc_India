@@ -10,9 +10,10 @@ import {
   Images,
   Loader2,
   MapPin,
+  Zap,
+  CheckCircle
 } from "lucide-react";
 import { clubService } from "../../services/api";
-import "./ClubDetail.css";
 
 const generateSlug = (name) =>
   name
@@ -23,9 +24,9 @@ const generateSlug = (name) =>
 
 const roleIcon = (role = "") => {
   const r = role.toLowerCase();
-  if (r.includes("founder")) return <Crown size={14} />;
-  if (r.includes("admin")) return <Star size={14} />;
-  return <Shield size={14} />;
+  if (r.includes("founder")) return <Crown size={14} className="text-copper" />;
+  if (r.includes("admin")) return <Star size={14} className="text-copper" />;
+  return <Shield size={14} className="text-copper" />;
 };
 
 const roleLabel = (role = "") =>
@@ -54,7 +55,6 @@ const ClubDetail = () => {
       if (found) setClub(found);
       else navigate("/clubs", { replace: true });
     } catch (err) {
-      console.error("Error fetching club:", err);
       navigate("/clubs", { replace: true });
     } finally {
       setLoading(false);
@@ -63,9 +63,9 @@ const ClubDetail = () => {
 
   if (loading) {
     return (
-      <div className="cd-loading">
-        <Loader2 size={36} className="cd-spin" />
-        <p>Loading club details…</p>
+      <div className="min-h-screen bg-carbon flex flex-col items-center justify-center gap-4 text-white">
+        <div className="w-12 h-12 border-4 border-copper/30 border-t-copper rounded-full animate-spin"></div>
+        <p className="font-body text-xs tracking-widest uppercase opacity-50">Mobilizing Brotherhood...</p>
       </div>
     );
   }
@@ -76,7 +76,6 @@ const ClubDetail = () => {
     ? new Date(club.startedOn).toLocaleDateString("en-IN", {
         year: "numeric",
         month: "long",
-        day: "numeric",
       })
     : null;
 
@@ -84,32 +83,24 @@ const ClubDetail = () => {
     ? new Date().getFullYear() - new Date(club.startedOn).getFullYear()
     : null;
 
-  /* Build leadership list from API fields */
   const leaders = [];
-  // Primary founder
   if (club.founderName) {
     leaders.push({
       name: club.founderName,
       role: club.founderRole || "founder",
-      email: club.founderEmail || "",
-      phone: club.founderPhone || "",
     });
   }
-  // admins array (includes co-founders, admins, etc.)
   if (Array.isArray(club.admins)) {
     club.admins.forEach((a) => {
       if (a.name) {
         leaders.push({
           name: a.name,
           role: a.role || "admin",
-          email: a.email || "",
-          phone: a.phone || "",
         });
       }
     });
   }
 
-  // Separate founders from other admins
   const founders = leaders.filter((l) =>
     l.role?.toLowerCase().includes("founder")
   );
@@ -118,162 +109,143 @@ const ClubDetail = () => {
   );
 
   return (
-    <div className="cd-page">
-      {/* ── Banner ── */}
-      <div className="cd-banner">
-        {club.logoUrl ? (
-          <img
-            src={club.logoUrl}
-            alt={club.name}
-            className="cd-banner-bg"
-          />
-        ) : (
-          <div className="cd-banner-gradient" />
-        )}
-        <div className="cd-banner-overlay" />
+    <div className="min-h-screen bg-carbon text-white">
+      {/* Hero Banner */}
+      <div className="relative h-[60vh] md:h-[70vh] overflow-hidden">
+         {club.logoUrl ? (
+            <img src={club.logoUrl} alt={club.name} className="w-full h-full object-cover grayscale opacity-30" />
+         ) : (
+            <div className="w-full h-full bg-gradient-to-b from-carbon-light to-carbon" />
+         )}
+         <div className="absolute inset-0 bg-gradient-to-t from-carbon via-carbon/50 to-transparent" />
+         
+         <div className="absolute inset-0 flex flex-col justify-end px-6 md:px-12 pb-20 max-w-7xl mx-auto w-full">
+            <button
+               onClick={() => navigate("/clubs")}
+               className="flex items-center gap-2 font-body text-[10px] tracking-widest uppercase text-steel-dim hover:text-copper transition-colors mb-12"
+            >
+               <ArrowLeft size={14} />
+               Explore Network
+            </button>
 
-        <div className="cd-banner-content">
-          <button className="cd-back-btn" onClick={() => navigate("/clubs")}>
-            <ArrowLeft size={17} />
-            Back to Clubs
-          </button>
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
+               <div className="flex flex-col md:flex-row gap-8 items-start md:items-end">
+                  <div className="w-32 h-32 md:w-48 md:h-48 bg-carbon-light border border-white/10 p-4 shrink-0">
+                     {club.logoUrl ? (
+                        <img src={club.logoUrl} alt={club.name} className="w-full h-full object-contain" />
+                     ) : (
+                        <div className="w-full h-full flex items-center justify-center font-heading text-6xl text-white/5">
+                           {club.name.charAt(0)}
+                        </div>
+                     )}
+                  </div>
+                  <div>
+                     <h1 className="font-heading text-6xl md:text-8xl uppercase leading-none mb-4">{club.name}</h1>
+                     <p className="font-text text-copper italic text-lg opacity-80 uppercase tracking-widest">"{club.moto || "Brotherhood over everything."}"</p>
+                  </div>
+               </div>
 
-          {/* Logo */}
-          <div className="cd-logo-wrap">
-            {club.logoUrl ? (
-              <img src={club.logoUrl} alt={club.name} className="cd-logo-img" />
-            ) : (
-              <div className="cd-logo-fallback">
-                <span>{club.name.charAt(0)}</span>
-              </div>
-            )}
-          </div>
-
-          <h1 className="cd-club-name">{club.name}</h1>
-          {club.moto && <p className="cd-club-moto">"{club.moto}"</p>}
-
-          <div className="cd-meta-row">
-            {joinDate && (
-              <div className="cd-meta-pill">
-                <Calendar size={13} />
-                <span>Est. {joinDate}</span>
-              </div>
-            )}
-            <div className="cd-meta-pill">
-              <Users size={13} />
-              <span>{club.participantCount || 0} Members</span>
+               <div className="flex flex-wrap gap-4">
+                  <div className="bg-white/5 border border-white/10 px-6 py-4 backdrop-blur-md">
+                     <span className="block font-body text-[10px] text-steel-dim uppercase tracking-widest mb-1">Chapter Size</span>
+                     <span className="block font-heading text-2xl">{club.participantCount || 0} RIDERS</span>
+                  </div>
+                  <div className="bg-copper/10 border border-copper/30 px-6 py-4 backdrop-blur-md">
+                     <span className="block font-body text-[10px] text-copper uppercase tracking-widest mb-1">Status</span>
+                     <div className="flex items-center gap-2">
+                        <CheckCircle size={16} className="text-copper" />
+                        <span className="block font-heading text-2xl text-copper">BUC VERIFIED</span>
+                     </div>
+                  </div>
+               </div>
             </div>
-            {club.city && (
-              <div className="cd-meta-pill">
-                <MapPin size={13} />
-                <span>{club.city}</span>
-              </div>
-            )}
-            <div className="cd-meta-pill cd-meta-pill--approved">
-              <Shield size={13} />
-              <span>BUC Approved</span>
-            </div>
-          </div>
-        </div>
+         </div>
       </div>
 
-      {/* ── Body ── */}
-      <div className="cd-body">
+      {/* Content */}
+      <div className="max-w-7xl mx-auto px-6 md:px-12 py-24">
+         <div className="grid grid-cols-1 lg:grid-cols-12 gap-20">
+            {/* Left: About */}
+            <div className="lg:col-span-8 space-y-20">
+               <section>
+                  <h2 className="font-heading text-3xl uppercase mb-8 flex items-center gap-4">
+                     <Zap size={24} className="text-copper" />
+                     The Ethos
+                  </h2>
+                  <p className="font-text text-steel-dim text-xl leading-relaxed whitespace-pre-wrap">
+                     {club.showcaseText || "This chapter has not yet defined their public ethos statement. Rest assured, they represent the highest standards of the brotherhood."}
+                  </p>
+               </section>
 
-        {/* Stats */}
-        <div className="cd-stats-row">
-          <div className="cd-stat-card">
-            <Users size={22} />
-            <span className="cd-stat-num">{club.participantCount || 0}</span>
-            <span className="cd-stat-lbl">Active Members</span>
-          </div>
-          {yearsActive !== null && (
-            <div className="cd-stat-card">
-              <Calendar size={22} />
-              <span className="cd-stat-num">{yearsActive > 0 ? `${yearsActive}+` : "<1"}</span>
-              <span className="cd-stat-lbl">Years Active</span>
+               <section>
+                  <h2 className="font-heading text-3xl uppercase mb-12 flex items-center gap-4">
+                     <Images size={24} className="text-copper" />
+                     The Vault
+                  </h2>
+                  <div className="aspect-video bg-carbon-light border border-white/5 flex flex-col items-center justify-center text-center p-12">
+                     <Images size={48} className="text-white/10 mb-6" />
+                     <h3 className="font-heading text-2xl uppercase mb-2">Restricted Access</h3>
+                     <p className="font-body text-xs tracking-widest uppercase text-steel-dim">Gallery coming soon to the public network.</p>
+                  </div>
+               </section>
             </div>
-          )}
-          <div className="cd-stat-card">
-            <Shield size={22} />
-            <span className="cd-stat-num">BUC</span>
-            <span className="cd-stat-lbl">Partner Club</span>
-          </div>
-        </div>
 
-        {/* About */}
-        {club.showcaseText && (
-          <section className="cd-section">
-            <h2 className="cd-section-title">About the Club</h2>
-            <p className="cd-description">{club.showcaseText}</p>
-          </section>
-        )}
+            {/* Right: Leadership & Meta */}
+            <div className="lg:col-span-4 space-y-12">
+               {/* Leadership */}
+               <div className="bg-carbon-light border border-white/5 p-10">
+                  <h3 className="font-body text-[10px] uppercase tracking-[0.3em] text-copper mb-8">Command Structure</h3>
+                  
+                  <div className="space-y-8">
+                     {founders.map((leader, i) => (
+                        <div key={i} className="flex items-center gap-6">
+                           <div className="w-16 h-16 bg-carbon border border-white/10 flex items-center justify-center font-heading text-2xl text-copper">
+                              {leader.name.charAt(0)}
+                           </div>
+                           <div>
+                              <p className="font-heading text-xl uppercase leading-none mb-1">{leader.name}</p>
+                              <div className="flex items-center gap-2">
+                                 {roleIcon(leader.role)}
+                                 <span className="font-body text-[10px] uppercase tracking-widest text-steel-dim">{roleLabel(leader.role)}</span>
+                              </div>
+                           </div>
+                        </div>
+                     ))}
+                     
+                     {admins.map((leader, i) => (
+                        <div key={i} className="flex items-center gap-6">
+                           <div className="w-16 h-16 bg-carbon border border-white/10 flex items-center justify-center font-heading text-2xl text-white/20">
+                              {leader.name.charAt(0)}
+                           </div>
+                           <div>
+                              <p className="font-heading text-xl uppercase leading-none mb-1">{leader.name}</p>
+                              <div className="flex items-center gap-2">
+                                 {roleIcon(leader.role)}
+                                 <span className="font-body text-[10px] uppercase tracking-widest text-steel-dim">{roleLabel(leader.role)}</span>
+                              </div>
+                           </div>
+                        </div>
+                     ))}
+                  </div>
+               </div>
 
-        {/* Founders & Co-founders */}
-        {founders.length > 0 && (
-          <section className="cd-section">
-            <h2 className="cd-section-title">
-              <Crown size={18} className="cd-section-icon" />
-              Founders
-            </h2>
-            <div className="cd-leaders-grid">
-              {founders.map((leader, i) => (
-                <div key={i} className="cd-leader-card cd-leader-card--founder">
-                  <div className="cd-leader-avatar cd-leader-avatar--founder">
-                    <span>{leader.name.charAt(0).toUpperCase()}</span>
+               {/* Meta Stats */}
+               <div className="space-y-4">
+                  <div className="flex justify-between p-6 border border-white/5 font-body">
+                     <span className="text-[10px] uppercase tracking-widest text-steel-dim">Active Since</span>
+                     <span className="text-xs uppercase text-white font-bold">{joinDate || "N/A"}</span>
                   </div>
-                  <div className="cd-leader-info">
-                    <p className="cd-leader-name">{leader.name}</p>
-                    <div className="cd-leader-role">
-                      {roleIcon(leader.role)}
-                      <span>{roleLabel(leader.role)}</span>
-                    </div>
+                  <div className="flex justify-between p-6 border border-white/5 font-body">
+                     <span className="text-[10px] uppercase tracking-widest text-steel-dim">Loyalty Rank</span>
+                     <span className="text-xs uppercase text-copper font-bold">{yearsActive > 0 ? `ELITE CHAPTER` : "INITIATE"}</span>
                   </div>
-                </div>
-              ))}
+                  <div className="flex justify-between p-6 border border-white/5 font-body">
+                     <span className="text-[10px] uppercase tracking-widest text-steel-dim">Location</span>
+                     <span className="text-xs uppercase text-white font-bold">{club.city || "INDIA"}</span>
+                  </div>
+               </div>
             </div>
-          </section>
-        )}
-
-        {/* Admins / Leadership (non-founders) */}
-        {admins.length > 0 && (
-          <section className="cd-section">
-            <h2 className="cd-section-title">
-              <Star size={18} className="cd-section-icon" />
-              Club Leadership
-            </h2>
-            <div className="cd-leaders-grid">
-              {admins.map((leader, i) => (
-                <div key={i} className="cd-leader-card">
-                  <div className="cd-leader-avatar">
-                    <span>{leader.name.charAt(0).toUpperCase()}</span>
-                  </div>
-                  <div className="cd-leader-info">
-                    <p className="cd-leader-name">{leader.name}</p>
-                    <div className="cd-leader-role">
-                      {roleIcon(leader.role)}
-                      <span>{roleLabel(leader.role)}</span>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </section>
-        )}
-
-        {/* Gallery placeholder */}
-        <section className="cd-section cd-gallery-section">
-          <div className="cd-gallery-header">
-            <Images size={20} />
-            <h2 className="cd-section-title">Gallery</h2>
-          </div>
-          <div className="cd-gallery-placeholder">
-            <Images size={48} />
-            <p>Gallery coming soon</p>
-            <span>Photos and memories from rides will appear here.</span>
-          </div>
-        </section>
-
+         </div>
       </div>
     </div>
   );

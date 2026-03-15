@@ -1,12 +1,26 @@
 import React, { useEffect, useState } from "react";
 import { clubService, clubMembershipService } from "../../services/api";
-import "./ClubManagement.css";
+import { motion, AnimatePresence } from "framer-motion";
+import { 
+  Shield, 
+  Users, 
+  CheckCircle, 
+  XCircle, 
+  ChevronRight, 
+  ChevronDown,
+  MessageSquare, 
+  Info,
+  Clock,
+  ExternalLink,
+  UserCheck
+} from "lucide-react";
 
 const ClubManagement = () => {
   const [clubs, setClubs] = useState([]);
   const [memberships, setMemberships] = useState([]);
   const [loading, setLoading] = useState(true);
   const [updatingId, setUpdatingId] = useState(null);
+  const [expandedClub, setExpandedClub] = useState(null);
 
   useEffect(() => {
     loadData();
@@ -19,10 +33,10 @@ const ClubManagement = () => {
         clubService.getAllAdmin(),
         clubMembershipService.getAllAdmin(),
       ]);
-      setClubs(clubList);
-      setMemberships(membershipList);
+      setClubs(clubList || []);
+      setMemberships(membershipList || []);
     } catch (error) {
-      console.error("Failed to load club management data:", error);
+      console.error("Critical failure during telemetry retrieval:", error);
     } finally {
       setLoading(false);
     }
@@ -34,173 +48,223 @@ const ClubManagement = () => {
       await clubService.updateStatus(id, status);
       await loadData();
     } catch (error) {
-      console.error("Failed to update club status:", error);
+      console.error("Protocol update failure:", error);
     } finally {
       setUpdatingId(null);
     }
   };
 
-  const statusLabelClass = (status) => {
-    if (status === "approved") return "club-status-approved";
-    if (status === "rejected") return "club-status-rejected";
-    return "club-status-pending";
+  const toggleExpand = (clubId) => {
+    setExpandedClub(expandedClub === clubId ? null : clubId);
   };
 
-  const exitMemberships = memberships.filter(
+  const exitMemberships = (memberships || []).filter(
     (m) => m.status === "exited" && m.exitReason
   );
 
   const getParticipantsForClub = (clubId) =>
-    memberships.filter(
+    (memberships || []).filter(
       (m) =>
-        m.clubId?._id === clubId &&
+        (m.clubId?._id || m.clubId) === clubId &&
         m.status === "active"
     );
 
   return (
-    <div className="club-management">
-      <h1 className="page-title">Partner Clubs</h1>
-      <p className="page-subtitle">
-        Review collaboration requests, approve clubs, and track member exit
-        reasons.
-      </p>
+    <div className="space-y-12 pb-20">
+      {/* Page Header */}
+      <div>
+        <span className="text-copper font-body text-[10px] tracking-ultra uppercase mb-2 block font-bold">Consub-Division Alpha</span>
+        <h2 className="font-heading text-4xl uppercase leading-none text-white">Partner <span className="text-transparent outline-title">Clubs</span></h2>
+        <p className="font-text text-steel-dim text-sm mt-4 max-w-2xl italic">
+          Review collaboration requests, authenticate credentials, and monitor coalition resonance through exit telemetry.
+        </p>
+      </div>
 
       {loading ? (
-        <div className="no-active-event">Loading club data...</div>
+        <div className="flex flex-col items-center justify-center py-32 border border-white/5 bg-carbon-light">
+           <div className="w-12 h-12 border-2 border-copper/20 border-t-copper rounded-full animate-spin mb-4"></div>
+           <p className="font-body text-[10px] uppercase tracking-widest text-steel-dim font-bold">Synchronizing Entity Manifest...</p>
+        </div>
       ) : (
         <>
-          <section className="club-section">
-            <h2 className="section-title">Club Collaboration Requests</h2>
+          {/* Main Section: Club Requests */}
+          <section className="space-y-6">
+            <div className="flex items-center gap-3 border-b border-white/5 pb-4">
+               <Shield size={20} className="text-copper" />
+               <h3 className="font-heading text-2xl uppercase text-white">Strategic Collaborations</h3>
+            </div>
+
             {clubs.length === 0 ? (
-              <div className="no-active-event">No club requests yet.</div>
+              <div className="p-12 border border-white/5 bg-carbon-light text-center">
+                 <p className="font-text text-steel-dim uppercase tracking-ultra italic">No pending coalition requests detected.</p>
+              </div>
             ) : (
-              <div className="club-table">
-                <div className="club-table-header">
-                  <span>Club</span>
-                  <span>Started</span>
-                  <span>Moto</span>
-                  <span>Status</span>
-                  <span>Actions</span>
+              <div className="grid gap-6">
+                <div className="hidden md:grid grid-cols-12 gap-4 px-8 py-4 bg-carbon-light border border-white/5 font-body text-[10px] uppercase tracking-widest text-steel-dim font-bold">
+                   <div className="col-span-4">Designation / Intel</div>
+                   <div className="col-span-2">Inception</div>
+                   <div className="col-span-3">Doctrine / Moto</div>
+                   <div className="col-span-1 text-center">Resonance</div>
+                   <div className="col-span-2 text-right">Authorize</div>
                 </div>
+
                 {clubs.map((club) => {
                   const participants = getParticipantsForClub(club._id);
+                  const isExpanded = expandedClub === club._id;
+
                   return (
-                    <div key={club._id} className="club-row club-row-with-participants">
-                      <div className="club-main">
-                        <div className="club-logo-small">
-                          {club.logoUrl ? (
-                            <img src={club.logoUrl} alt={club.name} />
-                          ) : (
-                            <span>{club.name?.charAt(0) || "C"}</span>
-                          )}
-                        </div>
-                        <div>
-                          <div className="club-name">{club.name}</div>
-                          {club.founder?.name && (
-                            <div className="club-meta">
-                              Founder: {club.founder.name} (
-                              {club.founder.role || "founder"})
-                            </div>
-                          )}
-                          <div className="club-meta">
-                            Active participants: {participants.length}
-                          </div>
-                        </div>
-                      </div>
-                      <div className="club-cell">
-                        {club.startedOn
-                          ? new Date(club.startedOn).toLocaleDateString()
-                          : "-"}
-                      </div>
-                      <div className="club-cell club-moto">
-                        {club.moto || club.showcaseText || "-"}
-                      </div>
-                      <div className="club-cell">
-                        <span className={statusLabelClass(club.status)}>
-                          {club.status}
-                        </span>
-                      </div>
-                      <div className="club-cell club-actions">
-                        <button
-                          type="button"
-                          className="status-btn approve"
-                          disabled={updatingId === club._id}
-                          onClick={() => changeStatus(club._id, "approved")}
-                        >
-                          Approve
-                        </button>
-                        <button
-                          type="button"
-                          className="status-btn reject"
-                          disabled={updatingId === club._id}
-                          onClick={() => changeStatus(club._id, "rejected")}
-                        >
-                          Reject
-                        </button>
-                      </div>
-                      {participants.length > 0 && (
-                        <div className="club-participants">
-                          <div className="club-participants-header">
-                            <span>Active club participants</span>
-                          </div>
-                          <div className="club-participants-table">
-                            <div className="club-participants-row club-participants-row-header">
-                              <span>Name</span>
-                              <span>Email</span>
-                              <span>Phone</span>
-                              <span>Role</span>
-                              <span>Joined At</span>
-                            </div>
-                            {participants.map((m) => (
-                              <div key={m._id} className="club-participants-row">
-                                <span>{m.userId?.fullName || "Member"}</span>
-                                <span>{m.userId?.email || "-"}</span>
-                                <span>{m.userId?.phone || "-"}</span>
-                                <span>{m.role || "member"}</span>
-                                <span>
-                                  {m.createdAt
-                                    ? new Date(m.createdAt).toLocaleDateString()
-                                    : "-"}
-                                </span>
+                    <motion.div 
+                      key={club._id} 
+                      layout
+                      className="bg-carbon border border-white/5 overflow-hidden group hover:border-white/10 transition-colors"
+                    >
+                      <div className="md:grid grid-cols-12 gap-4 px-8 py-6 items-center">
+                        {/* Club Identity */}
+                        <div className="col-span-12 md:col-span-4 flex items-center gap-4 mb-6 md:mb-0">
+                           <div className="w-12 h-12 flex-shrink-0 bg-carbon-light border border-white/10 flex items-center justify-center overflow-hidden grayscale group-hover:grayscale-0 transition-all duration-500">
+                              {club.logoUrl ? (
+                                <img src={club.logoUrl} alt={club.name} className="w-full h-full object-cover" />
+                              ) : (
+                                <span className="font-heading text-xl text-copper">{club.name?.charAt(0) || "Ω"}</span>
+                              )}
+                           </div>
+                           <div>
+                              <div className="font-heading text-xl text-white uppercase group-hover:text-copper transition-colors">{club.name}</div>
+                              <div className="font-body text-[9px] text-steel-dim uppercase tracking-widest mt-1">
+                                High Commander: <span className="text-white">{club.founder?.name || "REDACTED"}</span>
                               </div>
-                            ))}
-                          </div>
+                           </div>
                         </div>
-                      )}
-                    </div>
+
+                        {/* Started On */}
+                        <div className="col-span-6 md:col-span-2 space-y-1">
+                           <div className="flex items-center gap-2 text-steel-dim text-[10px] uppercase tracking-widest">
+                              <Clock size={12} className="text-copper/50" />
+                              <span>{club.startedOn ? new Date(club.startedOn).toLocaleDateString() : "ALPHA PHASE"}</span>
+                           </div>
+                        </div>
+
+                        {/* Moto */}
+                        <div className="col-span-6 md:col-span-3">
+                           <p className="text-steel-dim text-[10px] uppercase tracking-widest italic line-clamp-1 group-hover:line-clamp-none transition-all">
+                              "{club.moto || club.showcaseText || "NO DECLARED DOCTRINE"}"
+                           </p>
+                        </div>
+
+                        {/* Status/Badge */}
+                        <div className="col-span-6 md:col-span-1 text-center">
+                           <span className={`px-3 py-1 font-body text-[8px] uppercase font-bold tracking-widest inline-block rounded-full ${
+                             club.status === "approved" ? "bg-green-500/10 text-green-500 border border-green-500/20" :
+                             club.status === "rejected" ? "bg-red-500/10 text-red-500 border border-red-500/20" :
+                             "bg-copper/10 text-copper border border-copper/20"
+                           }`}>
+                             {club.status}
+                           </span>
+                        </div>
+
+                        {/* Actions */}
+                        <div className="col-span-6 md:col-span-2 flex justify-end gap-2">
+                           <button
+                             disabled={updatingId === club._id}
+                             onClick={() => changeStatus(club._id, "approved")}
+                             className="p-3 text-steel-dim hover:text-green-500 hover:bg-green-500/5 transition-all border border-transparent hover:border-green-500/20 disabled:opacity-20"
+                             title="Approve Coalition"
+                           >
+                             <CheckCircle size={18} />
+                           </button>
+                           <button
+                             disabled={updatingId === club._id}
+                             onClick={() => changeStatus(club._id, "rejected")}
+                             className="p-3 text-steel-dim hover:text-red-500 hover:bg-red-500/5 transition-all border border-transparent hover:border-red-500/20 disabled:opacity-20"
+                             title="Reject Coalition"
+                           >
+                             <XCircle size={18} />
+                           </button>
+                           {participants.length > 0 && (
+                             <button
+                               onClick={() => toggleExpand(club._id)}
+                               className={`p-3 transition-all ${isExpanded ? 'text-copper bg-copper/5 border border-copper/20' : 'text-steel-dim hover:text-white hover:bg-white/5 border border-transparent hover:border-white/10'}`}
+                             >
+                               {isExpanded ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
+                             </button>
+                           )}
+                        </div>
+                      </div>
+
+                      {/* Expanded Participants Section */}
+                      <AnimatePresence>
+                        {isExpanded && participants.length > 0 && (
+                          <motion.div
+                            initial={{ height: 0, opacity: 0 }}
+                            animate={{ height: "auto", opacity: 1 }}
+                            exit={{ height: 0, opacity: 0 }}
+                            className="bg-carbon-light border-t border-white/5"
+                          >
+                            <div className="p-8 space-y-6">
+                              <div className="flex items-center gap-2 border-b border-white/5 pb-2">
+                                 <Users size={14} className="text-copper" />
+                                 <h4 className="font-body text-[10px] uppercase tracking-widest font-bold text-white">Active Operational Units ({participants.length})</h4>
+                              </div>
+
+                              <div className="grid gap-2">
+                                {participants.map((m) => (
+                                  <div key={m._id} className="grid grid-cols-1 md:grid-cols-5 gap-4 py-3 border-b border-white/5 font-body text-[9px] uppercase tracking-widest text-steel-dim hover:text-white transition-colors">
+                                    <div className="flex items-center gap-2 font-bold text-white">
+                                       <UserCheck size={12} className="text-copper" />
+                                       {m.userId?.fullName || "UNKNOWN UNIT"}
+                                    </div>
+                                    <div className="truncate">{m.userId?.email || "ENCRYPTED"}</div>
+                                    <div className="font-mono text-[8px]">{m.userId?.phone || "-"}</div>
+                                    <div className="text-copper font-bold">{m.role || "MEMBER"}</div>
+                                    <div className="text-right italic">ENGAGED: {m.createdAt ? new Date(m.createdAt).toLocaleDateString() : "-"}</div>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </motion.div>
                   );
                 })}
               </div>
             )}
           </section>
 
-          <section className="club-section">
-            <h2 className="section-title">Member Exit Reasons</h2>
+          {/* Secondary Section: Exit Telemetry */}
+          <section className="space-y-6">
+            <div className="flex items-center gap-3 border-b border-white/5 pb-4">
+               <Info size={20} className="text-copper" />
+               <h3 className="font-heading text-2xl uppercase text-white">Dissolution Telemetry</h3>
+            </div>
+
             {exitMemberships.length === 0 ? (
-              <div className="no-active-event">
-                No members have exited partner clubs yet.
+              <div className="p-12 border border-white/5 bg-carbon-light text-center">
+                 <p className="font-text text-steel-dim uppercase tracking-ultra italic">Stable cohesion detected across all sectors.</p>
               </div>
             ) : (
-              <div className="club-exits">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {exitMemberships.map((m) => (
-                  <div key={m._id} className="exit-row">
-                    <div className="exit-main">
-                      <div className="exit-title">
-                        {m.userId?.fullName || "Member"} left{" "}
-                        {m.clubId?.name || "Club"}
-                      </div>
-                      <div className="exit-meta">
-                        {m.userId?.email && <span>{m.userId.email}</span>}
-                        {m.userId?.phone && <span>{m.userId.phone}</span>}
-                        {m.exitedAt && (
-                          <span>
-                            {new Date(m.exitedAt).toLocaleDateString()}
-                          </span>
-                        )}
-                      </div>
+                  <div key={m._id} className="p-8 bg-carbon border border-white/5 group hover:border-red-500/20 transition-all">
+                    <div className="flex justify-between items-start mb-4">
+                       <div>
+                          <div className="font-heading text-lg text-white group-hover:text-red-500 transition-colors uppercase">
+                             {m.userId?.fullName || "UNIT"} // {m.clubId?.name || "COALITION"}
+                          </div>
+                          <div className="flex gap-3 mt-2 text-[8px] uppercase tracking-widest text-steel-dim font-bold">
+                             <span>ID: {m.userId?.email || "REDACTED"}</span>
+                             <span className="text-copper">PH: {m.userId?.phone || "REDACTED"}</span>
+                             <span className="text-red-500/50">EXIT: {m.exitedAt ? new Date(m.exitedAt).toLocaleDateString() : "MANUAL TERM"}</span>
+                          </div>
+                       </div>
+                       <MessageSquare size={20} className="text-red-500/20 group-hover:text-red-500/50 transition-colors" />
                     </div>
-                    <div className="exit-reason">
-                      <strong>Reason:</strong> {m.exitReason}
+                    
+                    <div className="bg-carbon-light p-4 border-l-2 border-red-500/30">
+                       <div className="font-body text-[8px] uppercase tracking-widest text-red-500 font-bold mb-1">Debriefing Summary:</div>
+                       <p className="font-text text-xs italic text-steel-dim leading-relaxed">
+                         "{m.exitReason || "No formal reason provided for strategic withdrawal."}"
+                       </p>
                     </div>
                   </div>
                 ))}

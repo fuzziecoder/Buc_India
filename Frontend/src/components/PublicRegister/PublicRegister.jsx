@@ -276,7 +276,7 @@ const PublicRegister = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
-        <Loader2 className="w-8 h-8 text-orange-500 animate-spin" />
+        <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
       </div>
     );
   }
@@ -293,7 +293,7 @@ const PublicRegister = () => {
         </button>
         <div className="register-header">
           <h2 className="text-3xl font-extrabold text-white sm:text-4xl">
-            Event <span className="text-orange-500">Registration</span>
+            Event <span className="text-blue-500">Registration</span>
           </h2>
           {event && (
             <p className="mt-4 text-xl text-gray-400">
@@ -651,7 +651,7 @@ const PublicRegister = () => {
                     {Object.keys(formData.requestedGears).map((gear) => (
                       <label
                         key={gear}
-                        className="flex items-center space-x-2 cursor-pointer bg-white/5 p-3 rounded-lg border border-white/10 hover:border-orange-500/50 transition-all"
+                        className="flex items-center space-x-2 cursor-pointer bg-white/5 p-3 rounded-lg border border-white/10 hover:border-blue-500/50 transition-all"
                       >
                         <input
                           type="checkbox"
@@ -733,7 +733,7 @@ const PublicRegister = () => {
             </h3>
             <p className="text-gray-300 text-lg mb-10 leading-relaxed">
               Your registration for{" "}
-              <span className="text-orange-500 font-bold">{event?.title}</span>{" "}
+              <span className="text-blue-500 font-bold">{event?.title}</span>{" "}
               has been confirmed. See you on the road!
             </p>
             <button

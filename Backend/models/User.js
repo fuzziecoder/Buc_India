@@ -67,6 +67,27 @@ const userSchema = new mongoose.Schema({
     type: String,
     default: ''
   },
+  // Social media links
+  facebookUrl: {
+    type: String,
+    default: ''
+  },
+  instagramUrl: {
+    type: String,
+    default: ''
+  },
+  twitterUrl: {
+    type: String,
+    default: ''
+  },
+  youtubeUrl: {
+    type: String,
+    default: ''
+  },
+  websiteUrl: {
+    type: String,
+    default: ''
+  },
   profileImage: {
     type: String,
     default: ''

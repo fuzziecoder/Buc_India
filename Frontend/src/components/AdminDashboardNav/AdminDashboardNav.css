@@ -104,7 +104,7 @@
 }
 
 .nav-item.active {
-  background-color: #f97316;
+  background-color: #3B82F6;
   color: #fff;
 }
 
@@ -211,7 +211,7 @@
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #f97316 0%, #ef4444 100%);
+  background: linear-gradient(135deg, #3B82F6 0%, #ef4444 100%);
   display: flex;
   align-items: center;
   justify-content: center;

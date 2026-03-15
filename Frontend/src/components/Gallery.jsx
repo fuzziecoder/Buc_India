@@ -1,21 +1,119 @@
-import React, { useEffect, useMemo, useState } from "react";
-import {
-  Camera,
-  Play,
-  Heart,
-  MessageCircle,
-  Share2,
-  Calendar as CalendarIcon,
-  Tag,
+import React, { useEffect, useMemo, useState, useRef } from "react";
+import { 
+  motion, 
+  AnimatePresence, 
+  useScroll, 
+  useTransform, 
+  useSpring,
+  useMotionValue 
+} from "framer-motion";
+import { 
+  Heart, 
+  MessageCircle, 
+  Share2, 
+  Play, 
+  Pause, 
+  X, 
+  ChevronRight,
+  Maximize2
 } from "lucide-react";
 import { galleryService } from "../services/api";
+
+const GalleryCard = ({ item, index, onClick }) => {
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
+
+  const rotateX = useSpring(useTransform(mouseY, [-0.5, 0.5], [10, -10]), { stiffness: 150, damping: 15 });
+  const rotateY = useSpring(useTransform(mouseX, [-0.5, 0.5], [-10, 10]), { stiffness: 150, damping: 15 });
+  
+  const handleMouseMove = (e) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = (e.clientX - rect.left) / rect.width - 0.5;
+    const y = (e.clientY - rect.top) / rect.height - 0.5;
+    mouseX.set(x);
+    mouseY.set(y);
+  };
+
+  const handleMouseLeave = () => {
+    mouseX.set(0);
+    mouseY.set(0);
+  };
+
+  // No offsets for symmetrical grid
+  const xOffset = "0%";
+  const yOffset = "0px";
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 50 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-100px" }}
+      transition={{ duration: 0.8, delay: (index % 3) * 0.1 }}
+      style={{ x: xOffset, y: yOffset }}
+      className="relative mb-12"
+    >
+      <motion.div
+        onMouseMove={handleMouseMove}
+        onMouseLeave={handleMouseLeave}
+        onClick={() => onClick(item)}
+        style={{ rotateX, rotateY, transformStyle: "preserve-3d" }}
+        className="group relative aspect-[4/5] bg-carbon border border-white/5 overflow-hidden cursor-none"
+      >
+        {/* Hover Aura */}
+        <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 bg-[radial-gradient(circle_at_var(--x)_var(--y),rgba(184,115,51,0.15)_0%,transparent_70%)] pointer-events-none" 
+             style={{ "--x": "50%", "--y": "50%" }}></div>
+
+        {item.type === "video" ? (
+          <video
+            src={item.src}
+            className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-1000 scale-110 group-hover:scale-100"
+            muted
+            loop
+            onMouseEnter={(e) => e.currentTarget.play()}
+            onMouseLeave={(e) => {
+              e.currentTarget.pause();
+              e.currentTarget.currentTime = 0;
+            }}
+          />
+        ) : (
+          <img
+            src={item.src}
+            alt={item.title}
+            className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-1000 scale-110 group-hover:scale-100"
+          />
+        )}
+
+        {/* Content Overlay */}
+        <div className="absolute inset-0 flex flex-col justify-end p-8 translate-z-[40px] opacity-0 group-hover:opacity-100 transition-all duration-500">
+          <div className="flex items-center gap-2 mb-2">
+            <span className="text-[10px] font-bold text-copper uppercase tracking-[0.2em]">{item.category}</span>
+          </div>
+          <h3 className="font-heading text-2xl text-white uppercase leading-none mb-4">{item.title}</h3>
+          
+          <div className="flex items-center gap-6 text-white/60">
+            <div className="flex items-center gap-1.5"><Heart size={14} /> <span className="text-xs font-bold">{item.likes}</span></div>
+            <div className="flex items-center gap-1.5"><MessageCircle size={14} /> <span className="text-xs font-bold">{item.comments || 0}</span></div>
+            <div className="ml-auto w-8 h-8 rounded-full border border-white/20 flex items-center justify-center group-hover:border-copper group-hover:bg-copper group-hover:text-carbon transition-all">
+               <Maximize2 size={14} />
+            </div>
+          </div>
+        </div>
+        
+        {/* Top Right Tag */}
+        <div className="absolute top-4 right-4 flex items-center justify-center w-8 h-8 border border-white/10 backdrop-blur-md opacity-0 group-hover:opacity-100 transition-opacity">
+           {item.type === "video" ? <Play size={12} className="text-white" /> : <ChevronRight size={12} className="text-white" />}
+        </div>
+      </motion.div>
+    </motion.div>
+  );
+};
 
 const Gallery = () => {
   const [activeCategory, setActiveCategory] = useState("all");
   const [selectedMedia, setSelectedMedia] = useState(null);
-  const [playingVideos, setPlayingVideos] = useState(new Set());
   const [galleryItems, setGalleryItems] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [visibleCount, setVisibleCount] = useState(9);
 
   const categories = [
     { id: "all", name: "All Media" },
@@ -23,6 +121,7 @@ const Gallery = () => {
     { id: "events", name: "Events" },
     { id: "bikes", name: "Member Bikes" },
     { id: "rallies", name: "Rallies" },
+    { id: "highlights", name: "Ride Highlights" },
   ];
 
   const autoGalleryItems = useMemo(() => {
@@ -36,329 +135,200 @@ const Gallery = () => {
       const title = filename.replace(/[-_]/g, " ").replace(/\.[^.]+$/, "");
       const isVideo = /\.(mp4|webm|mov)$/i.test(filename);
       const normalizedPath = path.toLowerCase();
-      const lowerFile = filename.toLowerCase();
       let category = "rides";
       if (normalizedPath.includes("/rallies/")) category = "rallies";
-      else if (
-        normalizedPath.includes("/rides/") ||
-        normalizedPath.includes("/group-rides/")
-      )
-        category = "rides";
-      else if (lowerFile.includes("rally")) category = "rallies";
-      else if (lowerFile.includes("ride")) category = "rides";
+      else if (normalizedPath.includes("/bikes/")) category = "bikes";
+      else if (normalizedPath.includes("/events/")) category = "events";
+      else if (normalizedPath.includes("/highlights/")) category = "highlights";
+      else if (normalizedPath.includes("/rides/")) category = "rides";
+      
       return {
-        id: 1000 + index,
+        id: `local-${index}`,
         type: isVideo ? "video" : "image",
         src: mod.default,
         title,
         category,
-        likes: Math.floor(Math.random() * 100) + 10,
-        comments: Math.floor(Math.random() * 30),
-        author: "BUC Team",
+        likes: Math.floor(Math.random() * 200) + 50,
+        author: "BUC MEDIA",
       };
     });
     return items;
   }, []);
 
-  const baseMediaItems = useMemo(
-    () =>
-      galleryItems.map((item) => ({
-        id: item._id,
-        type: "image",
-        src: item.imageUrl,
-        title: item.eventName,
-        category: item.category || "all",
-        author: "BUC Admin",
-        eventDate: item.eventDate,
-        likes: 0,
-        comments: 0,
-        fromBackend: true,
-      })),
-    [galleryItems],
-  );
-
   const mediaItems = useMemo(() => {
-    const combined = [...baseMediaItems, ...autoGalleryItems];
-    return combined.sort((a, b) => {
-      const dateA = a.eventDate ? new Date(a.eventDate) : new Date(0);
-      const dateB = b.eventDate ? new Date(b.eventDate) : new Date(0);
-      return dateB - dateA;
-    });
-  }, [baseMediaItems, autoGalleryItems]);
+    const backend = galleryItems.map(item => ({
+      id: item._id,
+      type: "image",
+      src: item.imageUrl,
+      title: item.eventName,
+      category: item.category || "rides",
+      author: "CENTRAL COMMAND",
+      likes: 0,
+    }));
+    return [...backend, ...autoGalleryItems];
+  }, [galleryItems, autoGalleryItems]);
 
-  const filteredMedia =
-    activeCategory === "all"
-      ? mediaItems
-      : mediaItems.filter((item) => item.category === activeCategory);
-
-  const INITIAL_COUNT = 6;
-  const [visibleCount, setVisibleCount] = useState(INITIAL_COUNT);
-  const displayedMedia = filteredMedia.slice(0, visibleCount);
-
-  useEffect(() => {
-    setVisibleCount(INITIAL_COUNT);
-  }, [activeCategory]);
+  const filteredMedia = useMemo(() => 
+    activeCategory === "all" ? mediaItems : mediaItems.filter(i => i.category === activeCategory)
+  , [mediaItems, activeCategory]);
 
   useEffect(() => {
-    const fetchGalleryItems = async () => {
+    const fetchGallery = async () => {
       setLoading(true);
       try {
         const data = await galleryService.getAll();
-        setGalleryItems(data);
+        setGalleryItems(data || []);
       } catch (err) {
-        // Silent fallback: still show bundled/local gallery assets
-        console.warn(
-          "Gallery server unavailable; showing local gallery assets only.",
-          err,
-        );
+        console.warn("Using local intelligence only.");
       } finally {
         setLoading(false);
       }
     };
-
-    fetchGalleryItems();
+    fetchGallery();
   }, []);
 
-  const formatDate = (date) => {
-    if (!date) return "";
-    try {
-      return new Date(date).toLocaleDateString();
-    } catch {
-      return date;
-    }
-  };
-
   return (
-    <section id="gallery" className="relative pt-20 py-20 overflow-hidden">
-      <div className="absolute inset-0 z-0">
-        <img
-          src="https://images.pexels.com/photos/1119796/pexels-photo-1119796.jpeg?auto=compress&cs=tinysrgb&w=1920&h=1080&fit=crop"
-          alt="Motorcycle gallery background"
-          className="w-full h-full object-cover"
-        />
-        <div className="absolute inset-0 bg-black/90"></div>
+    <section id="gallery" className="relative pt-40 pb-32 bg-carbon-dark min-h-screen">
+      {/* Background Decor */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-[20%] -left-[10%] w-[600px] h-[600px] bg-copper/5 rounded-full blur-[120px]"></div>
+        <div className="absolute bottom-[20%] -right-[10%] w-[500px] h-[500px] bg-copper/5 rounded-full blur-[100px]"></div>
+        
+        {/* Kinetic Watermark */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-[0.02] select-none pointer-events-none">
+           <h2 className="text-[40vw] font-heading leading-none text-white whitespace-nowrap">VAULT</h2>
+        </div>
       </div>
 
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
-            Community{" "}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-600">
-              Gallery
-            </span>
-          </h2>
-          <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-            Relive the memories and share your adventures with the community.
-            From epic rides to unforgettable events.
-          </p>
-        </div>
-
-        <div className="flex flex-wrap justify-center gap-4 mb-12">
-          {categories.map((category) => (
-            <button
-              key={category.id}
-              onClick={() => setActiveCategory(category.id)}
-              className={`px-6 py-3 rounded-lg font-semibold transition-all duration-200 ${
-                activeCategory === category.id
-                  ? "bg-gradient-to-r from-orange-500 to-red-600 text-white"
-                  : "bg-gray-800 text-gray-300 hover:text-white hover:bg-gray-700"
-              }`}
+      <div className="max-w-7xl mx-auto px-6 relative z-10">
+        <header className="flex flex-col md:flex-row justify-between items-end gap-12 mb-24">
+          <div className="max-w-2xl">
+            <motion.span 
+              initial={{ opacity: 0, x: -20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              className="text-copper font-body tracking-[0.5em] text-xs uppercase mb-4 block font-bold"
             >
-              {category.name}
-            </button>
+              The BUC Chronicles
+            </motion.span>
+            <motion.h2 
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8 }}
+              className="font-heading text-7xl md:text-8xl text-white uppercase leading-none"
+            >
+              The <span className="text-copper">Vault</span>
+            </motion.h2>
+          </div>
+          
+          <nav className="flex flex-wrap gap-x-12 gap-y-6">
+            {categories.map((cat) => (
+              <button
+                key={cat.id}
+                onClick={() => setActiveCategory(cat.id)}
+                className={`relative group font-heading text-sm uppercase tracking-widest transition-colors ${activeCategory === cat.id ? "text-white" : "text-white/40 hover:text-white"}`}
+              >
+                {cat.name}
+                <motion.div 
+                  initial={false}
+                  animate={{ width: activeCategory === cat.id ? "100%" : "0%" }}
+                  className="absolute -bottom-2 left-0 h-[1px] bg-copper transition-all"
+                ></motion.div>
+                <div className="absolute -bottom-2 left-0 w-0 h-[1px] bg-copper group-hover:w-full transition-all duration-300 opacity-50"></div>
+              </button>
+            ))}
+          </nav>
+        </header>
+
+        {/* Broken Grid Masonry */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-16 gap-y-24">
+          {filteredMedia.slice(0, visibleCount).map((item, index) => (
+            <GalleryCard 
+              key={item.id} 
+              item={item} 
+              index={index} 
+              onClick={setSelectedMedia} 
+            />
           ))}
         </div>
 
-        {/* No server error messaging on public site */}
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {displayedMedia.map((item) => (
-            <div
-              key={item.id}
-              className="relative bg-gray-900 rounded-lg overflow-hidden border border-gray-700 hover:border-orange-500/50 transition-all duration-300 group cursor-pointer"
-              onClick={() => setSelectedMedia(item)}
-            >
-              <div className="relative">
-                {item.type === "video" ? (
-                  <video
-                    src={item.src}
-                    className="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-300"
-                    preload="metadata"
-                    muted
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      const video = e.currentTarget;
-                      if (video.paused) {
-                        video.play().then(() => {
-                          setPlayingVideos((prev) =>
-                            new Set(prev).add(item.id),
-                          );
-                        });
-                      } else {
-                        video.pause();
-                        setPlayingVideos((prev) => {
-                          const newSet = new Set(prev);
-                          newSet.delete(item.id);
-                          return newSet;
-                        });
-                      }
-                    }}
-                    onEnded={() => {
-                      setPlayingVideos((prev) => {
-                        const newSet = new Set(prev);
-                        newSet.delete(item.id);
-                        return newSet;
-                      });
-                    }}
-                  />
-                ) : (
-                  <img
-                    src={item.src}
-                    alt={item.title}
-                    className="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-300"
-                  />
-                )}
-
-                {item.type === "video" && (
-                  <div className="absolute inset-0 flex items-center justify-center bg-black/40 group-hover:bg-black/20 transition-all duration-300">
-                    <div className="bg-white/20 backdrop-blur-sm rounded-full p-4 group-hover:scale-110 transition-transform duration-200">
-                      {playingVideos.has(item.id) ? (
-                        <div className="h-8 w-8 text-white flex items-center justify-center">
-                          <div className="w-2 h-6 bg-white rounded-sm mx-0.5"></div>
-                          <div className="w-2 h-6 bg-white rounded-sm mx-0.5"></div>
-                        </div>
-                      ) : (
-                        <Play className="h-8 w-8 text-white" />
-                      )}
-                    </div>
-                    <div className="absolute bottom-4 left-4 bg-black/60 text-white px-2 py-1 rounded text-xs">
-                      Click to play
-                    </div>
-                    {item.duration && (
-                      <div className="absolute bottom-4 right-4 bg-black/60 text-white px-2 py-1 rounded text-sm">
-                        {item.duration}
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                  <div className="absolute bottom-4 left-4 right-4">
-                    <h3 className="text-white font-semibold mb-2">
-                      {item.title}
-                    </h3>
-                    <p className="text-gray-300 text-sm">by {item.author}</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="p-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex flex-col space-y-1">
-                    <span className="text-xs text-gray-400 flex items-center gap-1">
-                      <Tag className="h-3 w-3 text-orange-500" />
-                      {item.category === "all"
-                        ? "All Media"
-                        : item.category === "rides"
-                          ? "Group Rides"
-                          : item.category === "events"
-                            ? "Events"
-                            : item.category === "bikes"
-                              ? "Member Bikes"
-                              : item.category === "rallies"
-                                ? "Rallies"
-                                : item.category}
-                    </span>
-                    {item.eventDate && (
-                      <span className="text-xs text-gray-400 flex items-center gap-1">
-                        <CalendarIcon className="h-3 w-3 text-orange-500" />
-                        {formatDate(item.eventDate)}
-                      </span>
-                    )}
-                  </div>
-                  <div className="flex items-center space-x-4">
-                    <button className="flex items-center space-x-1 text-gray-400 hover:text-red-500 transition-colors duration-200">
-                      <Heart className="h-4 w-4" />
-                      <span className="text-sm">{item.likes}</span>
-                    </button>
-                    <button className="flex items-center space-x-1 text-gray-400 hover:text-blue-500 transition-colors duration-200">
-                      <MessageCircle className="h-4 w-4" />
-                      <span className="text-sm">{item.comments}</span>
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-
+        {/* Load More Strategem */}
         {visibleCount < filteredMedia.length && (
-          <div className="text-center mt-12">
-            <button
-              onClick={() => setVisibleCount(filteredMedia.length)}
-              className="bg-gray-800 text-white px-8 py-3 rounded-lg font-semibold hover:bg-gray-700 transition-all duration-200"
+          <div className="mt-32 flex justify-center">
+            <button 
+              onClick={() => setVisibleCount(prev => prev + 6)}
+              className="relative px-12 py-5 group overflow-hidden border border-white/10"
             >
-              Load More Media
+              <div className="absolute inset-0 bg-copper translate-y-full group-hover:translate-y-0 transition-transform duration-500"></div>
+              <span className="relative z-10 font-heading text-xs tracking-[0.4em] uppercase text-white group-hover:text-carbon transition-colors duration-500">
+                Explore Visual Archive
+              </span>
             </button>
           </div>
         )}
+      </div>
 
+      {/* Cinematic Quad-Split Lightbox */}
+      <AnimatePresence>
         {selectedMedia && (
-          <div
-            className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4"
-            onClick={() => setSelectedMedia(null)}
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] flex items-center justify-center p-6 md:p-20 bg-carbon-dark/95 backdrop-blur-2xl"
           >
-            <div
-              className="max-w-4xl w-full bg-gray-900 rounded-lg overflow-hidden"
-              onClick={(e) => e.stopPropagation()}
+            {/* Split Reveal Shutter Effects could be added here as motion divs */}
+            <motion.div 
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="relative w-full max-w-6xl aspect-video md:aspect-auto md:h-full bg-carbon border border-white/5 overflow-hidden flex flex-col md:flex-row shadow-[0_50px_100px_-20px_rgba(0,0,0,1)]"
             >
-              <div className="relative">
+              <div className="flex-1 bg-black relative">
                 {selectedMedia.type === "video" ? (
-                  <video
-                    src={selectedMedia.src}
-                    className="w-full h-96 object-cover"
-                    controls
-                    autoPlay
-                    muted
-                  />
+                  <video src={selectedMedia.src} className="w-full h-full object-contain" autoPlay controls />
                 ) : (
-                  <img
-                    src={selectedMedia.src}
-                    alt={selectedMedia.title}
-                    className="w-full h-96 object-cover"
-                  />
+                  <img src={selectedMedia.src} alt={selectedMedia.title} className="w-full h-full object-contain" />
                 )}
-                <button
-                  onClick={() => setSelectedMedia(null)}
-                  className="absolute top-4 right-4 bg-black/60 text-white p-2 rounded-full hover:bg-black/80 transition-colors duration-200"
-                >
-                  ×
-                </button>
               </div>
-              <div className="p-6">
-                <h3 className="text-2xl font-bold text-white mb-2">
-                  {selectedMedia.title}
-                </h3>
-                <p className="text-gray-300 mb-4">by {selectedMedia.author}</p>
-                <div className="flex items-center space-x-6">
-                  <button className="flex items-center space-x-2 text-gray-400 hover:text-red-500 transition-colors duration-200">
-                    <Heart className="h-5 w-5" />
-                    <span>{selectedMedia.likes} likes</span>
-                  </button>
-                  <button className="flex items-center space-x-2 text-gray-400 hover:text-blue-500 transition-colors duration-200">
-                    <MessageCircle className="h-5 w-5" />
-                    <span>{selectedMedia.comments} comments</span>
-                  </button>
-                  <button className="flex items-center space-x-2 text-gray-400 hover:text-orange-500 transition-colors duration-200">
-                    <Share2 className="h-5 w-5" />
-                    <span>Share</span>
-                  </button>
+              
+              <div className="w-full md:w-80 p-8 flex flex-col justify-between border-l border-white/5">
+                <div>
+                  <div className="flex items-center gap-2 mb-6">
+                    <div className="w-2 h-2 rounded-full bg-copper"></div>
+                    <span className="text-[10px] font-bold text-copper uppercase tracking-[0.2em]">{selectedMedia.category}</span>
+                  </div>
+                  <h3 className="font-heading text-3xl text-white uppercase mb-4 leading-tight">{selectedMedia.title}</h3>
+                  <p className="text-steel-dim text-xs uppercase tracking-widest mb-12">SOURCE: {selectedMedia.author}</p>
+                  
+                  <div className="space-y-6">
+                     <div className="flex items-center justify-between text-white/40 text-xs font-bold uppercase tracking-widest border-b border-white/5 pb-4">
+                        <span>Affiliation</span>
+                        <span className="text-white">BUC INDIA</span>
+                     </div>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-4 mt-12">
+                   <button className="flex-1 py-4 border border-white/10 hover:border-copper flex items-center justify-center gap-2 text-white/60 hover:text-copper transition-all">
+                      <Heart size={16} />
+                      <span className="text-[10px] font-bold uppercase">{selectedMedia.likes}</span>
+                   </button>
+                   <button className="flex-1 py-4 border border-white/10 hover:border-copper flex items-center justify-center gap-2 text-white/60 hover:text-copper transition-all">
+                      <Share2 size={16} />
+                   </button>
                 </div>
               </div>
-            </div>
-          </div>
+
+              <button 
+                onClick={() => setSelectedMedia(null)}
+                className="absolute top-8 right-8 w-12 h-12 border border-white/10 flex items-center justify-center text-white/40 hover:text-copper hover:border-copper transition-all rounded-full"
+              >
+                <X size={20} />
+              </button>
+            </motion.div>
+          </motion.div>
         )}
-      </div>
+      </AnimatePresence>
     </section>
   );
 };

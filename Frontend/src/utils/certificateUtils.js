@@ -40,9 +40,9 @@ export const generateCertificate = (registration, event) => {
   doc.rect(0, 0, 297, 210, "F");
 
   // Accent gradient bars
-  doc.setFillColor(249, 115, 22); // orange
+  doc.setFillColor(59, 130, 246); // blue
   doc.rect(0, 0, 297, 12, "F");
-  doc.setFillColor(220, 38, 38); // red
+  doc.setFillColor(220, 38, 38); // indigo
   doc.rect(0, 198, 297, 12, "F");
 
   // Outer border

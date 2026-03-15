@@ -10,7 +10,7 @@
 .collab-header {
   background: radial-gradient(
       130% 130% at 0% 0%,
-      rgba(249, 115, 22, 0.12) 0%,
+      rgba(59, 130, 246, 0.12) 0%,
       transparent 55%
     ),
     rgba(255, 255, 255, 0.02);
@@ -52,13 +52,13 @@
   width: 68px;
   height: 68px;
   border-radius: 1.25rem;
-  background: linear-gradient(135deg, #f97316, #dc2626);
+  background: linear-gradient(135deg, #3B82F6, #dc2626);
   display: flex;
   align-items: center;
   justify-content: center;
   color: #fff;
   margin-bottom: 1.25rem;
-  box-shadow: 0 12px 34px rgba(249, 115, 22, 0.35);
+  box-shadow: 0 12px 34px rgba(59, 130, 246, 0.35);
 }
 
 .collab-heading {
@@ -74,7 +74,7 @@
 }
 
 .collab-heading-accent {
-  background: linear-gradient(to right, #f97316, #dc2626);
+  background: linear-gradient(to right, #3B82F6, #dc2626);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -93,8 +93,8 @@
   display: inline-flex;
   align-items: center;
   gap: 0.55rem;
-  background: rgba(249, 115, 22, 0.1);
-  border: 1px solid rgba(249, 115, 22, 0.3);
+  background: rgba(59, 130, 246, 0.1);
+  border: 1px solid rgba(59, 130, 246, 0.3);
   border-radius: 0.85rem;
   padding: 0.65rem 1rem;
   font-size: 0.84rem;
@@ -102,10 +102,10 @@
   margin-top: 0.5rem;
 }
 
-.collab-auth-warning svg { color: #f97316; flex-shrink: 0; }
+.collab-auth-warning svg { color: #3B82F6; flex-shrink: 0; }
 
 .collab-login-link {
-  color: #f97316;
+  color: #3B82F6;
   font-weight: 700;
   text-decoration: underline;
 }
@@ -146,7 +146,7 @@
   gap: 0.5rem;
 }
 
-.collab-card-title svg { color: #f97316; }
+.collab-card-title svg { color: #3B82F6; }
 
 .collab-card-subtitle {
   font-size: 0.83rem;
@@ -180,7 +180,7 @@
   margin-bottom: 0.3rem;
 }
 
-.collab-required {
+.collab-requiindigo {
   color: #f43f5e;
   margin-left: 0.1rem;
 }
@@ -201,8 +201,8 @@
 
 .collab-input:focus,
 .collab-textarea:focus {
-  border-color: #f97316;
-  box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.18);
+  border-color: #3B82F6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.18);
   background: #fff;
 }
 
@@ -272,8 +272,8 @@
 }
 
 .collab-add-admin-btn:hover {
-  background: rgba(249, 115, 22, 0.06);
-  border-color: rgba(249, 115, 22, 0.55);
+  background: rgba(59, 130, 246, 0.06);
+  border-color: rgba(59, 130, 246, 0.55);
   color: #ea580c;
 }
 
@@ -296,7 +296,7 @@
   gap: 0.35rem;
   padding: 1.25rem 1rem;
   border-radius: 1.1rem;
-  border: 2px dashed rgba(249, 115, 22, 0.5);
+  border: 2px dashed rgba(59, 130, 246, 0.5);
   background: #fffbeb;
   cursor: pointer;
   text-align: center;
@@ -304,8 +304,8 @@
 }
 
 .collab-upload-tile:hover {
-  background: rgba(249, 115, 22, 0.05);
-  border-color: #f97316;
+  background: rgba(59, 130, 246, 0.05);
+  border-color: #3B82F6;
 }
 
 .collab-upload-tile input[type="file"] {
@@ -316,11 +316,11 @@
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background: rgba(249, 115, 22, 0.1);
+  background: rgba(59, 130, 246, 0.1);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #f97316;
+  color: #3B82F6;
 }
 
 .collab-upload-label {
@@ -342,7 +342,7 @@
   justify-content: center;
   gap: 0.55rem;
   width: 100%;
-  background: linear-gradient(135deg, #f97316, #dc2626);
+  background: linear-gradient(135deg, #3B82F6, #dc2626);
   color: #fff;
   border: none;
   border-radius: 1.1rem;
@@ -351,14 +351,14 @@
   font-weight: 800;
   cursor: pointer;
   transition: filter 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
-  box-shadow: 0 10px 30px rgba(249, 115, 22, 0.35);
+  box-shadow: 0 10px 30px rgba(59, 130, 246, 0.35);
   font-family: inherit;
 }
 
 .collab-submit-btn:hover:not(:disabled) {
   filter: brightness(1.07);
   transform: translateY(-2px);
-  box-shadow: 0 16px 40px rgba(249, 115, 22, 0.45);
+  box-shadow: 0 16px 40px rgba(59, 130, 246, 0.45);
 }
 
 .collab-submit-btn:disabled {

@@ -85,7 +85,7 @@ const YourEvents = () => {
     return (
       <div className="flex-1 flex items-center justify-center min-h-[60vh]">
         <div className="text-center">
-          <Loader2 className="w-12 h-12 text-orange-500 animate-spin mx-auto mb-4" />
+          <Loader2 className="w-12 h-12 text-blue-500 animate-spin mx-auto mb-4" />
           <p className="text-gray-400">Loading your events...</p>
         </div>
       </div>
@@ -101,8 +101,8 @@ const YourEvents = () => {
 
         {upcomingEvents.length === 0 && pastEvents.length === 0 ? (
           <div className="bg-gray-900/50 border border-gray-800 rounded-3xl p-12 text-center">
-            <div className="bg-orange-500/10 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6">
-              <Calendar className="w-8 h-8 text-orange-500" />
+            <div className="bg-blue-500/10 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6">
+              <Calendar className="w-8 h-8 text-blue-500" />
             </div>
             <h3 className="text-2xl font-bold text-white mb-2">No events registered</h3>
             <p className="text-gray-400 mb-8 max-w-md mx-auto">
@@ -110,7 +110,7 @@ const YourEvents = () => {
             </p>
             <button
               onClick={() => navigate("/events")}
-              className="bg-orange-500 hover:bg-orange-600 text-white px-8 py-3 rounded-xl font-bold transition-all transform hover:scale-105"
+              className="bg-blue-500 hover:bg-blue-600 text-white px-8 py-3 rounded-xl font-bold transition-all transform hover:scale-105"
             >
               Explore Events
             </button>
@@ -121,7 +121,7 @@ const YourEvents = () => {
             {upcomingEvents.length > 0 && (
               <section>
                 <div className="flex items-center space-x-3 mb-6">
-                  <div className="w-2 h-8 bg-orange-500 rounded-full"></div>
+                  <div className="w-2 h-8 bg-blue-500 rounded-full"></div>
                   <h2 className="text-2xl font-bold text-white">Upcoming Rides</h2>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -171,7 +171,7 @@ const EventCard = ({ event, isPast, registration }) => {
   });
 
   return (
-    <div className="bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden hover:border-orange-500/50 transition-all group">
+    <div className="bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden hover:border-blue-500/50 transition-all group">
       <div className="h-48 relative overflow-hidden">
         <img
           src={
@@ -184,7 +184,7 @@ const EventCard = ({ event, isPast, registration }) => {
         <div className="absolute inset-0 bg-gradient-to-t from-gray-900 to-transparent"></div>
         <div className="absolute bottom-4 left-4">
           <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${
-            isPast ? "bg-gray-800 text-gray-400" : "bg-orange-500 text-white"
+            isPast ? "bg-gray-800 text-gray-400" : "bg-blue-500 text-white"
           }`}>
             {isPast ? "Completed" : "Upcoming"}
           </span>
@@ -194,15 +194,15 @@ const EventCard = ({ event, isPast, registration }) => {
         <h3 className="text-xl font-bold text-white mb-4 line-clamp-1">{event.title}</h3>
         <div className="space-y-3 mb-6">
           <div className="flex items-center text-gray-400 text-sm">
-            <Calendar className="w-4 h-4 mr-2 text-orange-500" />
+            <Calendar className="w-4 h-4 mr-2 text-blue-500" />
             <span>{date}</span>
           </div>
           <div className="flex items-center text-gray-400 text-sm">
-            <Clock className="w-4 h-4 mr-2 text-orange-500" />
+            <Clock className="w-4 h-4 mr-2 text-blue-500" />
             <span>{event.eventTime || "06:00 AM"}</span>
           </div>
           <div className="flex items-center text-gray-400 text-sm">
-            <MapPin className="w-4 h-4 mr-2 text-orange-500" />
+            <MapPin className="w-4 h-4 mr-2 text-blue-500" />
             <span className="line-clamp-1">{event.location || "Meeting point details in group"}</span>
           </div>
           {event.certificateEnabled && registration && (
