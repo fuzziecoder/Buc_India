@@ -235,4 +235,15 @@ export const certificateService = {
   },
 };
 
+export const siteContentService = {
+  getHumanityCallsCarousel: async () => {
+    const response = await api.get("/site-content/humanity-calls-carousel");
+    return response.data;
+  },
+  updateHumanityCallsCarousel: async (images) => {
+    const response = await api.put("/site-content/humanity-calls-carousel", { images });
+    return response.data;
+  },
+};
+
 export default api;
