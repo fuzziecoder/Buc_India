@@ -35,7 +35,7 @@ const About = () => {
         >
           <span className="text-copper font-body tracking-ultra text-xs md:text-sm uppercase mb-6 block font-bold">Our Legacy</span>
           <h2 className="font-heading text-6xl md:text-8xl text-white uppercase leading-none mb-8">
-            More Than <br/><span className="text-transparent" style={{ WebkitTextStroke: "1px rgba(255,255,255,0.2)" }}>A Club</span>
+            More Than <br/><span className="text-transparent" style={{ WebkitTextStroke: "1px rgba(255,255,255,0.2)" }}>A Community</span>
           </h2>
           <p className="font-text text-steel-dim text-lg leading-relaxed mb-10 border-l-2 border-copper pl-6 max-w-xl">
             BUC India is a community of passionate riders dedicated to the spirit of brotherhood. We stand for more than just the road — supporting humanity, fostering genuine connections, and leading the way in passionate safety.

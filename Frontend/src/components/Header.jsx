@@ -152,7 +152,7 @@ const Header = () => {
             animate={{ y: 0 }}
             exit={{ y: "-100%" }}
             transition={{ duration: 0.8, ease: [0.7, 0, 0.3, 1] }}
-            className="fixed inset-0 bg-carbon z-[1000] flex items-center justify-center overflow-hidden"
+            className="fixed inset-0 bg-carbon z-[1000] flex flex-col md:flex-row md:items-center md:justify-center overflow-x-hidden"
           >
             {/* Background Ghost Text */}
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none overflow-hidden select-none">
@@ -195,10 +195,11 @@ const Header = () => {
               }
             `}</style>
 
-            {/* Main Menu Grid */}
-            <div className="relative z-10 w-full max-w-7xl mx-auto px-10 grid grid-cols-1 md:grid-cols-12 gap-12 items-center">
+            {/* Scrollable Nav Area (mobile: flex-1 scroll; desktop: centered) */}
+            <div className="flex-1 overflow-y-auto overflow-x-hidden md:overflow-visible md:flex-none w-full md:flex md:items-center md:justify-center">
+            <div className="relative z-10 w-full max-w-7xl mx-auto px-6 md:px-10 pt-24 pb-6 md:pt-0 md:pb-0 grid grid-cols-1 md:grid-cols-12 gap-2 md:gap-12 items-center">
               {/* Navigation Links (Left Pane) */}
-              <nav className="md:col-span-7 flex flex-col items-start gap-4">
+              <nav className="md:col-span-7 flex flex-col items-start gap-1 md:gap-4">
                 {navigation.map((item, index) => (
                   <div
                     key={item.name}
@@ -215,10 +216,10 @@ const Header = () => {
                       }`}
                     >
                       <span
-                        className={`font-heading text-5xl md:text-7xl transition-all duration-500 ease-[cubic-bezier(0.7,0,0.3,1)] ${
+                        className={`font-heading text-[10vw] sm:text-5xl md:text-7xl transition-all duration-500 ease-[cubic-bezier(0.7,0,0.3,1)] ${
                           location.pathname === item.path
-                            ? "text-copper tracking-[0.2em]"
-                            : "text-white/20 group-hover:text-white group-hover:tracking-[0.2em]"
+                            ? "text-copper tracking-[0.1em] md:tracking-[0.2em]"
+                            : "text-white/40 group-hover:text-white group-hover:tracking-[0.1em] md:group-hover:tracking-[0.2em]"
                         }`}
                       >
                         {item.name}
@@ -232,8 +233,8 @@ const Header = () => {
                 ))}
               </nav>
 
-              {/* Right Pane: Auth & Social */}
-              <div className="md:col-span-5 flex flex-col items-start md:items-end gap-12">
+              {/* Right Pane: Auth & Social — hidden on mobile */}
+              <div className="hidden md:flex md:col-span-5 flex-col items-start md:items-end gap-12">
                 {/* Auth Section */}
                 <div className="flex flex-col items-start md:items-end gap-10 w-full mb-8">
                   <button
@@ -284,9 +285,10 @@ const Header = () => {
                 </div>
               </div>
             </div>
+            </div>{/* end scrollable area */}
 
-            {/* Bottom Quote */}
-            <div className="absolute bottom-10 left-0 w-full text-center px-6">
+            {/* Desktop Bottom Quote */}
+            <div className="hidden md:block absolute bottom-10 left-0 w-full text-center px-6">
               <div className="flex flex-col gap-2">
                 <div className="text-copper font-body tracking-[0.4em] text-[10px] uppercase opacity-60">
                   Ride Together • Stand Together • BUC India
@@ -294,6 +296,28 @@ const Header = () => {
                 <div className="text-white/10 font-heading text-xs tracking-widest uppercase">
                   Where Passion Meets the Pavement
                 </div>
+              </div>
+            </div>
+
+            {/* Mobile-only: Pinned bottom auth bar */}
+            <div className="md:hidden relative z-20 flex-none w-full">
+              {/* Subtle top separator glow */}
+              <div className="h-[1px] w-full bg-gradient-to-r from-transparent via-copper/30 to-transparent" />
+              <div className="flex items-stretch bg-carbon/95 backdrop-blur-md">
+                <button
+                  onClick={() => handleNavigate("/login")}
+                  className="flex-1 py-5 flex items-center justify-center gap-2 font-body text-xs tracking-[0.4em] uppercase text-white/50 hover:text-copper border-r border-white/5 transition-colors duration-300"
+                >
+                  <span className="w-4 h-[1px] bg-current"></span>
+                  LOGIN
+                  <span className="w-4 h-[1px] bg-current"></span>
+                </button>
+                <button
+                  onClick={() => handleNavigate("/signup")}
+                  className="flex-1 py-5 flex items-center justify-center font-heading text-sm tracking-widest uppercase bg-copper text-carbon hover:bg-white transition-colors duration-300"
+                >
+                  JOIN BROTHERHOOD
+                </button>
               </div>
             </div>
           </motion.div>
