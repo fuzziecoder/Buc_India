@@ -12,7 +12,6 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 import SmoothScroll from "./components/animations/SmoothScroll.jsx";
-import CustomCursor from "./components/animations/CustomCursor.jsx";
 import Preloader from "./components/animations/Preloader.jsx";
 
 // Lazy load non-critical routes
@@ -73,7 +72,6 @@ function App() {
           transition={{ duration: 1.2, ease: [0.85, 0, 0.15, 1], delay: 0.1 }}
           className="origin-center"
         >
-          <CustomCursor />
           <ScrollToTop />
           <div className="min-h-screen bg-carbon">
             <ToastContainer position="top-center" autoClose={3000} theme="dark" />
