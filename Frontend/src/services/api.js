@@ -239,13 +239,13 @@ export const certificateService = {
   },
 };
 
-export const siteContentService = {
-  getHumanityCallsCarousel: async () => {
-    const response = await api.get("/site-content/humanity-calls-carousel");
+export const talentService = {
+  submit: async (formData) => {
+    const response = await api.post("/talent", formData);
     return response.data;
   },
-  updateHumanityCallsCarousel: async (images) => {
-    const response = await api.put("/site-content/humanity-calls-carousel", { images });
+  getAll: async () => {
+    const response = await api.get("/talent");
     return response.data;
   },
 };

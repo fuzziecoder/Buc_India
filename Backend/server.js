@@ -16,7 +16,7 @@ import clubMembershipRoutes from "./routes/clubMembershipRoutes.js";
 import certificateRoutes from "./routes/certificateRoutes.js";
 import otpRoutes from "./routes/otpRoutes.js";
 import userAuthRoutes from "./routes/userAuthRoutes.js";
-import siteContentRoutes from "./routes/siteContentRoutes.js";
+import talentRoutes from "./routes/talentRoutes.js";
 
 const app = express();
 
@@ -29,13 +29,8 @@ app.use(cookieParser());
 app.use(
   cors({
     origin: function (origin, callback) {
-      // Parse the comma-separated list from .env
-      const envOrigins = process.env.FRONTEND_URL 
-        ? process.env.FRONTEND_URL.split(',').map(url => url.trim())
-        : [];
-
       const allowedOrigins = [
-        ...envOrigins,
+        process.env.FRONTEND_URL,
         "http://localhost:3000",
         "http://localhost:5173",
         "http://localhost:5174",
@@ -91,6 +86,19 @@ mongoose
       );
     }
 
+    // Programmatically drop old email index on users if it is not sparse
+    try {
+      const usersCollection = mongoose.connection.collection("users");
+      const usersIndexes = await usersCollection.indexes();
+      const emailIndex = usersIndexes.find((idx) => idx.name === "email_1");
+      if (emailIndex && !emailIndex.sparse) {
+        console.log("Dropping old non-sparse email index on users collection...");
+        await usersCollection.dropIndex("email_1");
+      }
+    } catch (err) {
+      console.warn("Note: Could not drop email index on users:", err.message);
+    }
+
     // Create initial admin(s) if not exists
     // Keep backward compatibility: many deployments previously used username "admin"
     const adminUsername = process.env.ADMIN_USERNAME || "bucindia";
@@ -128,7 +136,7 @@ app.use("/api/club-memberships", clubMembershipRoutes);
 app.use("/api/certificates", certificateRoutes);
 app.use("/api/otp", otpRoutes);
 app.use("/api/user-auth", userAuthRoutes);
-app.use("/api/site-content", siteContentRoutes);
+app.use("/api/talent", talentRoutes);
 
 // Error handler
 app.use((err, req, res, next) => {
