@@ -11,8 +11,6 @@ import {
   MessageSquare, 
   Info,
   Clock,
-  Info,
-  Clock,
   ExternalLink,
   UserCheck,
   Trash2
