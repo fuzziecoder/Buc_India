@@ -1,4 +1,5 @@
 import Talent from "../models/Talent.js";
+import { sendRegistrationConfirmation } from "../utils/mailSender.js";
 
 export const submitTalent = async (req, res) => {
   try {
@@ -6,7 +7,7 @@ export const submitTalent = async (req, res) => {
       fullName, age, gender, phone, email, city,
       talentCategory, subTalentDescription, experienceLevel, yearsOfExperience,
       portfolioLink,
-      isRider, bikeModel, ridingExperience,
+      isRider, bikeModel, ridingExperience, clubId,
       shortDescription, whyParticipate,
       availableDates,
       openToPerformLive, openToCompetition,
@@ -48,6 +49,7 @@ export const submitTalent = async (req, res) => {
       isRider: isRider === "true" || isRider === true,
       bikeModel: bikeModel || "",
       ridingExperience: ridingExperience || "",
+      clubId: (isRider === "true" || isRider === true) ? (clubId || null) : null,
       shortDescription,
       whyParticipate,
       availableDates,
@@ -61,6 +63,11 @@ export const submitTalent = async (req, res) => {
     });
 
     await talent.save();
+
+    if (email) {
+      sendRegistrationConfirmation(email.toLowerCase(), fullName, "Talent Participant").catch(err => console.error("Email send error:", err));
+    }
+
     res.status(201).json({ message: "Talent registration submitted successfully!", talent });
   } catch (error) {
     console.error("Talent Submit Error:", error);

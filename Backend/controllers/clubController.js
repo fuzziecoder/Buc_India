@@ -193,3 +193,22 @@ export const updateClubStatus = async (req, res) => {
     res.status(400).json({ message: error.message });
   }
 };
+
+// Admin: delete club
+export const deleteClub = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const club = await Club.findByIdAndDelete(id);
+    if (!club) {
+      return res.status(404).json({ message: 'Club not found' });
+    }
+    
+    // Clean up associated memberships
+    await ClubMembership.deleteMany({ clubId: id });
+    
+    res.json({ message: 'Club and associated memberships deleted successfully' });
+  } catch (error) {
+    console.error('Delete club error:', error);
+    res.status(500).json({ message: error.message });
+  }
+};

@@ -176,6 +176,10 @@ export const clubService = {
     const response = await api.patch(`/clubs/${id}/status`, { status });
     return response.data;
   },
+  deleteAdmin: async (id) => {
+    const response = await api.delete(`/clubs/${id}`);
+    return response.data;
+  },
 };
 
 export const clubMembershipService = {

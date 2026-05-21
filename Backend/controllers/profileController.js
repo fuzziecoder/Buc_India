@@ -1,6 +1,7 @@
 import User from "../models/User.js";
 import Otp from "../models/Otp.js";
 import { cloudinary } from "../middleware/cloudinaryConfig.js";
+import { sendRegistrationConfirmation } from "../utils/mailSender.js";
 
 export const getProfile = async (req, res) => {
   try {
@@ -59,20 +60,30 @@ export const userSignup = async (req, res) => {
       emergencyContactName,
       emergencyContactPhone,
       otp,
+      clubId,
     } = req.body;
 
     const isRider = registrationType === 'Rider' || registrationType === 'Student Rider';
     const isStudent = registrationType === 'Student' || registrationType === 'Student Rider';
+    const isPC = registrationType === 'PC';
 
     // 1. Mandatory overall validation (Common to ALL registration types)
     if (
-      !phone || !fullName || !email || !password || !otp ||
+      !phone || !fullName ||
       !address || !city || !state || !pincode || 
       !emergencyContactName || !emergencyContactPhone
     ) {
       return res.status(400).json({ 
-        message: "Full Name, Phone, Email, Password, OTP, Address, and Emergency Contact details are required for all registrations." 
+        message: "Full Name, Phone, Address, and Emergency Contact details are required for all registrations." 
       });
+    }
+
+    if (!isPC) {
+      if (!email || !password || !otp) {
+        return res.status(400).json({ 
+          message: "Email, Password, and OTP are required for this registration type." 
+        });
+      }
     }
 
     // 2. Role-specific validation
@@ -94,11 +105,14 @@ export const userSignup = async (req, res) => {
 
     // Check if phone or email already exists
     const existingUser = await User.findOne({
-      $or: [{ phone }, { email: email.toLowerCase() }],
+      $or: [
+        { phone },
+        ...(email ? [{ email: email.toLowerCase() }] : [])
+      ]
     });
 
     if (existingUser) {
-      const field = existingUser.email === email.toLowerCase() ? "Email" : "Phone number";
+      const field = existingUser.email && email && existingUser.email === email.toLowerCase() ? "Email" : "Phone number";
       return res
         .status(400)
         .json({
@@ -106,17 +120,19 @@ export const userSignup = async (req, res) => {
         });
     }
 
-    // Verify OTP exists for this email (Common to all)
-    const otpRecord = await Otp.findOne({
-      email: email.toLowerCase(),
-      otp,
-      type: "signup",
-    });
-
-    if (!otpRecord) {
-      return res.status(400).json({
-        message: "Invalid or expired OTP. Please verify your email first.",
+    // Verify OTP exists for this email (Common to all except PC)
+    if (!isPC) {
+      const otpRecord = await Otp.findOne({
+        email: email.toLowerCase(),
+        otp,
+        type: "signup",
       });
+
+      if (!otpRecord) {
+        return res.status(400).json({
+          message: "Invalid or expired OTP. Please verify your email first.",
+        });
+      }
     }
 
     // File Upload Validation
@@ -135,8 +151,6 @@ export const userSignup = async (req, res) => {
       registrationType,
       fullName,
       phone,
-      email: email.toLowerCase(),
-      password,
       address,
       city,
       state,
@@ -150,12 +164,22 @@ export const userSignup = async (req, res) => {
       websiteUrl: req.body.websiteUrl || "",
     };
 
+    if (email) {
+      userData.email = email.toLowerCase();
+    }
+    if (password) {
+      userData.password = password;
+    }
+
     if (isRider) {
       userData.dateOfBirth = dateOfBirth;
       userData.bloodGroup = bloodGroup;
       userData.bikeModel = bikeModel;
       userData.bikeRegistrationNumber = bikeRegistrationNumber;
       userData.licenseNumber = licenseNumber;
+      if (clubId) {
+        userData.clubId = clubId;
+      }
     }
 
     if (isStudent) {
@@ -176,8 +200,15 @@ export const userSignup = async (req, res) => {
     const user = new User(userData);
     await user.save();
 
+    // Send confirmation email
+    if (email) {
+      sendRegistrationConfirmation(email.toLowerCase(), fullName, registrationType).catch(err => console.error("Email send error:", err));
+    }
+
     // Clear OTP
-    await Otp.deleteMany({ email: email.toLowerCase(), type: "signup" });
+    if (email) {
+      await Otp.deleteMany({ email: email.toLowerCase(), type: "signup" });
+    }
 
     // Don't send password back
     const userResponse = user.toObject();

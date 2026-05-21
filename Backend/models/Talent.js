@@ -27,6 +27,7 @@ const talentSchema = new mongoose.Schema(
     isRider: { type: Boolean, default: false },
     bikeModel: { type: String, trim: true },
     ridingExperience: { type: String, trim: true },
+    clubId: { type: mongoose.Schema.Types.ObjectId, ref: 'Club', default: null },
 
     // Additional Info
     shortDescription: { type: String, required: true, trim: true },

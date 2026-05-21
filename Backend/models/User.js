@@ -117,6 +117,11 @@ const userSchema = new mongoose.Schema({
   licenseImagePublicId: {
     type: String,
     default: ''
+  },
+  clubId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Club',
+    default: null
   }
 }, { timestamps: true });
 
