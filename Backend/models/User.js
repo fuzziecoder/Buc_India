@@ -2,10 +2,25 @@ import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
 
 const userSchema = new mongoose.Schema({
+  bucId: {
+    type: String,
+    unique: true,
+    sparse: true
+  },
   registrationType: {
     type: String,
     enum: ['PC', 'Rider', 'Student Rider', 'Student'],
     default: 'Rider'
+  },
+  tshirtSize: {
+    type: String,
+    enum: ['S', 'M', 'L', 'XL', 'XXL', 'XXXL'],
+    default: ''
+  },
+  clubId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Club',
+    default: null
   },
   collegeName: {
     type: String,

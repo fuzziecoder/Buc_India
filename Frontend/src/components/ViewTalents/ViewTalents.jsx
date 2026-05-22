@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { Download, RefreshCw, X, Star } from "lucide-react";
 import { talentService } from "../../services/api";
+import { exportToExcel, exportToPDF } from "../../utils/exportUtils";
 
 const EXPERIENCE_LEVELS = ["All", "Beginner", "Intermediate", "Professional"];
 
@@ -10,6 +11,10 @@ const ViewTalents = () => {
   const [filterName, setFilterName] = useState("");
   const [filterLevel, setFilterLevel] = useState("All");
   const [isLoading, setIsLoading] = useState(false);
+  const [showExportModal, setShowExportModal] = useState(false);
+  const [exportType, setExportType] = useState(null);
+  const [availableFields, setAvailableFields] = useState([]);
+  const [selectedFields, setSelectedFields] = useState([]);
 
   const loadData = useCallback(async () => {
     try {
@@ -46,6 +51,7 @@ const ViewTalents = () => {
 
   const TABLE_COLUMNS = [
     { key: "sno", label: "S.No" },
+    { key: "bucId", label: "BUC ID" },
     { key: "fullName", label: "Full Name" },
     { key: "age", label: "Age" },
     { key: "gender", label: "Gender" },
@@ -86,56 +92,55 @@ const ViewTalents = () => {
     return String(val);
   };
 
-  const handleExportPDF = () => {
-    const printWindow = window.open("", "_blank");
-    const pdfCols = TABLE_COLUMNS.filter(c => !["portfolioLink", "socialMediaLinks"].includes(c.key));
-
-    const tableRows = filtered.map((t, i) =>
-      `<tr>${pdfCols.map(col => {
-        if (col.key === "sno") return `<td>${i + 1}</td>`;
-        const val = t[col.key];
-        if (val === null || val === undefined || val === "") return `<td>-</td>`;
-        if (["isRider", "openToPerformLive", "openToCompetition"].includes(col.key)) return `<td>${val ? "Yes" : "No"}</td>`;
-        if (col.key === "createdAt") {
-          try { return `<td>${new Date(val).toLocaleDateString()}</td>`; } catch { return `<td>${val}</td>`; }
-        }
-        return `<td>${String(val).slice(0, 80)}</td>`;
-      }).join("")}</tr>`
-    ).join("");
-
-    const levelLabel = filterLevel !== "All" ? ` — ${filterLevel}` : "";
-    printWindow.document.write(`
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <title>BUC India — Talent Registrations${levelLabel}</title>
-        <style>
-          * { margin: 0; padding: 0; box-sizing: border-box; }
-          body { font-family: Arial, sans-serif; font-size: 8px; padding: 16px; color: #111; }
-          .header { border-bottom: 2px solid #c19a6b; padding-bottom: 10px; margin-bottom: 12px; }
-          .header h1 { font-size: 15px; }
-          .header p { color: #c19a6b; font-size: 9px; margin-top: 2px; }
-          table { width: 100%; border-collapse: collapse; }
-          th { background: #1a1a1a; color: #fff; padding: 5px 7px; text-align: left; font-size: 7px; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap; }
-          td { padding: 4px 7px; border-bottom: 1px solid #eee; vertical-align: top; max-width: 120px; word-wrap: break-word; }
-          tr:nth-child(even) { background: #f9f9f9; }
-        </style>
-      </head>
-      <body>
-        <div class="header">
-          <h1>BUC India — Talent Registrations${levelLabel}</h1>
-          <p>Bikers Unity Calls | Total: ${filtered.length} entries | Generated: ${new Date().toLocaleString()}</p>
-        </div>
-        <table>
-          <thead><tr>${pdfCols.map(c => `<th>${c.label}</th>`).join("")}</tr></thead>
-          <tbody>${tableRows}</tbody>
-        </table>
-      </body>
-      </html>
-    `);
-    printWindow.document.close();
-    printWindow.print();
+  const getAvailableFields = () => {
+    return TABLE_COLUMNS.filter(c => c.key !== "sno");
   };
+
+  const handleExportClick = (type) => {
+    if (filtered.length === 0) {
+      alert("No talents to export");
+      return;
+    }
+    const fields = getAvailableFields();
+    setAvailableFields(fields);
+    setSelectedFields(fields.map((f) => f.key));
+    setExportType(type);
+    setShowExportModal(true);
+  };
+
+  const handleExportConfirm = () => {
+    if (selectedFields.length === 0) {
+      alert("Please select at least one field to export");
+      return;
+    }
+    setShowExportModal(false);
+
+    const title = `BUC India - Talent Registrations${filterLevel !== "All" ? ` (${filterLevel})` : ""}`;
+    
+    if (exportType === "excel") {
+      exportToExcel(filtered, null, selectedFields);
+    } else if (exportType === "pdf") {
+      exportToPDF(filtered, null, selectedFields, { eventTitle: title });
+    }
+
+    setExportType(null);
+    setSelectedFields([]);
+  };
+
+  const handleExportCancel = () => {
+    setShowExportModal(false);
+    setExportType(null);
+    setSelectedFields([]);
+  };
+
+  const toggleFieldSelection = (fieldKey) => {
+    setSelectedFields((prev) =>
+      prev.includes(fieldKey) ? prev.filter((k) => k !== fieldKey) : [...prev, fieldKey]
+    );
+  };
+
+  const selectAllFields = () => setSelectedFields(availableFields.map((f) => f.key));
+  const deselectAllFields = () => setSelectedFields([]);
 
   return (
     <div className="view-registrations">
@@ -171,7 +176,15 @@ const ViewTalents = () => {
             </button>
           )}
           <button
-            onClick={handleExportPDF}
+            onClick={() => handleExportClick("excel")}
+            className="refresh-button"
+            title="Export to Excel"
+            style={{ background: "#217346", color: "#fff", display: "flex", alignItems: "center", gap: 6 }}
+          >
+            <Download size={16} /> Excel
+          </button>
+          <button
+            onClick={() => handleExportClick("pdf")}
             className="refresh-button"
             title="Export to PDF"
             style={{ background: "#c19a6b", color: "#111", display: "flex", alignItems: "center", gap: 6 }}
@@ -234,6 +247,42 @@ const ViewTalents = () => {
               ))}
             </tbody>
           </table>
+        </div>
+      )}
+
+      {showExportModal && (
+        <div className="export-modal-overlay" onClick={handleExportCancel} style={{
+          position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(0,0,0,0.8)", zIndex: 1000, display: "flex", justifyContent: "center", alignItems: "center"
+        }}>
+          <div className="export-modal" onClick={(e) => e.stopPropagation()} style={{
+            background: "#111", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "8px", width: "90%", maxWidth: "500px", display: "flex", flexDirection: "column", maxHeight: "80vh"
+          }}>
+            <div className="export-modal-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "16px", borderBottom: "1px solid rgba(255,255,255,0.1)" }}>
+              <h3 style={{ margin: 0, color: "#fff" }}>Select Fields to Export ({exportType === "excel" ? "Excel" : "PDF"})</h3>
+              <button onClick={handleExportCancel} style={{ background: "transparent", border: "none", color: "#888", cursor: "pointer", fontSize: "16px" }}>✕</button>
+            </div>
+            <div className="export-modal-content" style={{ padding: "16px", overflowY: "auto", flex: 1 }}>
+              <div style={{ display: "flex", gap: "10px", marginBottom: "16px", alignItems: "center" }}>
+                <button onClick={selectAllFields} style={{ background: "#c19a6b", color: "#111", border: "none", padding: "4px 12px", borderRadius: "4px", cursor: "pointer", fontSize: "12px", fontWeight: "bold" }}>Select All</button>
+                <button onClick={deselectAllFields} style={{ background: "rgba(255,255,255,0.1)", color: "#fff", border: "none", padding: "4px 12px", borderRadius: "4px", cursor: "pointer", fontSize: "12px" }}>Deselect All</button>
+                <span style={{ color: "#888", fontSize: "12px", marginLeft: "auto" }}>{selectedFields.length} of {availableFields.length} selected</span>
+              </div>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
+                {availableFields.map((field) => (
+                  <label key={field.key} style={{ display: "flex", alignItems: "center", gap: "8px", color: "#ccc", fontSize: "13px", cursor: "pointer" }}>
+                    <input type="checkbox" checked={selectedFields.includes(field.key)} onChange={() => toggleFieldSelection(field.key)} style={{ accentColor: "#c19a6b" }} />
+                    <span style={{ textOverflow: "ellipsis", overflow: "hidden", whiteSpace: "nowrap" }}>{field.label}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+            <div className="export-modal-footer" style={{ padding: "16px", borderTop: "1px solid rgba(255,255,255,0.1)", display: "flex", justifyContent: "flex-end", gap: "10px" }}>
+              <button onClick={handleExportCancel} style={{ background: "transparent", border: "1px solid rgba(255,255,255,0.2)", color: "#fff", padding: "8px 16px", borderRadius: "4px", cursor: "pointer" }}>Cancel</button>
+              <button onClick={handleExportConfirm} disabled={selectedFields.length === 0} style={{ background: selectedFields.length === 0 ? "rgba(255,255,255,0.1)" : "#c19a6b", color: selectedFields.length === 0 ? "#888" : "#111", border: "none", padding: "8px 16px", borderRadius: "4px", cursor: selectedFields.length === 0 ? "not-allowed" : "pointer", fontWeight: "bold" }}>
+                Export {exportType === "excel" ? "Excel" : "PDF"}
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

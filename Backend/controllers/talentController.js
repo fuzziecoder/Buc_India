@@ -1,4 +1,5 @@
 import Talent from "../models/Talent.js";
+import { generateUniqueBucId } from "../utils/generateBucId.js";
 import { sendRegistrationConfirmation } from "../utils/mailSender.js";
 
 export const submitTalent = async (req, res) => {
@@ -7,19 +8,20 @@ export const submitTalent = async (req, res) => {
       fullName, age, gender, phone, email, city,
       talentCategory, subTalentDescription, experienceLevel, yearsOfExperience,
       portfolioLink,
-      isRider, bikeModel, ridingExperience, clubId,
+      isRider, bikeModel, ridingExperience,
       shortDescription, whyParticipate,
       availableDates,
       openToPerformLive, openToCompetition,
       pastAchievements, socialMediaLinks,
       consentInfoTrue, consentRules, consentMedia,
+      tshirtSize,
     } = req.body;
 
     // Required field validation
     if (
       !fullName || !age || !gender || !phone || !email || !city ||
       !talentCategory || !subTalentDescription || !experienceLevel || !yearsOfExperience ||
-      !shortDescription || !whyParticipate || !availableDates
+      !shortDescription || !whyParticipate || !availableDates || !tshirtSize
     ) {
       return res.status(400).json({ message: "Please fill all required fields." });
     }
@@ -34,7 +36,10 @@ export const submitTalent = async (req, res) => {
       return res.status(400).json({ message: "You must give permission for media use." });
     }
 
+    const bucId = await generateUniqueBucId();
+
     const talent = new Talent({
+      bucId,
       fullName,
       age: Number(age),
       gender,
@@ -42,6 +47,7 @@ export const submitTalent = async (req, res) => {
       email,
       city,
       talentCategory,
+      tshirtSize,
       subTalentDescription,
       experienceLevel,
       yearsOfExperience: Number(yearsOfExperience),
@@ -49,7 +55,6 @@ export const submitTalent = async (req, res) => {
       isRider: isRider === "true" || isRider === true,
       bikeModel: bikeModel || "",
       ridingExperience: ridingExperience || "",
-      clubId: (isRider === "true" || isRider === true) ? (clubId || null) : null,
       shortDescription,
       whyParticipate,
       availableDates,
@@ -64,8 +69,15 @@ export const submitTalent = async (req, res) => {
 
     await talent.save();
 
-    if (email) {
-      sendRegistrationConfirmation(email.toLowerCase(), fullName, "Talent Participant").catch(err => console.error("Email send error:", err));
+    try {
+      await sendRegistrationConfirmation(talent.email, {
+        fullName: talent.fullName,
+        tshirtSize: talent.tshirtSize,
+        bucId: talent.bucId,
+        clubName: "" // Talents don't register under a club directly in this form
+      });
+    } catch (mailError) {
+      console.error("Failed to send welcome email to talent:", mailError);
     }
 
     res.status(201).json({ message: "Talent registration submitted successfully!", talent });

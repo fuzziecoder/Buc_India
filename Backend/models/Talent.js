@@ -2,6 +2,11 @@ import mongoose from "mongoose";
 
 const talentSchema = new mongoose.Schema(
   {
+    bucId: {
+      type: String,
+      unique: true,
+      sparse: true
+    },
     // Basic Details
     fullName: { type: String, required: true, trim: true },
     age: { type: Number, required: true },
@@ -12,6 +17,11 @@ const talentSchema = new mongoose.Schema(
 
     // Talent Details
     talentCategory: { type: String, required: true, trim: true },
+    tshirtSize: {
+      type: String,
+      enum: ['S', 'M', 'L', 'XL', 'XXL', 'XXXL'],
+      default: ''
+    },
     subTalentDescription: { type: String, required: true, trim: true },
     experienceLevel: { 
       type: String, 

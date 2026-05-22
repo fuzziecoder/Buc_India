@@ -1,6 +1,8 @@
 import User from "../models/User.js";
 import Otp from "../models/Otp.js";
+import Club from "../models/Club.js";
 import { cloudinary } from "../middleware/cloudinaryConfig.js";
+import { generateUniqueBucId } from "../utils/generateBucId.js";
 import { sendRegistrationConfirmation } from "../utils/mailSender.js";
 
 export const getProfile = async (req, res) => {
@@ -30,7 +32,7 @@ export const getProfile = async (req, res) => {
 
 export const getAllProfiles = async (req, res) => {
   try {
-    const users = await User.find().sort({ createdAt: -1 });
+    const users = await User.find().populate('clubId', 'name').sort({ createdAt: -1 });
     res.json(users);
   } catch (error) {
     console.error("Get All Profiles Error:", error);
@@ -60,6 +62,7 @@ export const userSignup = async (req, res) => {
       emergencyContactName,
       emergencyContactPhone,
       otp,
+      tshirtSize,
       clubId,
     } = req.body;
 
@@ -68,20 +71,16 @@ export const userSignup = async (req, res) => {
     const isPC = registrationType === 'PC';
 
     // 1. Mandatory overall validation (Common to ALL registration types)
-    if (
-      !phone || !fullName ||
-      !address || !city || !state || !pincode || 
-      !emergencyContactName || !emergencyContactPhone
-    ) {
+    if (!phone || !fullName || !address || !city || !state || !pincode || !tshirtSize) {
       return res.status(400).json({ 
-        message: "Full Name, Phone, Address, and Emergency Contact details are required for all registrations." 
+        message: "Full Name, Phone, T-Shirt Size, and Address details are required for all registrations." 
       });
     }
 
     if (!isPC) {
-      if (!email || !password || !otp) {
+      if (!email || !password || !otp || !emergencyContactName || !emergencyContactPhone) {
         return res.status(400).json({ 
-          message: "Email, Password, and OTP are required for this registration type." 
+          message: "Email, Password, OTP, and Emergency Contact details are required." 
         });
       }
     }
@@ -103,25 +102,17 @@ export const userSignup = async (req, res) => {
       }
     }
 
-    // Check if phone or email already exists
-    const existingUser = await User.findOne({
-      $or: [
-        { phone },
-        ...(email ? [{ email: email.toLowerCase() }] : [])
-      ]
-    });
-
-    if (existingUser) {
-      const field = existingUser.email && email && existingUser.email === email.toLowerCase() ? "Email" : "Phone number";
-      return res
-        .status(400)
-        .json({
-          message: `${field} is already registered.`,
-        });
-    }
-
-    // Verify OTP exists for this email (Common to all except PC)
     if (!isPC) {
+      const existingUser = await User.findOne({
+        $or: [{ phone }, { email: email.toLowerCase() }],
+      });
+
+      if (existingUser) {
+        const field = existingUser.email === email.toLowerCase() ? "Email" : "Phone number";
+        return res.status(400).json({ message: `${field} is already registered.` });
+      }
+
+      // Verify OTP exists for this email
       const otpRecord = await Otp.findOne({
         email: email.toLowerCase(),
         otp,
@@ -133,13 +124,19 @@ export const userSignup = async (req, res) => {
           message: "Invalid or expired OTP. Please verify your email first.",
         });
       }
+    } else {
+      // For PC, just check phone
+      const existingUser = await User.findOne({ phone });
+      if (existingUser) {
+        return res.status(400).json({ message: "Phone number is already registered." });
+      }
     }
 
     // File Upload Validation
     const profileImageFile = req.files && req.files.profileImage ? req.files.profileImage[0] : null;
     const licenseImageFile = req.files && req.files.licenseImage ? req.files.licenseImage[0] : null;
 
-    if (!profileImageFile) {
+    if (!isPC && !profileImageFile) {
       return res.status(400).json({ message: "Profile image upload is required." });
     }
 
@@ -147,7 +144,10 @@ export const userSignup = async (req, res) => {
       return res.status(400).json({ message: "License image upload is required for Riders." });
     }
 
+    const bucId = await generateUniqueBucId();
+
     const userData = {
+      bucId,
       registrationType,
       fullName,
       phone,
@@ -155,20 +155,25 @@ export const userSignup = async (req, res) => {
       city,
       state,
       pincode,
-      emergencyContactName,
-      emergencyContactPhone,
-      facebookUrl: req.body.facebookUrl || "",
-      instagramUrl: req.body.instagramUrl || "",
-      twitterUrl: req.body.twitterUrl || "",
-      youtubeUrl: req.body.youtubeUrl || "",
-      websiteUrl: req.body.websiteUrl || "",
+      tshirtSize,
+      clubId: clubId || null,
     };
 
-    if (email) {
+    if (!isPC) {
       userData.email = email.toLowerCase();
-    }
-    if (password) {
       userData.password = password;
+      userData.emergencyContactName = emergencyContactName;
+      userData.emergencyContactPhone = emergencyContactPhone;
+      userData.facebookUrl = req.body.facebookUrl || "";
+      userData.instagramUrl = req.body.instagramUrl || "";
+      userData.twitterUrl = req.body.twitterUrl || "";
+      userData.youtubeUrl = req.body.youtubeUrl || "";
+      userData.websiteUrl = req.body.websiteUrl || "";
+    }
+
+    if (isPC) {
+      userData.bikeModel = bikeModel || "";
+      userData.bikeRegistrationNumber = bikeRegistrationNumber || "";
     }
 
     if (isRider) {
@@ -177,9 +182,6 @@ export const userSignup = async (req, res) => {
       userData.bikeModel = bikeModel;
       userData.bikeRegistrationNumber = bikeRegistrationNumber;
       userData.licenseNumber = licenseNumber;
-      if (clubId) {
-        userData.clubId = clubId;
-      }
     }
 
     if (isStudent) {
@@ -200,14 +202,27 @@ export const userSignup = async (req, res) => {
     const user = new User(userData);
     await user.save();
 
-    // Send confirmation email
-    if (email) {
-      sendRegistrationConfirmation(email.toLowerCase(), fullName, registrationType).catch(err => console.error("Email send error:", err));
-    }
-
     // Clear OTP
-    if (email) {
-      await Otp.deleteMany({ email: email.toLowerCase(), type: "signup" });
+    await Otp.deleteMany({ email: email.toLowerCase(), type: "signup" });
+
+    // Send confirmation email
+    if (!isPC) {
+      let clubName = "";
+      if (clubId) {
+        const club = await Club.findById(clubId);
+        if (club) clubName = club.name;
+      }
+      try {
+        await sendRegistrationConfirmation(userData.email, {
+          fullName: userData.fullName,
+          tshirtSize: userData.tshirtSize,
+          bucId: userData.bucId,
+          clubName: clubName
+        });
+      } catch (mailError) {
+        console.error("Failed to send welcome email:", mailError);
+        // Do not fail the registration if email fails
+      }
     }
 
     // Don't send password back

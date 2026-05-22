@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { Download, RefreshCw, Filter, X } from "lucide-react";
 import { profileService } from "../../services/api";
+import { exportToExcel, exportToPDF } from "../../utils/exportUtils";
 
 const REGISTRATION_TYPES = ["All", "PC", "Rider", "Student Rider", "Student"];
 
@@ -10,13 +11,27 @@ const ViewUsers = () => {
   const [filterName, setFilterName] = useState("");
   const [filterType, setFilterType] = useState("All");
   const [isLoading, setIsLoading] = useState(false);
+  const [showExportModal, setShowExportModal] = useState(false);
+  const [exportType, setExportType] = useState(null);
+  const [availableFields, setAvailableFields] = useState([]);
+  const [selectedFields, setSelectedFields] = useState([]);
 
   const loadData = useCallback(async () => {
     try {
       setIsLoading(true);
       const allUsers = await profileService.getAllAdmin();
-      setUsers(allUsers);
-      setFilteredUsers(allUsers);
+      const processedUsers = allUsers.map(u => {
+        if (u.clubId && typeof u.clubId === 'object' && u.clubId.name) {
+          u.clubName = u.clubId.name;
+          delete u.clubId;
+        } else if (u.clubId) {
+          u.clubName = u.clubId;
+          delete u.clubId;
+        }
+        return u;
+      });
+      setUsers(processedUsers);
+      setFilteredUsers(processedUsers);
     } catch (error) {
       console.error("Error loading users:", error);
       alert("Failed to load users from server");
@@ -60,10 +75,16 @@ const ViewUsers = () => {
     ];
     if (filteredUsers.length > 0) {
       const firstReg = filteredUsers[0];
-      const keys = Object.keys(firstReg).filter(key => !excludeFields.includes(key));
+      let keys = Object.keys(firstReg).filter(key => !excludeFields.includes(key));
+      
+      // Move bucId to front if it exists
+      if (keys.includes('bucId')) {
+        keys = ['bucId', ...keys.filter(k => k !== 'bucId')];
+      }
+
       return [
         { key: "sno", label: "S.No", width: "60px" },
-        ...keys.map(key => ({ key, label: formatColumnName(key), width: "auto" }))
+        ...keys.map(key => ({ key, label: key === 'bucId' ? 'BUC ID' : formatColumnName(key), width: "auto" }))
       ];
     }
     return [];
@@ -95,69 +116,59 @@ const ViewUsers = () => {
     return value;
   };
 
-  // PDF Export
-  const handleExportPDF = () => {
-    const printWindow = window.open("", "_blank");
-    const pdfColumns = columns.filter(c =>
-      !["profileImage", "licenseImage"].includes(c.key)
-    );
-
-    const tableRows = filteredUsers.map((user, index) =>
-      `<tr>${pdfColumns.map(col => {
-        if (col.key === "sno") return `<td>${index + 1}</td>`;
-        const val = user[col.key];
-        if (val === null || val === undefined || val === "") return `<td>-</td>`;
-        if (col.key.toLowerCase().includes("date") || col.key.toLowerCase().includes("at")) {
-          try {
-            const date = new Date(val);
-            if (!isNaN(date.getTime())) return `<td>${date.toLocaleDateString()}</td>`;
-          } catch (e) {}
-        }
-        if (typeof val === "object") return `<td>${JSON.stringify(val)}</td>`;
-        return `<td>${val}</td>`;
-      }).join("")}</tr>`
-    ).join("");
-
-    const filterLabel = filterType !== "All" ? ` — ${filterType}` : "";
-    printWindow.document.write(`
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <title>BUC India — Registered Users${filterLabel}</title>
-        <style>
-          * { margin: 0; padding: 0; box-sizing: border-box; }
-          body { font-family: Arial, sans-serif; font-size: 9px; padding: 16px; color: #111; }
-          h1 { font-size: 16px; margin-bottom: 4px; }
-          .subtitle { font-size: 10px; color: #666; margin-bottom: 12px; }
-          table { width: 100%; border-collapse: collapse; margin-top: 8px; }
-          th { background: #1a1a1a; color: #fff; padding: 6px 8px; text-align: left; font-size: 8px; text-transform: uppercase; letter-spacing: 0.05em; }
-          td { padding: 5px 8px; border-bottom: 1px solid #eee; vertical-align: top; }
-          tr:nth-child(even) { background: #f9f9f9; }
-          .header { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; border-bottom: 2px solid #c19a6b; padding-bottom: 12px; }
-          .header-text h1 { color: #1a1a1a; }
-          .header-text p { color: #c19a6b; font-size: 10px; }
-          .badge { display: inline-block; padding: 2px 6px; border-radius: 3px; font-size: 7px; font-weight: bold; text-transform: uppercase; background: #c19a6b22; color: #c19a6b; border: 1px solid #c19a6b55; }
-        </style>
-      </head>
-      <body>
-        <div class="header">
-          <div class="header-text">
-            <h1>BUC India — Registered Users${filterLabel}</h1>
-            <p>Bikers Unity Calls | Total: ${filteredUsers.length} registrations | Generated: ${new Date().toLocaleString()}</p>
-          </div>
-        </div>
-        <table>
-          <thead>
-            <tr>${pdfColumns.map(col => `<th>${col.label}</th>`).join("")}</tr>
-          </thead>
-          <tbody>${tableRows}</tbody>
-        </table>
-      </body>
-      </html>
-    `);
-    printWindow.document.close();
-    printWindow.print();
+  const getAvailableFields = () => {
+    if (filteredUsers.length === 0) return [];
+    const excludeFields = ["_id", "password", "licenseImagePublicId", "profileImagePublicId", "__v", "updatedAt"];
+    const firstReg = filteredUsers[0];
+    const keys = Object.keys(firstReg).filter((key) => !excludeFields.includes(key));
+    return keys.map((key) => ({ key, label: formatColumnName(key) }));
   };
+
+  const handleExportClick = (type) => {
+    if (filteredUsers.length === 0) {
+      alert("No users to export");
+      return;
+    }
+    const fields = getAvailableFields();
+    setAvailableFields(fields);
+    setSelectedFields(fields.map((f) => f.key));
+    setExportType(type);
+    setShowExportModal(true);
+  };
+
+  const handleExportConfirm = () => {
+    if (selectedFields.length === 0) {
+      alert("Please select at least one field to export");
+      return;
+    }
+    setShowExportModal(false);
+
+    const title = `BUC India - Registered Users${filterType !== "All" ? ` (${filterType})` : ""}`;
+    
+    if (exportType === "excel") {
+      exportToExcel(filteredUsers, null, selectedFields);
+    } else if (exportType === "pdf") {
+      exportToPDF(filteredUsers, null, selectedFields, { eventTitle: title });
+    }
+
+    setExportType(null);
+    setSelectedFields([]);
+  };
+
+  const handleExportCancel = () => {
+    setShowExportModal(false);
+    setExportType(null);
+    setSelectedFields([]);
+  };
+
+  const toggleFieldSelection = (fieldKey) => {
+    setSelectedFields((prev) =>
+      prev.includes(fieldKey) ? prev.filter((k) => k !== fieldKey) : [...prev, fieldKey]
+    );
+  };
+
+  const selectAllFields = () => setSelectedFields(availableFields.map((f) => f.key));
+  const deselectAllFields = () => setSelectedFields([]);
 
   const clearFilters = () => {
     setFilterName("");
@@ -202,9 +213,18 @@ const ViewUsers = () => {
             </button>
           )}
 
-          {/* PDF Export */}
+          {/* Export Actions */}
           <button
-            onClick={handleExportPDF}
+            onClick={() => handleExportClick("excel")}
+            className="refresh-button"
+            title="Export to Excel"
+            style={{ background: "#217346", color: "#fff", display: "flex", alignItems: "center", gap: 6 }}
+          >
+            <Download size={16} /> Excel
+          </button>
+
+          <button
+            onClick={() => handleExportClick("pdf")}
             className="refresh-button"
             title="Export to PDF"
             style={{ background: "#c19a6b", color: "#111", display: "flex", alignItems: "center", gap: 6 }}
@@ -294,6 +314,42 @@ const ViewUsers = () => {
               )}
             </tbody>
           </table>
+        </div>
+      )}
+
+      {showExportModal && (
+        <div className="export-modal-overlay" onClick={handleExportCancel} style={{
+          position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(0,0,0,0.8)", zIndex: 1000, display: "flex", justifyContent: "center", alignItems: "center"
+        }}>
+          <div className="export-modal" onClick={(e) => e.stopPropagation()} style={{
+            background: "#111", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "8px", width: "90%", maxWidth: "500px", display: "flex", flexDirection: "column", maxHeight: "80vh"
+          }}>
+            <div className="export-modal-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "16px", borderBottom: "1px solid rgba(255,255,255,0.1)" }}>
+              <h3 style={{ margin: 0, color: "#fff" }}>Select Fields to Export ({exportType === "excel" ? "Excel" : "PDF"})</h3>
+              <button onClick={handleExportCancel} style={{ background: "transparent", border: "none", color: "#888", cursor: "pointer", fontSize: "16px" }}>✕</button>
+            </div>
+            <div className="export-modal-content" style={{ padding: "16px", overflowY: "auto", flex: 1 }}>
+              <div style={{ display: "flex", gap: "10px", marginBottom: "16px", alignItems: "center" }}>
+                <button onClick={selectAllFields} style={{ background: "#c19a6b", color: "#111", border: "none", padding: "4px 12px", borderRadius: "4px", cursor: "pointer", fontSize: "12px", fontWeight: "bold" }}>Select All</button>
+                <button onClick={deselectAllFields} style={{ background: "rgba(255,255,255,0.1)", color: "#fff", border: "none", padding: "4px 12px", borderRadius: "4px", cursor: "pointer", fontSize: "12px" }}>Deselect All</button>
+                <span style={{ color: "#888", fontSize: "12px", marginLeft: "auto" }}>{selectedFields.length} of {availableFields.length} selected</span>
+              </div>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
+                {availableFields.map((field) => (
+                  <label key={field.key} style={{ display: "flex", alignItems: "center", gap: "8px", color: "#ccc", fontSize: "13px", cursor: "pointer" }}>
+                    <input type="checkbox" checked={selectedFields.includes(field.key)} onChange={() => toggleFieldSelection(field.key)} style={{ accentColor: "#c19a6b" }} />
+                    <span style={{ textOverflow: "ellipsis", overflow: "hidden", whiteSpace: "nowrap" }}>{field.label}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+            <div className="export-modal-footer" style={{ padding: "16px", borderTop: "1px solid rgba(255,255,255,0.1)", display: "flex", justifyContent: "flex-end", gap: "10px" }}>
+              <button onClick={handleExportCancel} style={{ background: "transparent", border: "1px solid rgba(255,255,255,0.2)", color: "#fff", padding: "8px 16px", borderRadius: "4px", cursor: "pointer" }}>Cancel</button>
+              <button onClick={handleExportConfirm} disabled={selectedFields.length === 0} style={{ background: selectedFields.length === 0 ? "rgba(255,255,255,0.1)" : "#c19a6b", color: selectedFields.length === 0 ? "#888" : "#111", border: "none", padding: "8px 16px", borderRadius: "4px", cursor: selectedFields.length === 0 ? "not-allowed" : "pointer", fontWeight: "bold" }}>
+                Export {exportType === "excel" ? "Excel" : "PDF"}
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
