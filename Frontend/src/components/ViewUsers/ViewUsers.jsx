@@ -77,9 +77,11 @@ const ViewUsers = () => {
       const firstReg = filteredUsers[0];
       let keys = Object.keys(firstReg).filter(key => !excludeFields.includes(key));
       
-      // Move bucId to front if it exists
+      // Move bucId to front if it exists, otherwise force add it
       if (keys.includes('bucId')) {
         keys = ['bucId', ...keys.filter(k => k !== 'bucId')];
+      } else {
+        keys = ['bucId', ...keys];
       }
 
       return [

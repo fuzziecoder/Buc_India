@@ -128,18 +128,24 @@ const GalleryManagement = () => {
       toast.error("Please select an image to upload");
       return;
     }
-    if (!formData.eventName || !formData.eventDate) {
+    if (formData.category !== 'cover' && (!formData.eventName || !formData.eventDate)) {
       toast.error("Designation and timestamp mandatory");
       return;
     }
 
     const data = new FormData();
-    data.append("eventName", formData.eventName);
-    data.append("eventDate", formData.eventDate);
-    data.append("category", formData.category);
     if (mediaFile) {
       data.append("media", mediaFile);
     }
+    
+    if (formData.category === 'cover') {
+      data.append("eventName", "Registration Portal Cover");
+      data.append("eventDate", new Date().toISOString());
+    } else {
+      data.append("eventName", formData.eventName);
+      data.append("eventDate", formData.eventDate);
+    }
+    data.append("category", formData.category);
 
     setSubmitting(true);
     try {
@@ -227,31 +233,36 @@ const GalleryManagement = () => {
                 
                 <form onSubmit={handleSubmit}>
                   <Grid container spacing={4}>
-                    <Grid item xs={12} md={6}>
-                      <TextField
-                        fullWidth
-                        label="Event Name"
-                        name="eventName"
-                        value={formData.eventName}
-                        onChange={handleChange}
-                        required
-                        variant="outlined"
-                        sx={{ input: { color: 'white' }, label: { color: 'rgba(255,255,255,0.7)' } }}
-                      />
-                    </Grid>
-                    <Grid item xs={12} md={6}>
-                      <TextField
-                        fullWidth
-                        label="Event Date"
-                        type="date"
-                        name="eventDate"
-                        value={formData.eventDate}
-                        onChange={handleChange}
-                        required
-                        InputLabelProps={{ shrink: true }}
-                        sx={{ input: { color: 'white' }, label: { color: 'rgba(255,255,255,0.7)' } }}
-                      />
-                    </Grid>
+                    {formData.category !== 'cover' && (
+                      <>
+                        <Grid item xs={12} md={6}>
+                          <TextField
+                            fullWidth
+                            label="Event Name"
+                            name="eventName"
+                            value={formData.eventName}
+                            onChange={handleChange}
+                            required={formData.category !== 'cover'}
+                            variant="outlined"
+                            sx={{ input: { color: 'white' }, label: { color: 'rgba(255,255,255,0.7)' } }}
+                          />
+                        </Grid>
+                        <Grid item xs={12} md={6}>
+                          <TextField
+                            fullWidth
+                            label="Event Date"
+                            type="date"
+                            name="eventDate"
+                            value={formData.eventDate}
+                            onChange={handleChange}
+                            required={formData.category !== 'cover'}
+                            InputLabelProps={{ shrink: true }}
+                            variant="outlined"
+                            sx={{ input: { color: 'white' }, label: { color: 'rgba(255,255,255,0.7)' } }}
+                          />
+                        </Grid>
+                      </>
+                    )}
                     <Grid item xs={12} md={6}>
                       <FormControl fullWidth>
                         <InputLabel sx={{ color: 'rgba(255,255,255,0.7)' }}>Category</InputLabel>
