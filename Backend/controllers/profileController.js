@@ -72,9 +72,9 @@ export const userSignup = async (req, res) => {
     const isPC = registrationType === 'PC';
 
     // 1. Mandatory overall validation (Common to ALL registration types)
-    if (!phone || !fullName || !gender || !address || !city || !state || !pincode || !tshirtSize) {
+    if (!phone || !fullName || !address || !city || !state || !pincode || !tshirtSize) {
       return res.status(400).json({ 
-        message: "Full Name, Gender, Phone, T-Shirt Size, and Address details are required for all registrations." 
+        message: "Full Name, Phone, T-Shirt Size, and Address details are required for all registrations." 
       });
     }
 
@@ -152,7 +152,7 @@ export const userSignup = async (req, res) => {
       registrationType,
       fullName,
       phone,
-      gender,
+      gender: gender || "",
       address,
       city,
       state,
