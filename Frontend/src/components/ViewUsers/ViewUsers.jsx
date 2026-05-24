@@ -21,13 +21,14 @@ const ViewUsers = () => {
       setIsLoading(true);
       const allUsers = await profileService.getAllAdmin();
       const processedUsers = allUsers.map(u => {
+        // Ensure clubName is always defined on every user object so the column header is generated dynamically
+        u.clubName = "-";
         if (u.clubId && typeof u.clubId === 'object' && u.clubId.name) {
           u.clubName = u.clubId.name;
-          delete u.clubId;
-        } else if (u.clubId) {
+        } else if (u.clubId && typeof u.clubId === 'string') {
           u.clubName = u.clubId;
-          delete u.clubId;
         }
+        delete u.clubId;
         return u;
       });
       setUsers(processedUsers);
