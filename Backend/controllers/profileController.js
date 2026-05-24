@@ -71,35 +71,54 @@ export const userSignup = async (req, res) => {
     const isStudent = registrationType === 'Student' || registrationType === 'Student Rider';
     const isPC = registrationType === 'PC';
 
+    // Check if it's a detailed registration (e.g. from the registration forms in registration branch)
+    // We determine this by checking if address or tshirtSize is provided.
+    const isDetailed = !!address || !!city || !!state || !!pincode || !!tshirtSize;
+
     // 1. Mandatory overall validation (Common to ALL registration types)
-    if (!phone || !fullName || !address || !city || !state || !pincode || !tshirtSize) {
-      return res.status(400).json({ 
-        message: "Full Name, Phone, T-Shirt Size, and Address details are required for all registrations." 
-      });
+    if (isDetailed) {
+      if (!phone || !fullName || !address || !city || !state || !pincode || !tshirtSize) {
+        return res.status(400).json({ 
+          message: "Full Name, Phone, T-Shirt Size, and Address details are required for all registrations." 
+        });
+      }
+    } else {
+      if (!phone || !fullName) {
+        return res.status(400).json({ 
+          message: "Full Name and Phone are required." 
+        });
+      }
     }
 
     if (!isPC) {
-      if (!email || !password || !otp || !emergencyContactName || !emergencyContactPhone) {
+      if (!email || !password || !otp) {
         return res.status(400).json({ 
-          message: "Email, Password, OTP, and Emergency Contact details are required." 
+          message: "Email, Password, and OTP are required." 
+        });
+      }
+      if (isDetailed && (!emergencyContactName || !emergencyContactPhone)) {
+        return res.status(400).json({ 
+          message: "Emergency Contact details are required." 
         });
       }
     }
 
     // 2. Role-specific validation
-    if (isRider) {
-      if (!bikeModel || !bikeRegistrationNumber || !licenseNumber) {
-        return res.status(400).json({ 
-          message: "Bike details and license details are required for Rider registrations." 
-        });
+    if (isDetailed) {
+      if (isRider) {
+        if (!bikeModel || !bikeRegistrationNumber || !licenseNumber) {
+          return res.status(400).json({ 
+            message: "Bike details and license details are required for Rider registrations." 
+          });
+        }
       }
-    }
-    
-    if (isStudent) {
-      if (!collegeName || !collegeIdNo) {
-        return res.status(400).json({ 
-          message: "College Name and Student ID Number are required for Student registrations." 
-        });
+      
+      if (isStudent) {
+        if (!collegeName || !collegeIdNo) {
+          return res.status(400).json({ 
+            message: "College Name and Student ID Number are required for Student registrations." 
+          });
+        }
       }
     }
 
@@ -137,11 +156,11 @@ export const userSignup = async (req, res) => {
     const profileImageFile = req.files && req.files.profileImage ? req.files.profileImage[0] : null;
     const licenseImageFile = req.files && req.files.licenseImage ? req.files.licenseImage[0] : null;
 
-    if (!isPC && !profileImageFile) {
+    if (isDetailed && !isPC && !profileImageFile) {
       return res.status(400).json({ message: "Profile image upload is required." });
     }
 
-    if (isRider && !licenseImageFile) {
+    if (isDetailed && isRider && !licenseImageFile) {
       return res.status(400).json({ message: "License image upload is required for Riders." });
     }
 
@@ -153,19 +172,19 @@ export const userSignup = async (req, res) => {
       fullName,
       phone,
       gender: gender || "",
-      address,
-      city,
-      state,
-      pincode,
-      tshirtSize,
+      address: address || "",
+      city: city || "",
+      state: state || "",
+      pincode: pincode || "",
+      tshirtSize: tshirtSize || "",
       clubId: clubId || null,
     };
 
     if (!isPC) {
       userData.email = email.toLowerCase();
       userData.password = password;
-      userData.emergencyContactName = emergencyContactName;
-      userData.emergencyContactPhone = emergencyContactPhone;
+      userData.emergencyContactName = emergencyContactName || "";
+      userData.emergencyContactPhone = emergencyContactPhone || "";
       userData.facebookUrl = req.body.facebookUrl || "";
       userData.instagramUrl = req.body.instagramUrl || "";
       userData.twitterUrl = req.body.twitterUrl || "";
@@ -179,21 +198,23 @@ export const userSignup = async (req, res) => {
     }
 
     if (isRider) {
-      userData.dateOfBirth = dateOfBirth;
-      userData.bloodGroup = bloodGroup;
-      userData.bikeModel = bikeModel;
-      userData.bikeRegistrationNumber = bikeRegistrationNumber;
-      userData.licenseNumber = licenseNumber;
+      userData.dateOfBirth = dateOfBirth || null;
+      userData.bloodGroup = bloodGroup || "";
+      userData.bikeModel = bikeModel || "";
+      userData.bikeRegistrationNumber = bikeRegistrationNumber || "";
+      userData.licenseNumber = licenseNumber || "";
     }
 
     if (isStudent) {
-      userData.collegeName = collegeName;
-      userData.collegeIdNo = collegeIdNo;
+      userData.collegeName = collegeName || "";
+      userData.collegeIdNo = collegeIdNo || "";
     }
 
     // Set Profile Image
-    userData.profileImage = profileImageFile.path;
-    userData.profileImagePublicId = profileImageFile.filename;
+    if (profileImageFile) {
+      userData.profileImage = profileImageFile.path;
+      userData.profileImagePublicId = profileImageFile.filename;
+    }
 
     // Set License Image if present/rider
     if (isRider && licenseImageFile) {
