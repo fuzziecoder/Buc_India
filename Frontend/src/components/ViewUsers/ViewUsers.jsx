@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { Download, RefreshCw, Filter, X, Camera, FileText, Upload, Shield, GraduationCap, Bike, Users, User, Mail, Phone, Trash2 } from "lucide-react";
+import { Download, RefreshCw, Filter, X, Camera, FileText, Upload, Shield, GraduationCap, Bike, Users, User, Mail, Phone, Trash2, Calendar } from "lucide-react";
 import { profileService, clubService } from "../../services/api";
 import { exportToExcel, exportToPDF } from "../../utils/exportUtils";
 
@@ -114,7 +114,6 @@ const ViewUsers = () => {
         } else if (u.clubId && typeof u.clubId === 'string') {
           u.clubName = u.clubId;
         }
-        delete u.clubId;
         return u;
       });
       setUsers(processedUsers);
