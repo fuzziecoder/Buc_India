@@ -1,4 +1,5 @@
 import Talent from "../models/Talent.js";
+import Otp from "../models/Otp.js";
 import { generateUniqueBucId } from "../utils/generateBucId.js";
 import { sendRegistrationConfirmation } from "../utils/mailSender.js";
 
@@ -15,15 +16,16 @@ export const submitTalent = async (req, res) => {
       pastAchievements, socialMediaLinks,
       consentInfoTrue, consentRules, consentMedia,
       tshirtSize,
+      otp,
     } = req.body;
 
     // Required field validation
     if (
       !fullName || !age || !gender || !phone || !email || !city ||
       !talentCategory || !subTalentDescription || !experienceLevel || !yearsOfExperience ||
-      !shortDescription || !whyParticipate || !availableDates || !tshirtSize
+      !shortDescription || !whyParticipate || !availableDates || !tshirtSize || !otp
     ) {
-      return res.status(400).json({ message: "Please fill all required fields." });
+      return res.status(400).json({ message: "Please fill all required fields, including OTP." });
     }
 
     if (!consentInfoTrue || consentInfoTrue === "false") {
@@ -34,6 +36,17 @@ export const submitTalent = async (req, res) => {
     }
     if (!consentMedia || consentMedia === "false") {
       return res.status(400).json({ message: "You must give permission for media use." });
+    }
+
+    // Verify OTP exists for this email
+    const otpRecord = await Otp.findOne({
+      email: email.toLowerCase(),
+      otp,
+      type: "talent_signup",
+    });
+
+    if (!otpRecord) {
+      return res.status(400).json({ message: "Invalid or expired OTP. Please verify your email first." });
     }
 
     const bucId = await generateUniqueBucId();
@@ -68,6 +81,13 @@ export const submitTalent = async (req, res) => {
     });
 
     await talent.save();
+
+    // Delete verified OTP record
+    try {
+      await Otp.deleteOne({ _id: otpRecord._id });
+    } catch (otpDelError) {
+      console.error("Failed to delete talent OTP:", otpDelError);
+    }
 
     try {
       await sendRegistrationConfirmation(talent.email, {

@@ -1,6 +1,7 @@
 import Club from '../models/Club.js';
 import ClubMembership from '../models/ClubMembership.js';
 import User from '../models/User.js';
+import Otp from '../models/Otp.js';
 
 // Public: list approved clubs with minimal info
 export const getPublicClubs = async (req, res) => {
@@ -58,7 +59,28 @@ export const createClubRequest = async (req, res) => {
       admins,
       creatorEmail,
       creatorPhone,
+      otp,
     } = req.body;
+
+    const emailToVerify = creatorEmail || founderEmail;
+    if (!emailToVerify) {
+      return res.status(400).json({ message: 'Creator or founder email is required' });
+    }
+
+    if (!otp) {
+      return res.status(400).json({ message: 'OTP verification is required' });
+    }
+
+    // Verify OTP exists for this email
+    const otpRecord = await Otp.findOne({
+      email: emailToVerify.toLowerCase(),
+      otp,
+      type: "club_signup",
+    });
+
+    if (!otpRecord) {
+      return res.status(400).json({ message: "Invalid or expired OTP. Please verify your email first." });
+    }
 
     if (!name) {
       return res.status(400).json({ message: 'Club name is required' });
@@ -140,6 +162,13 @@ export const createClubRequest = async (req, res) => {
     }
 
     const club = await Club.create(clubData);
+
+    // Delete verified OTP record
+    try {
+      await Otp.deleteOne({ _id: otpRecord._id });
+    } catch (otpDelError) {
+      console.error("Failed to delete club OTP:", otpDelError);
+    }
 
     // Optionally create a membership record for the founder so they get access after approval
     if (creatorEmail || creatorPhone) {
