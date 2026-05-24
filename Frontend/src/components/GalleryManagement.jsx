@@ -123,7 +123,18 @@ const GalleryManagement = ({ isCoverOnly = false }) => {
 
   const displayedItems = isCoverOnly
     ? items.filter((item) => item.category === "cover")
-    : items;
+    : items.filter((item) => item.category !== "cover");
+
+  const activeCategories = isCoverOnly
+    ? [{ id: "cover", label: "Cover Photo (Registration Portal)" }]
+    : [
+        { id: "all", label: "All Media" },
+        { id: "rides", label: "Group Rides" },
+        { id: "events", label: "Events" },
+        { id: "bikes", label: "Member Bikes" },
+        { id: "rallies", label: "Rallies" },
+        { id: "highlights", label: "Ride Highlights (2–3s Clips)" },
+      ];
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -156,6 +167,10 @@ const GalleryManagement = ({ isCoverOnly = false }) => {
       if (isEditing) {
         await galleryService.update(editId, data);
         toast.success("Intelligence manifest updated");
+      } else if (isCoverOnly && displayedItems.length > 0) {
+        const existingId = displayedItems[0]._id;
+        await galleryService.update(existingId, data);
+        toast.success("Cover photo successfully updated");
       } else {
         await galleryService.create(data);
         toast.success("Image added to gallery");
@@ -186,7 +201,16 @@ const GalleryManagement = ({ isCoverOnly = false }) => {
   };
 
   const getCategoryLabel = (id) => {
-    const cat = categories.find((c) => c.id === id);
+    const allCats = [
+      { id: "all", label: "All Media" },
+      { id: "rides", label: "Group Rides" },
+      { id: "events", label: "Events" },
+      { id: "bikes", label: "Member Bikes" },
+      { id: "rallies", label: "Rallies" },
+      { id: "highlights", label: "Ride Highlights (2–3s Clips)" },
+      { id: "cover", label: "Cover Photo (Registration Portal)" },
+    ];
+    const cat = allCats.find((c) => c.id === id);
     return cat ? cat.label : id;
   };
 
@@ -286,7 +310,7 @@ const GalleryManagement = ({ isCoverOnly = false }) => {
                             label="Category"
                             sx={{ color: 'white' }}
                           >
-                            {categories.map((cat) => (
+                            {activeCategories.map((cat) => (
                               <MenuItem key={cat.id} value={cat.id}>
                                 {cat.label}
                               </MenuItem>
