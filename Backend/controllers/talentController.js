@@ -51,7 +51,10 @@ export const submitTalent = async (req, res) => {
 
     const bucId = await generateUniqueBucId();
 
-    const talent = new Talent({
+    const talentImageFile = req.files && req.files.talentImage ? req.files.talentImage[0] : null;
+    const talentVideoFile = req.files && req.files.talentVideo ? req.files.talentVideo[0] : null;
+
+    const talentData = {
       bucId,
       fullName,
       age: Number(age),
@@ -78,7 +81,18 @@ export const submitTalent = async (req, res) => {
       consentInfoTrue: true,
       consentRules: true,
       consentMedia: true,
-    });
+    };
+
+    if (talentImageFile) {
+      talentData.talentImage = talentImageFile.path;
+      talentData.talentImagePublicId = talentImageFile.filename;
+    }
+    if (talentVideoFile) {
+      talentData.talentVideo = talentVideoFile.path;
+      talentData.talentVideoPublicId = talentVideoFile.filename;
+    }
+
+    const talent = new Talent(talentData);
 
     await talent.save();
 

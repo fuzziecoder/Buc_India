@@ -54,6 +54,12 @@ const talentSchema = new mongoose.Schema(
     pastAchievements: { type: String, trim: true },
     socialMediaLinks: { type: String, trim: true },
 
+    // Visual Assets
+    talentImage: { type: String, trim: true },
+    talentImagePublicId: { type: String, trim: true },
+    talentVideo: { type: String, trim: true },
+    talentVideoPublicId: { type: String, trim: true },
+
     // Legal consents
     consentInfoTrue: { type: Boolean, required: true },
     consentRules: { type: Boolean, required: true },
