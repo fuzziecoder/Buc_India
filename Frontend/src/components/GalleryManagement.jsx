@@ -45,7 +45,7 @@ const categories = [
   { id: "cover", label: "Cover Photo (Registration Portal)" },
 ];
 
-const GalleryManagement = () => {
+const GalleryManagement = ({ isCoverOnly = false }) => {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -54,9 +54,9 @@ const GalleryManagement = () => {
   const [editId, setEditId] = useState(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(null);
   const [formData, setFormData] = useState({
-    eventName: "",
-    eventDate: "",
-    category: "all",
+    eventName: isCoverOnly ? "Registration Portal Cover" : "",
+    eventDate: isCoverOnly ? new Date().toISOString().split("T")[0] : "",
+    category: isCoverOnly ? "cover" : "all",
   });
   const [mediaFile, setMediaFile] = useState(null);
   const [mediaPreview, setMediaPreview] = useState(null);
@@ -97,9 +97,9 @@ const GalleryManagement = () => {
 
   const resetForm = () => {
     setFormData({
-      eventName: "",
-      eventDate: "",
-      category: "all",
+      eventName: isCoverOnly ? "Registration Portal Cover" : "",
+      eventDate: isCoverOnly ? new Date().toISOString().split("T")[0] : "",
+      category: isCoverOnly ? "cover" : "all",
     });
     setMediaFile(null);
     setMediaPreview(null);
@@ -114,12 +114,16 @@ const GalleryManagement = () => {
     setFormData({
       eventName: item.eventName,
       eventDate: item.eventDate ? item.eventDate.split("T")[0] : "",
-      category: item.category || "all",
+      category: item.category || (isCoverOnly ? "cover" : "all"),
     });
     setMediaPreview(item.imageUrl);
     setShowForm(true);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
+
+  const displayedItems = isCoverOnly
+    ? items.filter((item) => item.category === "cover")
+    : items;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -191,22 +195,30 @@ const GalleryManagement = () => {
       {/* Page Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
         <div>
-          <span className="text-copper font-body text-[10px] tracking-ultra uppercase mb-2 block font-bold">Archives Division</span>
-          <h2 className="font-heading text-4xl uppercase leading-none text-white">Visual <span className="text-transparent outline-title">Intelligence</span></h2>
+          <span className="text-copper font-body text-[10px] tracking-ultra uppercase mb-2 block font-bold">
+            {isCoverOnly ? "Registration Portal" : "Archives Division"}
+          </span>
+          <h2 className="font-heading text-4xl uppercase leading-none text-white">
+            {isCoverOnly ? (
+              <>Cover <span className="text-transparent outline-title">Photo</span></>
+            ) : (
+              <>Visual <span className="text-transparent outline-title">Intelligence</span></>
+            )}
+          </h2>
         </div>
         <div className="flex gap-4">
           <a
-            href="/gallery"
+            href={isCoverOnly ? "/" : "/gallery"}
             target="_blank"
             className="border border-white/10 text-white px-6 py-3 font-heading text-lg uppercase hover:bg-white/5 transition-all flex items-center gap-2"
           >
-            <ExternalLink size={16} /> View Node
+            <ExternalLink size={16} /> {isCoverOnly ? "View Portal" : "View Node"}
           </a>
           <button 
             onClick={() => { resetForm(); setShowForm(true); }}
             className="btn-metallica flex items-center gap-2"
           >
-            <Plus size={18} /> Archive New
+            <Plus size={18} /> {isCoverOnly ? "Upload Cover" : "Archive New"}
           </button>
         </div>
       </div>
@@ -263,25 +275,27 @@ const GalleryManagement = () => {
                         </Grid>
                       </>
                     )}
-                    <Grid item xs={12} md={6}>
-                      <FormControl fullWidth>
-                        <InputLabel sx={{ color: 'rgba(255,255,255,0.7)' }}>Category</InputLabel>
-                        <Select
-                          name="category"
-                          value={formData.category}
-                          onChange={handleChange}
-                          label="Category"
-                          sx={{ color: 'white' }}
-                        >
-                          {categories.map((cat) => (
-                            <MenuItem key={cat.id} value={cat.id}>
-                              {cat.label}
-                            </MenuItem>
-                          ))}
-                        </Select>
-                      </FormControl>
-                    </Grid>
-                    <Grid item xs={12} md={6}>
+                    {!isCoverOnly && (
+                      <Grid item xs={12} md={6}>
+                        <FormControl fullWidth>
+                          <InputLabel sx={{ color: 'rgba(255,255,255,0.7)' }}>Category</InputLabel>
+                          <Select
+                            name="category"
+                            value={formData.category}
+                            onChange={handleChange}
+                            label="Category"
+                            sx={{ color: 'white' }}
+                          >
+                            {categories.map((cat) => (
+                              <MenuItem key={cat.id} value={cat.id}>
+                                {cat.label}
+                              </MenuItem>
+                            ))}
+                          </Select>
+                        </FormControl>
+                      </Grid>
+                    )}
+                    <Grid item xs={12} md={isCoverOnly ? 12 : 6}>
                       <Button
                         variant="outlined"
                         component="label"
@@ -339,26 +353,33 @@ const GalleryManagement = () => {
       <div className="space-y-6">
         <h3 className="font-heading text-xl uppercase tracking-widest text-white flex items-center gap-3">
           <ImageIcon size={20} className="text-copper" />
-          Cataloged Artifacts ({items.length})
+          {isCoverOnly ? `Cover Photos (${displayedItems.length})` : `Cataloged Artifacts (${displayedItems.length})`}
         </h3>
 
         {loading ? (
           <div className="flex justify-center py-24">
             <div className="w-12 h-12 border-4 border-copper/10 border-t-copper rounded-full animate-spin"></div>
           </div>
-        ) : items.length === 0 ? (
+        ) : displayedItems.length === 0 ? (
           <div className="p-20 border border-white/5 bg-carbon-light text-center">
-              <p className="font-text text-steel-dim uppercase tracking-ultra italic">The archives are currently void of intelligence.</p>
+              <p className="font-text text-steel-dim uppercase tracking-ultra italic">
+                {isCoverOnly ? "No cover photos have been uploaded yet." : "The archives are currently void of intelligence."}
+              </p>
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {items.map((item) => (
+            {displayedItems.map((item, index) => (
               <motion.div
                 key={item._id}
                 layout
                 whileHover={{ y: -5 }}
                 className="bg-carbon border border-white/5 group relative overflow-hidden h-[300px]"
               >
+                {isCoverOnly && index === 0 && (
+                  <div className="absolute top-4 left-4 z-10 px-3 py-1 bg-green-500 text-carbon font-heading text-[10px] uppercase tracking-widest font-black shadow-lg">
+                    Active Cover
+                  </div>
+                )}
                 <img
                   src={item.imageUrl}
                   alt={item.eventName}
