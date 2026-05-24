@@ -310,6 +310,10 @@ export const updateUserProfile = async (req, res) => {
     delete userData.password; // Don't allow password update here
     delete userData.email; // Don't allow email update here
 
+    if (userData.clubId === "" || userData.clubId === "null" || userData.clubId === "undefined") {
+      userData.clubId = null;
+    }
+
     // Handle profile image upload if provided
     if (req.files && req.files.profileImage) {
       if (user.profileImagePublicId) {
