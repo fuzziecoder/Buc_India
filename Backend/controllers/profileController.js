@@ -226,7 +226,9 @@ export const userSignup = async (req, res) => {
     await user.save();
 
     // Clear OTP
-    await Otp.deleteMany({ email: email.toLowerCase(), type: "signup" });
+    if (email) {
+      await Otp.deleteMany({ email: email.toLowerCase(), type: "signup" });
+    }
 
     // Send confirmation email
     if (!isPC) {
