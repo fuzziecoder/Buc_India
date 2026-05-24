@@ -32,7 +32,7 @@ export const getProfile = async (req, res) => {
 
 export const getAllProfiles = async (req, res) => {
   try {
-    const users = await User.find().populate('clubId', 'name').sort({ createdAt: -1 });
+    const users = await User.find().populate('clubId', 'name').sort({ createdAt: 1 });
     res.json(users);
   } catch (error) {
     console.error("Get All Profiles Error:", error);
@@ -293,17 +293,17 @@ export const userLogin = async (req, res) => {
 
 export const updateUserProfile = async (req, res) => {
   try {
-    const { email } = req.body; // In a real app, this would come from auth middleware
+    const { id, userId, email } = req.body;
 
-    if (!email) {
-      return res
-        .status(400)
-        .json({ message: "Email is required to identify the profile" });
+    let user;
+    if (id || userId) {
+      user = await User.findById(id || userId);
+    } else if (email) {
+      user = await User.findOne({ email: email.toLowerCase() });
     }
 
-    let user = await User.findOne({ email: email.toLowerCase() });
     if (!user) {
-      return res.status(404).json({ message: "User not found" });
+      return res.status(404).json({ message: "User not found to update" });
     }
 
     const userData = { ...req.body };
