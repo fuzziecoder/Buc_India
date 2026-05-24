@@ -50,6 +50,7 @@ export const userSignup = async (req, res) => {
       phone,
       password,
       fullName,
+      gender,
       dateOfBirth,
       bloodGroup,
       address,
@@ -71,9 +72,9 @@ export const userSignup = async (req, res) => {
     const isPC = registrationType === 'PC';
 
     // 1. Mandatory overall validation (Common to ALL registration types)
-    if (!phone || !fullName || !address || !city || !state || !pincode || !tshirtSize) {
+    if (!phone || !fullName || !gender || !address || !city || !state || !pincode || !tshirtSize) {
       return res.status(400).json({ 
-        message: "Full Name, Phone, T-Shirt Size, and Address details are required for all registrations." 
+        message: "Full Name, Gender, Phone, T-Shirt Size, and Address details are required for all registrations." 
       });
     }
 
@@ -151,6 +152,7 @@ export const userSignup = async (req, res) => {
       registrationType,
       fullName,
       phone,
+      gender,
       address,
       city,
       state,
@@ -323,5 +325,41 @@ export const updateUserProfile = async (req, res) => {
   } catch (error) {
     console.error("Update Profile Error:", error);
     res.status(400).json({ message: error.message });
+  }
+};
+
+export const deleteUserProfile = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const user = await User.findById(id);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Delete profile image from Cloudinary if exists
+    if (user.profileImagePublicId) {
+      try {
+        await cloudinary.uploader.destroy(user.profileImagePublicId);
+      } catch (e) {
+        console.warn("Could not delete profile image from Cloudinary:", e.message);
+      }
+    }
+
+    // Delete license image from Cloudinary if exists
+    if (user.licenseImagePublicId) {
+      try {
+        await cloudinary.uploader.destroy(user.licenseImagePublicId);
+      } catch (e) {
+        console.warn("Could not delete license image from Cloudinary:", e.message);
+      }
+    }
+
+    await User.findByIdAndDelete(id);
+
+    res.json({ message: "User deleted successfully" });
+  } catch (error) {
+    console.error("Delete User Error:", error);
+    res.status(500).json({ message: error.message || "Failed to delete user" });
   }
 };

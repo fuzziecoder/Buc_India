@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { Download, RefreshCw, Filter, X } from "lucide-react";
+import { Download, RefreshCw, Filter, X, Trash2 } from "lucide-react";
 import { profileService } from "../../services/api";
 import { exportToExcel, exportToPDF } from "../../utils/exportUtils";
 
@@ -86,7 +86,8 @@ const ViewUsers = () => {
 
       return [
         { key: "sno", label: "S.No", width: "60px" },
-        ...keys.map(key => ({ key, label: key === 'bucId' ? 'BUC ID' : formatColumnName(key), width: "auto" }))
+        ...keys.map(key => ({ key, label: key === 'bucId' ? 'BUC ID' : formatColumnName(key), width: "auto" })),
+        { key: "actions", label: "Actions", width: "100px" }
       ];
     }
     return [];
@@ -96,6 +97,37 @@ const ViewUsers = () => {
 
   const renderCellValue = (column, user, index) => {
     if (column.key === "sno") return index + 1;
+    if (column.key === "actions") {
+      return (
+        <button
+          onClick={() => handleDeleteUser(user._id, user.fullName)}
+          title="Delete User"
+          style={{
+            background: "rgba(239, 68, 68, 0.1)",
+            color: "#ef4444",
+            border: "1px solid rgba(239, 68, 68, 0.2)",
+            borderRadius: "6px",
+            padding: "6px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            cursor: "pointer",
+            transition: "all 0.2s",
+            margin: "0 auto",
+          }}
+          onMouseOver={(e) => {
+            e.currentTarget.style.background = "#ef4444";
+            e.currentTarget.style.color = "#fff";
+          }}
+          onMouseOut={(e) => {
+            e.currentTarget.style.background = "rgba(239, 68, 68, 0.1)";
+            e.currentTarget.style.color = "#ef4444";
+          }}
+        >
+          <Trash2 size={14} />
+        </button>
+      );
+    }
     const value = user[column.key];
     if (column.key === "profileImage" || column.key === "licenseImage") {
       if (!value) return "-";
@@ -175,6 +207,24 @@ const ViewUsers = () => {
   const clearFilters = () => {
     setFilterName("");
     setFilterType("All");
+  };
+
+  const handleDeleteUser = async (id, fullName) => {
+    if (!window.confirm(`Are you sure you want to permanently delete user "${fullName || 'this user'}"? This action cannot be undone.`)) {
+      return;
+    }
+    
+    try {
+      setIsLoading(true);
+      await profileService.delete(id);
+      alert("User deleted successfully");
+      loadData(); // Reload the list
+    } catch (error) {
+      console.error("Error deleting user:", error);
+      alert(error.response?.data?.message || "Failed to delete user");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (

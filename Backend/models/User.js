@@ -56,6 +56,11 @@ const userSchema = new mongoose.Schema({
     type: Date,
     default: null
   },
+  gender: {
+    type: String,
+    enum: ['male', 'female', 'prefernottosay', ''],
+    default: ''
+  },
   bloodGroup: {
     type: String,
     default: ''

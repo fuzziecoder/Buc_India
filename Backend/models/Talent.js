@@ -10,7 +10,7 @@ const talentSchema = new mongoose.Schema(
     // Basic Details
     fullName: { type: String, required: true, trim: true },
     age: { type: Number, required: true },
-    gender: { type: String, required: true, enum: ["Male", "Female", "Other", "Prefer not to say"] },
+    gender: { type: String, required: true, enum: ["male", "female", "prefernottosay", "Male", "Female", "Other", "Prefer not to say"] },
     phone: { type: String, required: true, trim: true },
     email: { type: String, required: true, trim: true, lowercase: true },
     city: { type: String, required: true, trim: true },
