@@ -103,8 +103,8 @@ export const registrationService = {
     });
     return response.data;
   },
-  getAll: async (eventId) => {
-    const params = {};
+  getAll: async (eventId, filters = {}) => {
+    const params = { ...filters };
     if (eventId && eventId !== "all") {
       params.eventId = eventId;
     }

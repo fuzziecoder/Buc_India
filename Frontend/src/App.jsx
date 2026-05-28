@@ -113,6 +113,13 @@ function App() {
                   />
                 </Route>
 
+                {/* Registration portal — full-screen, no site header/footer */}
+                <Route path="/register" element={<PublicRegister />} />
+                <Route
+                  path="/event-register/:eventId"
+                  element={<PublicRegister />}
+                />
+
                 {/* Routes without Public Header/Footer */}
                 <Route
                   path="/login"

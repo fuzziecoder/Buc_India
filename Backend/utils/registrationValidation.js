@@ -4,6 +4,7 @@ const TYPE_LABELS = {
   student: "Student",
   student_rider: "Student Rider",
   rider: "Rider",
+  pillion: "Pillion",
   public: "Public",
 };
 
@@ -157,8 +158,46 @@ export const validateRegistrationPayload = (body) => {
       );
       break;
 
+    case "pillion":
+      requireField(body, "city", errors, "City is required");
+      requireField(body, "tShirtSize", errors, "T-shirt size is required");
+      if (!body.riderPhone && !body.riderRegistrationId) {
+        errors.push(
+          "Provide Rider phone or Rider registration ID for mapping",
+        );
+      }
+      if (body.riderPhone) {
+        validatePhone(body.riderPhone, "Rider phone", errors);
+      }
+      break;
+
     default:
       break;
+  }
+
+  if (
+    registrationType === "rider" &&
+    (body.hasLinkedPillion === true || body.hasLinkedPillion === "true")
+  ) {
+    requireField(
+      body,
+      "linkedPillionName",
+      errors,
+      "Pillion name is required",
+    );
+    requireField(
+      body,
+      "linkedPillionMobile",
+      errors,
+      "Pillion mobile number is required",
+    );
+    requireField(
+      body,
+      "linkedPillionTShirtSize",
+      errors,
+      "Pillion T-shirt size is required",
+    );
+    validatePhone(body.linkedPillionMobile, "Pillion mobile number", errors);
   }
 
   return { errors, isLegacy: false };
