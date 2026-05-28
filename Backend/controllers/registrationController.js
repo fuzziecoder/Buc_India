@@ -52,6 +52,12 @@ export const createRegistration = async (req, res) => {
       youtubeUrl,
       websiteUrl,
       acceptedTerms,
+      riderPhone,
+      riderRegistrationId,
+      hasLinkedPillion,
+      linkedPillionName,
+      linkedPillionMobile,
+      linkedPillionTShirtSize,
       dateOfBirth,
       bloodGroup,
       address,
@@ -171,6 +177,14 @@ export const createRegistration = async (req, res) => {
       year: year || "",
       ridingExperience: ridingExperience || "",
       interestReason: interestReason || "",
+      tShirtSize: tShirtSize || "",
+      hasLinkedPillion: false,
+      linkedPillion: { name: "", mobile: "", tShirtSize: "" },
+      riderReference: {
+        riderRegistrationId: "",
+        riderPhone: "",
+        riderName: "",
+      },
       licenseImage: "",
       licenseImagePublicId: "",
       profileImage: "",
@@ -253,6 +267,49 @@ export const createRegistration = async (req, res) => {
         acceptedTerms === true || acceptedTerms === "true";
       registrationData.requestRidingGears = false;
       registrationData.requestedGears = {};
+
+      if (registrationType === "rider") {
+        registrationData.hasLinkedPillion =
+          hasLinkedPillion === true || hasLinkedPillion === "true";
+        if (registrationData.hasLinkedPillion) {
+          registrationData.linkedPillion = {
+            name: linkedPillionName || "",
+            mobile: linkedPillionMobile || "",
+            tShirtSize: linkedPillionTShirtSize || "",
+          };
+        }
+      }
+
+      if (registrationType === "pillion") {
+        registrationData.riderReference = {
+          riderRegistrationId: riderRegistrationId || "",
+          riderPhone: riderPhone || "",
+          riderName: "",
+        };
+
+        let mappedRider = null;
+        if (riderRegistrationId && mongoose.Types.ObjectId.isValid(riderRegistrationId)) {
+          mappedRider = await Registration.findById(riderRegistrationId)
+            .select("fullName phone registrationType");
+        }
+        if (!mappedRider && riderPhone) {
+          mappedRider = await Registration.findOne({
+            phone: riderPhone,
+            registrationType: "rider",
+          }).select("fullName phone registrationType");
+        }
+        if (!mappedRider || mappedRider.registrationType !== "rider") {
+          return res.status(400).json({
+            message:
+              "Unable to map pillion to rider. Check rider phone or registration ID.",
+          });
+        }
+        registrationData.riderReference = {
+          riderRegistrationId: String(mappedRider._id),
+          riderPhone: mappedRider.phone || riderPhone || "",
+          riderName: mappedRider.fullName || "",
+        };
+      }
 
       if (registrationType === "rider") {
         if (req.files?.licenseImage) {

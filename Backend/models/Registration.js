@@ -23,7 +23,7 @@ const registrationSchema = new mongoose.Schema({
   },
   registrationType: {
     type: String,
-    enum: ['student', 'student_rider', 'rider', 'public', ''],
+    enum: ['student', 'student_rider', 'rider', 'pillion', 'public', ''],
     default: ''
   },
   clubName: {
@@ -105,6 +105,20 @@ const registrationSchema = new mongoose.Schema({
   },
   tShirtSize: {
     type: String
+  },
+  hasLinkedPillion: {
+    type: Boolean,
+    default: false
+  },
+  linkedPillion: {
+    name: { type: String, trim: true, default: "" },
+    mobile: { type: String, trim: true, default: "" },
+    tShirtSize: { type: String, trim: true, default: "" }
+  },
+  riderReference: {
+    riderRegistrationId: { type: String, trim: true, default: "" },
+    riderPhone: { type: String, trim: true, default: "" },
+    riderName: { type: String, trim: true, default: "" }
   },
   licenseImage: {
     type: String,
