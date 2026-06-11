@@ -10,6 +10,9 @@ import Preloader from "./components/animations/Preloader.jsx";
 
 // Lazy load registration routes
 const MainRegistration = lazy(() => import("./components/MainRegistration.jsx"));
+const AdminLogin = lazy(() => import("./components/AdminLogin/AdminLogin.jsx"));
+const AdminDashboard = lazy(() => import("./components/AdminDashboardNav/AdminDashboardNav.jsx"));
+const AdminProtectedRoute = lazy(() => import("./components/AdminProtectedRoute.jsx"));
 
 const Loading = () => (
   <div className="flex items-center justify-center min-h-[50vh]">
@@ -46,6 +49,17 @@ function App() {
               <Routes>
                 {/* Registration routes */}
                 <Route path="/register/:slug" element={<MainRegistration />} />
+
+                {/* Admin routes */}
+                <Route path="/admin/login" element={<AdminLogin />} />
+                <Route
+                  path="/admin/*"
+                  element={
+                    <AdminProtectedRoute>
+                      <AdminDashboard />
+                    </AdminProtectedRoute>
+                  }
+                />
 
                 {/* Redirect rules to land only on registration page */}
                 <Route path="/register" element={<Navigate to="/register/june-21-event" replace />} />
