@@ -290,7 +290,7 @@ const EditUserModal = ({ isOpen, onClose, user, clubs, onSuccess }) => {
             </div>
 
             {/* Bike & License Info */}
-            {(editFormData.registrationType === "Rider" || editFormData.registrationType === "Student Rider" || editFormData.registrationType === "PC" || editFormData.registrationType === "Public User") && (
+            {(editFormData.registrationType === "Rider" || editFormData.registrationType === "Student Rider" || editFormData.registrationType === "PC") && (
               <div className="space-y-4">
                 <h3 className="font-body text-xs uppercase tracking-[0.2em] text-copper border-b border-white/10 pb-2 flex items-center gap-2">
                   <Bike size={14} /> Bike & License Information

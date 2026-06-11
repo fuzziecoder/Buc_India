@@ -214,7 +214,8 @@ const UserRegistrationForm = () => {
 
     const isRider = formData.registrationType === "Rider" || formData.registrationType === "Student Rider";
     const isStudent = formData.registrationType === "Student" || formData.registrationType === "Student Rider";
-    const isPC = formData.registrationType === "PC" || formData.registrationType === "Public User";
+    const isPC = formData.registrationType === "PC";
+    const isPublicUser = formData.registrationType === "Public User";
     const isPillion = formData.registrationType === "Pillion";
 
     // 1. Core validations common to ALL registration types
@@ -225,21 +226,27 @@ const UserRegistrationForm = () => {
       return toast.error("Please fill all required fields: Name, Phone, Gender, T-Shirt Size, and Address details.");
     }
 
-    if (!isPC) {
+    if (!isPC && !isPublicUser) {
       if (!formData.emergencyContactName || !formData.emergencyContactPhone) {
         return toast.error("Please fill Emergency Contact details.");
       }
     }
 
-    if (!isPC) {
+    if (!isPC && !isPublicUser) {
       if (!formData.email || !formData.password || !formData.otp) {
         return toast.error("Please fill Email, Password, and OTP.");
       }
       if (!otpSent) return toast.error("Please verify your email with OTP first");
     }
 
+    if (isPublicUser) {
+      if (!formData.email) {
+        return toast.error("Please fill Email Address.");
+      }
+    }
+
     if (formData.phone.length !== 10) return toast.error("Phone number must be exactly 10 digits");
-    if (!isPC) {
+    if (!isPC && !isPublicUser) {
       if (formData.emergencyContactPhone.length !== 10) return toast.error("Emergency contact phone number must be exactly 10 digits");
 
       if (!profileImage) {
@@ -297,23 +304,25 @@ const UserRegistrationForm = () => {
       data.append("phone", formData.phone);
       data.append("tshirtSize", formData.tshirtSize);
       data.append("gender", formData.gender);
-      if (!isPC) {
+      if (!isPC && !isPublicUser) {
         data.append("email", formData.email);
         data.append("password", formData.password);
         data.append("otp", formData.otp);
+      } else if (isPublicUser) {
+        data.append("email", formData.email);
       }
       data.append("address", formData.address);
       data.append("city", formData.city);
       data.append("state", formData.state);
       data.append("pincode", formData.pincode);
 
-      if (!isPC) {
+      if (!isPC && !isPublicUser) {
         data.append("emergencyContactName", formData.emergencyContactName);
         data.append("emergencyContactPhone", formData.emergencyContactPhone);
       }
 
       // Social details & Profile image (Common to non-PC)
-      if (!isPC) {
+      if (!isPC && !isPublicUser) {
         if (formData.facebookUrl) data.append("facebookUrl", formData.facebookUrl);
         if (formData.instagramUrl) data.append("instagramUrl", formData.instagramUrl);
         if (formData.twitterUrl) data.append("twitterUrl", formData.twitterUrl);
@@ -394,7 +403,8 @@ const UserRegistrationForm = () => {
 
   const isRider = formData.registrationType === "Rider" || formData.registrationType === "Student Rider";
   const isStudent = formData.registrationType === "Student" || formData.registrationType === "Student Rider";
-  const isPC = formData.registrationType === "PC" || formData.registrationType === "Public User";
+  const isPC = formData.registrationType === "PC";
+  const isPublicUser = formData.registrationType === "Public User";
   const isPillion = formData.registrationType === "Pillion";
 
   return (
@@ -495,7 +505,7 @@ const UserRegistrationForm = () => {
         {formData.registrationType && (
           <div className="space-y-12 animate-fade-in">
             {/* Uploads */}
-            {!isPC && (
+            {!isPC && !isPublicUser && (
               <div className="space-y-6">
                 <h3 className="font-body text-xs uppercase tracking-[0.2em] text-copper border-b border-white/10 pb-2">Visual Assets <span className="text-red-500">*</span></h3>
                 <div className={`grid grid-cols-1 ${isRider ? 'md:grid-cols-2' : 'max-w-md mx-auto'} gap-8`}>
@@ -555,7 +565,7 @@ const UserRegistrationForm = () => {
                   </select>
                 </div>
 
-                {!isPC && (
+                {!isPC && !isPublicUser && (
                   <>
                     <div className="space-y-1">
                       <label className="font-body text-[10px] uppercase tracking-widest text-steel-dim">Email Address <span className="text-red-500">*</span></label>
@@ -581,6 +591,9 @@ const UserRegistrationForm = () => {
                       </div>
                     </div>
                   </>
+                )}
+                {isPublicUser && (
+                  <InputField label="Email Address" name="email" icon={Mail} type="email" value={formData.email} onChange={handleInputChange} required />
                 )}
               </div>
             </div>
@@ -684,7 +697,7 @@ const UserRegistrationForm = () => {
             )}
 
             {/* Emergency Contact */}
-            {!isPC && (
+            {!isPC && !isPublicUser && (
               <div className="space-y-6">
                 <h3 className="font-body text-xs uppercase tracking-[0.2em] text-copper border-b border-white/10 pb-2">Emergency Contact <span className="text-red-500">*</span></h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -695,7 +708,7 @@ const UserRegistrationForm = () => {
             )}
 
             {/* Social Presence */}
-            {!isPC && (
+            {!isPC && !isPublicUser && (
               <div className="space-y-6">
                 <h3 className="font-body text-xs uppercase tracking-[0.2em] text-copper border-b border-white/10 pb-2">Social Presence</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
