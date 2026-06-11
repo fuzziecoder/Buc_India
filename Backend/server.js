@@ -3,6 +3,8 @@ import express from "express";
 import mongoose from "mongoose";
 import cookieParser from "cookie-parser";
 import cors from "cors";
+import path from "path";
+import { fileURLToPath } from "url";
 import Admin from "./models/Admin.js";
 import Registration from "./models/Registration.js";
 
@@ -137,6 +139,19 @@ app.use("/api/certificates", certificateRoutes);
 app.use("/api/otp", otpRoutes);
 app.use("/api/user-auth", userAuthRoutes);
 app.use("/api/talent", talentRoutes);
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Serve static assets in production
+if (process.env.NODE_ENV === "production") {
+  const frontendDistPath = path.join(__dirname, "../Frontend/dist");
+  app.use(express.static(frontendDistPath));
+
+  app.get("*", (req, res) => {
+    res.sendFile(path.resolve(frontendDistPath, "index.html"));
+  });
+}
 
 // Error handler
 app.use((err, req, res, next) => {
