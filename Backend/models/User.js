@@ -9,7 +9,7 @@ const userSchema = new mongoose.Schema({
   },
   registrationType: {
     type: String,
-    enum: ['PC', 'Rider', 'Student Rider', 'Student'],
+    enum: ['PC', 'Rider', 'Student Rider', 'Student', 'Pillion'],
     default: 'Rider'
   },
   tshirtSize: {
@@ -98,6 +98,14 @@ const userSchema = new mongoose.Schema({
     default: ''
   },
   emergencyContactPhone: {
+    type: String,
+    default: ''
+  },
+  riderPhone: {
+    type: String,
+    default: ''
+  },
+  riderRegistrationId: {
     type: String,
     default: ''
   },

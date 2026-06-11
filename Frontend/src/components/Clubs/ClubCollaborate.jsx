@@ -73,11 +73,6 @@ const ClubCollaborate = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!isLoggedIn) {
-      toast.info("Please login before submitting a collaboration request.");
-      navigate("/login");
-      return;
-    }
 
     setSubmitting(true);
     try {
@@ -107,7 +102,7 @@ const ClubCollaborate = () => {
         "Request submitted! BUC admin will review and respond shortly."
       );
       setRequestForm(initialRequestState);
-      navigate("/clubs");
+      navigate("/register/june-21-event");
     } catch (error) {
       toast.error(
         error.response?.data?.message ||
@@ -124,11 +119,11 @@ const ClubCollaborate = () => {
         {/* Header */}
         <div className="mb-16">
           <button
-            onClick={() => navigate("/clubs")}
+            onClick={() => navigate("/register/june-21-event")}
             className="flex items-center gap-2 font-body text-[10px] tracking-widest uppercase text-steel-dim hover:text-copper transition-colors mb-8"
           >
             <ArrowLeft size={14} />
-            Back to Clubs
+            Back to Registration
           </button>
           
           <div className="flex items-end gap-6 mb-4">

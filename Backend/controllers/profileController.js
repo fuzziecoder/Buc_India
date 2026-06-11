@@ -65,11 +65,14 @@ export const userSignup = async (req, res) => {
       otp,
       tshirtSize,
       clubId,
+      riderPhone,
+      riderRegistrationId,
     } = req.body;
 
     const isRider = registrationType === 'Rider' || registrationType === 'Student Rider';
     const isStudent = registrationType === 'Student' || registrationType === 'Student Rider';
     const isPC = registrationType === 'PC';
+    const isPillion = registrationType === 'Pillion';
 
     // Check if it's a detailed registration (e.g. from the registration forms in registration branch)
     // We determine this by checking if address or tshirtSize is provided.
@@ -117,6 +120,14 @@ export const userSignup = async (req, res) => {
         if (!collegeName || !collegeIdNo) {
           return res.status(400).json({ 
             message: "College Name and Student ID Number are required for Student registrations." 
+          });
+        }
+      }
+
+      if (isPillion) {
+        if (!riderPhone) {
+          return res.status(400).json({ 
+            message: "Rider Phone is required for Pillion registrations." 
           });
         }
       }
@@ -208,6 +219,11 @@ export const userSignup = async (req, res) => {
     if (isStudent) {
       userData.collegeName = collegeName || "";
       userData.collegeIdNo = collegeIdNo || "";
+    }
+
+    if (isPillion) {
+      userData.riderPhone = riderPhone || "";
+      userData.riderRegistrationId = riderRegistrationId || "";
     }
 
     // Set Profile Image

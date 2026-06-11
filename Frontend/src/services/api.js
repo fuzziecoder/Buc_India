@@ -260,5 +260,4 @@ export const talentService = {
     return response.data;
   },
 };
-
 export default api;

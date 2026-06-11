@@ -5,7 +5,7 @@ const UserProtectedRoute = ({ children }) => {
   const isLoggedIn = sessionStorage.getItem("userLoggedIn") === "true";
 
   if (!isLoggedIn) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/register/login" replace />;
   }
 
   return children;

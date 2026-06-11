@@ -62,7 +62,7 @@ const LoginForm = () => {
       window.dispatchEvent(new Event("user-login-change"));
 
       toast.success("Logged in successfully!");
-      navigate("/profile");
+      navigate("/register/june-21-event");
     } catch (error) {
       toast.error(
         error.response?.data?.message ||
@@ -120,17 +120,16 @@ const LoginForm = () => {
 
   return (
     <div className="min-h-screen bg-carbon text-white flex flex-col">
-      <Header />
       
       <main className="flex-grow flex items-center justify-center px-6 py-24 md:py-32">
         <div className="w-full max-w-md">
            {/* Back Button */}
            <button
-             onClick={() => navigate("/")}
+             onClick={() => navigate("/register/june-21-event")}
              className="flex items-center gap-2 font-body text-[10px] tracking-widest uppercase text-steel-dim hover:text-copper transition-colors mb-12"
            >
              <ArrowLeft size={14} />
-             Back to Home
+             Back to Registration
            </button>
 
            <div className="bg-carbon-light border border-white/5 p-8 md:p-12 relative overflow-hidden group">
@@ -216,7 +215,7 @@ const LoginForm = () => {
                    <p className="font-text text-steel-dim text-sm">
                      Not part of the tribe yet?{" "}
                      <button
-                       onClick={() => navigate("/signup")}
+                       onClick={() => navigate("/register/signup")}
                        className="text-copper uppercase font-body text-xs tracking-widest ml-2 hover:text-white transition-colors"
                      >
                        Join the Circle
@@ -228,7 +227,7 @@ const LoginForm = () => {
         </div>
       </main>
 
-      <Footer />
+
 
       {/* Forgot Password Modal Overlay */}
       {forgotPasswordOpen && (
