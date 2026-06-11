@@ -81,10 +81,10 @@ const MainRegistration = () => {
       {/* Cover Pic Section */}
       <div className="w-full h-[40vh] md:h-[50vh] lg:h-[60vh] flex items-center justify-center bg-carbon border-b border-white/5 relative overflow-hidden">
         <img 
-          src={coverPhoto || '/logo.jpg'} 
+          src={coverPhoto || '/bg_images/WhatsApp%20Image%202026-06-11%20at%2010.45.18%20AM.jpeg'} 
           alt="Event Banner" 
           className="w-full h-full object-contain transition-transform duration-1000 transform hover:scale-102"
-          style={coverPhoto ? { opacity: 0.95 } : { opacity: 0.8 }}
+          style={{ opacity: 0.95 }}
         />
         {/* Subtle overlay gradient at the very bottom to blend with the carbon background without covering content */}
         <div className="absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-carbon to-transparent pointer-events-none" />
