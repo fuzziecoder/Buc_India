@@ -71,7 +71,7 @@ export const userSignup = async (req, res) => {
 
     const isRider = registrationType === 'Rider' || registrationType === 'Student Rider';
     const isStudent = registrationType === 'Student' || registrationType === 'Student Rider';
-    const isPC = registrationType === 'PC';
+    const isPC = registrationType === 'PC' || registrationType === 'Public User';
     const isPillion = registrationType === 'Pillion';
 
     // Check if it's a detailed registration (e.g. from the registration forms in registration branch)

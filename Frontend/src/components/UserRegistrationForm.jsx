@@ -214,7 +214,7 @@ const UserRegistrationForm = () => {
 
     const isRider = formData.registrationType === "Rider" || formData.registrationType === "Student Rider";
     const isStudent = formData.registrationType === "Student" || formData.registrationType === "Student Rider";
-    const isPC = formData.registrationType === "PC";
+    const isPC = formData.registrationType === "PC" || formData.registrationType === "Public User";
     const isPillion = formData.registrationType === "Pillion";
 
     // 1. Core validations common to ALL registration types
@@ -394,7 +394,7 @@ const UserRegistrationForm = () => {
 
   const isRider = formData.registrationType === "Rider" || formData.registrationType === "Student Rider";
   const isStudent = formData.registrationType === "Student" || formData.registrationType === "Student Rider";
-  const isPC = formData.registrationType === "PC";
+  const isPC = formData.registrationType === "PC" || formData.registrationType === "Public User";
   const isPillion = formData.registrationType === "Pillion";
 
   return (
@@ -421,7 +421,13 @@ const UserRegistrationForm = () => {
               {
                 id: "PC",
                 title: "PC",
-                description: "Public Category",
+                description: "",
+                icon: Users,
+              },
+              {
+                id: "Public User",
+                title: "Public User",
+                description: "",
                 icon: Users,
               },
               {
