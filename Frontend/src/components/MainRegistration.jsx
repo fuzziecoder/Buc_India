@@ -13,13 +13,11 @@ const MainRegistration = () => {
   const [event, setEvent] = useState(null);
 
   const loadEventAndCover = useCallback(async () => {
-    // 1. Fetch general cover photo if fallback is needed
-    let fallbackCover = null;
+    // 1. Fetch general cover photo
     try {
       const items = await galleryService.getAll();
       const coverItem = items.find(item => item.category === 'cover');
       if (coverItem) {
-        fallbackCover = coverItem.imageUrl;
         setCoverPhoto(coverItem.imageUrl);
       }
     } catch (err) {
@@ -45,9 +43,6 @@ const MainRegistration = () => {
       const found = allEvents.find((e) => slugify(e.title) === currentSlug || e._id === currentSlug);
       if (found) {
         setEvent(found);
-        if (found.banner) {
-          setCoverPhoto(found.banner);
-        }
       } else {
         // Fallback title parsed from slug
         const formattedTitle = currentSlug

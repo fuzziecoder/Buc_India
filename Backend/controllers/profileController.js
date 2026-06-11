@@ -71,7 +71,7 @@ export const userSignup = async (req, res) => {
 
     const isRider = registrationType === 'Rider' || registrationType === 'Student Rider';
     const isStudent = registrationType === 'Student' || registrationType === 'Student Rider';
-    const isPC = registrationType === 'PC' || registrationType === 'Public User';
+    const isPS = registrationType === 'PS' || registrationType === 'Public User';
     const isPillion = registrationType === 'Pillion';
 
     // Check if it's a detailed registration (e.g. from the registration forms in registration branch)
@@ -93,7 +93,7 @@ export const userSignup = async (req, res) => {
       }
     }
 
-    if (!isPC) {
+    if (!isPS) {
       if (!email || !password || !otp) {
         return res.status(400).json({ 
           message: "Email, Password, and OTP are required." 
@@ -133,7 +133,7 @@ export const userSignup = async (req, res) => {
       }
     }
 
-    if (!isPC) {
+    if (!isPS) {
       const existingUser = await User.findOne({
         $or: [{ phone }, { email: email.toLowerCase() }],
       });
@@ -156,7 +156,7 @@ export const userSignup = async (req, res) => {
         });
       }
     } else {
-      // For PC, just check phone
+      // For PS, just check phone
       const existingUser = await User.findOne({ phone });
       if (existingUser) {
         return res.status(400).json({ message: "Phone number is already registered." });
@@ -167,7 +167,7 @@ export const userSignup = async (req, res) => {
     const profileImageFile = req.files && req.files.profileImage ? req.files.profileImage[0] : null;
     const licenseImageFile = req.files && req.files.licenseImage ? req.files.licenseImage[0] : null;
 
-    if (isDetailed && !isPC && !profileImageFile) {
+    if (isDetailed && !isPS && !profileImageFile) {
       return res.status(400).json({ message: "Profile image upload is required." });
     }
 
@@ -191,7 +191,7 @@ export const userSignup = async (req, res) => {
       clubId: clubId || null,
     };
 
-    if (!isPC) {
+    if (!isPS) {
       userData.email = email.toLowerCase();
       userData.password = password;
       userData.emergencyContactName = emergencyContactName || "";
@@ -203,7 +203,7 @@ export const userSignup = async (req, res) => {
       userData.websiteUrl = req.body.websiteUrl || "";
     }
 
-    if (isPC) {
+    if (isPS) {
       userData.bikeModel = bikeModel || "";
       userData.bikeRegistrationNumber = bikeRegistrationNumber || "";
     }
@@ -247,7 +247,7 @@ export const userSignup = async (req, res) => {
     }
 
     // Send confirmation email
-    if (!isPC) {
+    if (!isPS) {
       let clubName = "";
       if (clubId) {
         const club = await Club.findById(clubId);

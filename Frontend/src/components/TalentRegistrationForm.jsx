@@ -267,10 +267,10 @@ const TalentRegistrationForm = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {/* Image Upload Box */}
             <div className="flex flex-col space-y-4">
-              <label className="font-body text-[10px] uppercase tracking-widest text-steel-dim">
+              <span className="font-body text-[10px] uppercase tracking-widest text-white font-semibold">
                 Talent Image Showcase
-              </label>
-              <div className="relative group border border-dashed border-white/10 hover:border-copper/50 transition-all duration-300 bg-carbon/40 flex flex-col items-center justify-center p-6 h-60 text-center cursor-pointer overflow-hidden">
+              </span>
+              <label className="relative group border border-dashed border-white/10 hover:border-copper/50 transition-all duration-300 bg-carbon/40 flex flex-col items-center justify-center p-6 h-60 text-center cursor-pointer overflow-hidden w-full block">
                 {talentImagePreview ? (
                   <div className="absolute inset-0 w-full h-full group">
                     <img src={talentImagePreview} alt="Showcase Preview" className="w-full h-full object-cover" />
@@ -289,15 +289,15 @@ const TalentRegistrationForm = () => {
                   </div>
                 )}
                 <input type="file" accept="image/*" className="hidden" onChange={handleImageChange} />
-              </div>
+              </label>
             </div>
 
             {/* Video Upload Box */}
             <div className="flex flex-col space-y-4">
-              <label className="font-body text-[10px] uppercase tracking-widest text-steel-dim">
+              <span className="font-body text-[10px] uppercase tracking-widest text-white font-semibold">
                 Talent Video Showcase
-              </label>
-              <div className="relative group border border-dashed border-white/10 hover:border-copper/50 transition-all duration-300 bg-carbon/40 flex flex-col items-center justify-center p-6 h-60 text-center cursor-pointer overflow-hidden">
+              </span>
+              <label className="relative group border border-dashed border-white/10 hover:border-copper/50 transition-all duration-300 bg-carbon/40 flex flex-col items-center justify-center p-6 h-60 text-center cursor-pointer overflow-hidden w-full block">
                 {talentVideoPreview ? (
                   <div className="absolute inset-0 w-full h-full group">
                     <video src={talentVideoPreview} controls className="w-full h-full object-cover" />
@@ -319,7 +319,7 @@ const TalentRegistrationForm = () => {
                   </div>
                 )}
                 {!talentVideoPreview && <input type="file" accept="video/*" className="hidden" onChange={handleVideoChange} />}
-              </div>
+              </label>
             </div>
           </div>
         </div>
@@ -330,8 +330,8 @@ const TalentRegistrationForm = () => {
             <InputField label="Full Name" name="fullName" icon={User} value={formData.fullName} onChange={handleChange} required />
             <InputField label="Age" name="age" type="number" icon={Clock} value={formData.age} onChange={handleChange} required />
             <div className="space-y-1">
-              <label className="font-body text-[10px] uppercase tracking-widest text-steel-dim">Gender <span className="text-red-500">*</span></label>
-              <select name="gender" value={formData.gender} onChange={handleChange} required className="w-full bg-carbon border border-white/10 px-4 py-4 font-body text-xs outline-none focus:border-copper transition-colors appearance-none">
+              <label className="font-body text-[10px] uppercase tracking-widest text-white font-semibold">Gender <span className="text-red-500">*</span></label>
+              <select name="gender" value={formData.gender} onChange={handleChange} required className="w-full bg-carbon border border-white/10 px-4 py-4 font-body text-xs text-white outline-none focus:border-copper transition-colors appearance-none">
                 <option value="">Select Gender</option>
                 <option value="male">Male</option>
                 <option value="female">Female</option>
@@ -373,8 +373,8 @@ const TalentRegistrationForm = () => {
             )}
             <InputField label="City / Location" name="city" icon={MapPin} value={formData.city} onChange={handleChange} required />
             <div className="space-y-1">
-              <label className="font-body text-[10px] uppercase tracking-widest text-steel-dim">T-Shirt Size <span className="text-red-500">*</span></label>
-              <select name="tshirtSize" value={formData.tshirtSize} onChange={handleChange} required className="w-full bg-carbon border border-white/10 px-4 py-4 font-body text-xs outline-none focus:border-copper transition-colors appearance-none">
+              <label className="font-body text-[10px] uppercase tracking-widest text-white font-semibold">T-Shirt Size <span className="text-red-500">*</span></label>
+              <select name="tshirtSize" value={formData.tshirtSize} onChange={handleChange} required className="w-full bg-carbon border border-white/10 px-4 py-4 font-body text-xs text-white outline-none focus:border-copper transition-colors appearance-none">
                 <option value="">Select Size</option>
                 {["S", "M", "L", "XL", "XXL", "XXXL"].map(bg => <option key={bg} value={bg}>{bg}</option>)}
               </select>
@@ -387,12 +387,12 @@ const TalentRegistrationForm = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Talent Category Group Dropdown */}
             <div className="space-y-1">
-              <label className="font-body text-[10px] uppercase tracking-widest text-steel-dim">Talent Group <span className="text-red-500">*</span></label>
+              <label className="font-body text-[10px] uppercase tracking-widest text-white font-semibold">Talent Group <span className="text-red-500">*</span></label>
               <div className="relative">
                 <select
                   value={selectedGroup}
                   onChange={handleGroupChange}
-                  className="w-full bg-carbon border border-white/10 px-4 py-4 font-body text-xs outline-none focus:border-copper transition-colors appearance-none"
+                  className="w-full bg-carbon border border-white/10 px-4 py-4 font-body text-xs text-white outline-none focus:border-copper transition-colors appearance-none"
                 >
                   <option value="">Select Talent Group</option>
                   {Object.keys(TALENT_CATEGORIES).map(group => (
@@ -405,7 +405,7 @@ const TalentRegistrationForm = () => {
 
             {/* Talent Sub-category Dropdown */}
             <div className="space-y-1">
-              <label className="font-body text-[10px] uppercase tracking-widest text-steel-dim">Talent Category <span className="text-red-500">*</span></label>
+              <label className="font-body text-[10px] uppercase tracking-widest text-white font-semibold">Talent Category <span className="text-red-500">*</span></label>
               <div className="relative">
                 <select
                   name="talentCategory"
@@ -413,7 +413,7 @@ const TalentRegistrationForm = () => {
                   onChange={handleChange}
                   required
                   disabled={!selectedGroup}
-                  className="w-full bg-carbon border border-white/10 px-4 py-4 font-body text-xs outline-none focus:border-copper transition-colors appearance-none disabled:opacity-40"
+                  className="w-full bg-carbon border border-white/10 px-4 py-4 font-body text-xs text-white outline-none focus:border-copper transition-colors appearance-none disabled:opacity-40"
                 >
                   <option value="">Select Specific Talent</option>
                   {subcatsForGroup.map(item => (
@@ -429,7 +429,7 @@ const TalentRegistrationForm = () => {
             </div>
 
             <div className="space-y-1">
-              <label className="font-body text-[10px] uppercase tracking-widest text-steel-dim">Experience Level <span className="text-red-500">*</span></label>
+              <label className="font-body text-[10px] uppercase tracking-widest text-white font-semibold">Experience Level <span className="text-red-500">*</span></label>
               <div className="flex gap-4 mt-2 flex-wrap">
                 {["Beginner", "Intermediate", "Professional"].map(level => (
                   <label key={level} className={`flex items-center gap-2 px-5 py-3 border cursor-pointer transition-all duration-200 font-body text-xs uppercase tracking-widest ${formData.experienceLevel === level ? "border-copper bg-copper/10 text-white" : "border-white/10 text-steel-dim hover:border-white/30"}`}>
@@ -453,7 +453,7 @@ const TalentRegistrationForm = () => {
         <Section title="🏍️ Biker Info (Optional)">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-1">
-              <label className="font-body text-[10px] uppercase tracking-widest text-steel-dim">Are you a Rider?</label>
+              <label className="font-body text-[10px] uppercase tracking-widest text-white font-semibold">Are you a Rider?</label>
               <div className="flex gap-4 mt-2">
                 {["Yes", "No"].map(opt => (
                   <label key={opt} className={`flex items-center gap-2 px-5 py-3 border cursor-pointer transition-all duration-200 font-body text-xs uppercase tracking-widest ${(formData.isRider === "true" && opt === "Yes") || (formData.isRider === "false" && opt === "No") ? "border-copper bg-copper/10 text-white" : "border-white/10 text-steel-dim hover:border-white/30"}`}>
@@ -488,10 +488,10 @@ const TalentRegistrationForm = () => {
               </p>
               
               <div className="space-y-1">
-                <label className="font-body text-[10px] uppercase tracking-widest text-steel-dim">Select Your Associated Club</label>
+                <label className="font-body text-[10px] uppercase tracking-widest text-white font-semibold">Select Your Associated Club</label>
                 <div className="relative group">
                   <Shield className="absolute left-4 top-1/2 -translate-y-1/2 text-copper/70 group-hover:text-copper transition-colors" size={18} />
-                  <select name="clubId" value={formData.clubId} onChange={handleChange} className="w-full bg-carbon border border-white/20 hover:border-copper/50 pl-12 pr-4 py-4 font-body text-sm outline-none focus:border-copper transition-all appearance-none cursor-pointer shadow-inner">
+                  <select name="clubId" value={formData.clubId} onChange={handleChange} className="w-full bg-carbon border border-white/20 hover:border-copper/50 pl-12 pr-4 py-4 font-body text-sm text-white outline-none focus:border-copper transition-all appearance-none cursor-pointer shadow-inner">
                     <option value="">None / Not Applicable</option>
                     {clubs.map(club => (
                       <option key={club.id} value={club.id}>{club.name}</option>
@@ -523,7 +523,7 @@ const TalentRegistrationForm = () => {
         <Section title="💡 Participation Preferences">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-1">
-              <label className="font-body text-[10px] uppercase tracking-widest text-steel-dim">Open to Perform Live on Stage?</label>
+              <label className="font-body text-[10px] uppercase tracking-widest text-white font-semibold">Open to Perform Live on Stage?</label>
               <div className="flex gap-4 mt-2">
                 {["Yes", "No"].map(opt => (
                   <label key={opt} className={`flex items-center gap-2 px-5 py-3 border cursor-pointer transition-all duration-200 font-body text-xs uppercase tracking-widest ${(formData.openToPerformLive === "true" && opt === "Yes") || (formData.openToPerformLive === "false" && opt === "No") ? "border-copper bg-copper/10 text-white" : "border-white/10 text-steel-dim hover:border-white/30"}`}>
@@ -534,7 +534,7 @@ const TalentRegistrationForm = () => {
               </div>
             </div>
             <div className="space-y-1">
-              <label className="font-body text-[10px] uppercase tracking-widest text-steel-dim">Open for Competition?</label>
+              <label className="font-body text-[10px] uppercase tracking-widest text-white font-semibold">Open for Competition?</label>
               <div className="flex gap-4 mt-2">
                 {["Yes", "No"].map(opt => (
                   <label key={opt} className={`flex items-center gap-2 px-5 py-3 border cursor-pointer transition-all duration-200 font-body text-xs uppercase tracking-widest ${(formData.openToCompetition === "true" && opt === "Yes") || (formData.openToCompetition === "false" && opt === "No") ? "border-copper bg-copper/10 text-white" : "border-white/10 text-steel-dim hover:border-white/30"}`}>
@@ -602,7 +602,7 @@ const Section = ({ title, required, children }) => (
 
 const InputField = ({ label, icon: Icon, name, value, onChange, type = "text", required = false, placeholder = "" }) => (
   <div className="space-y-1">
-    <label className="font-body text-[10px] uppercase tracking-widest text-steel-dim">
+    <label className="font-body text-[10px] uppercase tracking-widest text-white font-semibold">
       {label} {required && <span className="text-red-500">*</span>}
     </label>
     <div className="relative">
@@ -614,7 +614,7 @@ const InputField = ({ label, icon: Icon, name, value, onChange, type = "text", r
         onChange={onChange}
         required={required}
         placeholder={placeholder}
-        className={`w-full bg-carbon border border-white/10 ${Icon ? "pl-12" : "pl-4"} pr-4 py-4 font-body text-xs outline-none focus:border-copper transition-colors placeholder:text-white/20`}
+        className={`w-full bg-carbon border border-white/10 ${Icon ? "pl-12" : "pl-4"} pr-4 py-4 font-body text-xs text-white outline-none focus:border-copper transition-colors placeholder:text-white/20`}
       />
     </div>
   </div>
@@ -622,7 +622,7 @@ const InputField = ({ label, icon: Icon, name, value, onChange, type = "text", r
 
 const TextAreaField = ({ label, name, value, onChange, required = false, placeholder = "" }) => (
   <div className="space-y-1">
-    <label className="font-body text-[10px] uppercase tracking-widest text-steel-dim">
+    <label className="font-body text-[10px] uppercase tracking-widest text-white font-semibold">
       {label} {required && <span className="text-red-500">*</span>}
     </label>
     <textarea
@@ -632,7 +632,7 @@ const TextAreaField = ({ label, name, value, onChange, required = false, placeho
       required={required}
       rows={3}
       placeholder={placeholder}
-      className="w-full bg-carbon border border-white/10 px-4 py-4 font-body text-xs outline-none focus:border-copper transition-colors resize-none placeholder:text-white/20"
+      className="w-full bg-carbon border border-white/10 px-4 py-4 font-body text-xs text-white outline-none focus:border-copper transition-colors resize-none placeholder:text-white/20"
     />
   </div>
 );

@@ -1,5 +1,5 @@
 import express from "express";
-import { submitTalent, getAllTalents } from "../controllers/talentController.js";
+import { submitTalent, getAllTalents, deleteTalent } from "../controllers/talentController.js";
 import { protect } from "../middleware/authMiddleware.js";
 import { talentUpload } from "../middleware/cloudinaryConfig.js";
 
@@ -17,5 +17,8 @@ router.post(
 
 // Admin only: get all talent registrations
 router.get("/", protect, getAllTalents);
+
+// Admin only: delete a talent registration
+router.delete("/:id", protect, deleteTalent);
 
 export default router;

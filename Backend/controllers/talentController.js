@@ -2,6 +2,7 @@ import Talent from "../models/Talent.js";
 import Otp from "../models/Otp.js";
 import { generateUniqueBucId } from "../utils/generateBucId.js";
 import { sendRegistrationConfirmation } from "../utils/mailSender.js";
+import { cloudinary } from "../middleware/cloudinaryConfig.js";
 
 export const submitTalent = async (req, res) => {
   try {
@@ -128,5 +129,37 @@ export const getAllTalents = async (req, res) => {
   } catch (error) {
     console.error("Get Talents Error:", error);
     res.status(500).json({ message: "Failed to fetch talent registrations." });
+  }
+};
+
+export const deleteTalent = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const talent = await Talent.findById(id);
+
+    if (!talent) {
+      return res.status(404).json({ message: 'Talent registration not found' });
+    }
+
+    if (talent.talentImagePublicId) {
+      try {
+        await cloudinary.uploader.destroy(talent.talentImagePublicId);
+      } catch (err) {
+        console.error('Error deleting talent image from Cloudinary:', err);
+      }
+    }
+
+    if (talent.talentVideoPublicId) {
+      try {
+        await cloudinary.uploader.destroy(talent.talentVideoPublicId, { resource_type: "video" });
+      } catch (err) {
+        console.error('Error deleting talent video from Cloudinary:', err);
+      }
+    }
+
+    await Talent.findByIdAndDelete(id);
+    res.json({ message: 'Talent registration deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
 };

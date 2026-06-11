@@ -4,7 +4,7 @@ import { profileService, clubService } from "../../services/api";
 import { exportToExcel, exportToPDF } from "../../utils/exportUtils";
 import EditUserModal from "./EditUserModal";
 
-const REGISTRATION_TYPES = ["All", "PC", "Public User", "Rider", "Student Rider", "Student", "Pillion"];
+const REGISTRATION_TYPES = ["All", "Rider", "Public User", "Student", "Student Rider", "Pillion", "PS"];
 
 const ViewUsers = () => {
   const [users, setUsers] = useState([]);

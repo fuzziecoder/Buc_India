@@ -9,7 +9,7 @@ const userSchema = new mongoose.Schema({
   },
   registrationType: {
     type: String,
-    enum: ['PC', 'Public User', 'Rider', 'Student Rider', 'Student', 'Pillion'],
+    enum: ['PS', 'Public User', 'Rider', 'Student Rider', 'Student', 'Pillion'],
     default: 'Rider'
   },
   tshirtSize: {

@@ -259,5 +259,9 @@ export const talentService = {
     const response = await api.get("/talent");
     return response.data;
   },
+  delete: async (id) => {
+    const response = await api.delete(`/talent/${id}`);
+    return response.data;
+  },
 };
 export default api;

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { Download, RefreshCw, X, Star } from "lucide-react";
+import { Download, RefreshCw, X, Star, Trash2 } from "lucide-react";
 import { talentService } from "../../services/api";
 import { exportToExcel, exportToPDF } from "../../utils/exportUtils";
 
@@ -15,6 +15,7 @@ const ViewTalents = () => {
   const [exportType, setExportType] = useState(null);
   const [availableFields, setAvailableFields] = useState([]);
   const [selectedFields, setSelectedFields] = useState([]);
+  const [talentToDelete, setTalentToDelete] = useState(null);
 
   const loadData = useCallback(async () => {
     try {
@@ -31,6 +32,18 @@ const ViewTalents = () => {
   }, []);
 
   useEffect(() => { loadData(); }, [loadData]);
+
+  const confirmDelete = async () => {
+    if (!talentToDelete) return;
+    try {
+      await talentService.delete(talentToDelete);
+      loadData(); // Refresh the list
+      setTalentToDelete(null);
+    } catch (error) {
+      console.error("Error deleting talent:", error);
+      alert("Failed to delete talent registration.");
+    }
+  };
 
   const applyFilters = useCallback(() => {
     let result = [...talents];
@@ -51,6 +64,7 @@ const ViewTalents = () => {
 
   const TABLE_COLUMNS = [
     { key: "sno", label: "S.No" },
+    { key: "actions", label: "Actions" },
     { key: "bucId", label: "BUC ID" },
     { key: "fullName", label: "Full Name" },
     { key: "age", label: "Age" },
@@ -76,6 +90,18 @@ const ViewTalents = () => {
 
   const renderCell = (col, talent, index) => {
     if (col.key === "sno") return index + 1;
+    if (col.key === "actions") {
+      return (
+        <button
+          onClick={() => setTalentToDelete(talent._id)}
+          className="text-red-500 hover:text-red-700 transition-colors"
+          title="Delete Registration"
+        >
+          <Trash2 size={18} />
+        </button>
+      );
+    }
+    
     const val = talent[col.key];
     if (val === null || val === undefined || val === "") return "-";
     if (col.key === "isRider" || col.key === "openToPerformLive" || col.key === "openToCompetition") {
@@ -93,7 +119,7 @@ const ViewTalents = () => {
   };
 
   const getAvailableFields = () => {
-    return TABLE_COLUMNS.filter(c => c.key !== "sno");
+    return TABLE_COLUMNS.filter(c => c.key !== "sno" && c.key !== "actions");
   };
 
   const handleExportClick = (type) => {
@@ -280,6 +306,33 @@ const ViewTalents = () => {
               <button onClick={handleExportCancel} style={{ background: "transparent", border: "1px solid rgba(255,255,255,0.2)", color: "#fff", padding: "8px 16px", borderRadius: "4px", cursor: "pointer" }}>Cancel</button>
               <button onClick={handleExportConfirm} disabled={selectedFields.length === 0} style={{ background: selectedFields.length === 0 ? "rgba(255,255,255,0.1)" : "#c19a6b", color: selectedFields.length === 0 ? "#888" : "#111", border: "none", padding: "8px 16px", borderRadius: "4px", cursor: selectedFields.length === 0 ? "not-allowed" : "pointer", fontWeight: "bold" }}>
                 Export {exportType === "excel" ? "Excel" : "PDF"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {talentToDelete && (
+        <div className="export-modal-overlay" onClick={() => setTalentToDelete(null)} style={{
+          position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(0,0,0,0.8)", zIndex: 1000, display: "flex", justifyContent: "center", alignItems: "center"
+        }}>
+          <div className="export-modal" onClick={(e) => e.stopPropagation()} style={{
+            background: "#111", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "8px", width: "90%", maxWidth: "400px", display: "flex", flexDirection: "column", boxShadow: "0 10px 25px rgba(0,0,0,0.5)"
+          }}>
+            <div className="export-modal-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "16px", borderBottom: "1px solid rgba(255,255,255,0.1)" }}>
+              <h3 style={{ margin: 0, color: "#fff", display: "flex", alignItems: "center", gap: "8px" }}>
+                <Trash2 size={18} className="text-red-500" /> Confirm Deletion
+              </h3>
+              <button onClick={() => setTalentToDelete(null)} style={{ background: "transparent", border: "none", color: "#888", cursor: "pointer", fontSize: "16px" }}>✕</button>
+            </div>
+            <div className="export-modal-content" style={{ padding: "20px 16px", color: "#ccc", fontSize: "14px", lineHeight: "1.5" }}>
+              Are you sure you want to permanently delete this talent registration? This action cannot be undone.
+            </div>
+            <div className="export-modal-footer" style={{ padding: "16px", borderTop: "1px solid rgba(255,255,255,0.1)", display: "flex", justifyContent: "flex-end", gap: "10px" }}>
+              <button onClick={() => setTalentToDelete(null)} style={{ background: "transparent", border: "1px solid rgba(255,255,255,0.2)", color: "#fff", padding: "8px 16px", borderRadius: "4px", cursor: "pointer", transition: "all 0.2s" }} onMouseOver={(e) => e.currentTarget.style.background="rgba(255,255,255,0.05)"} onMouseOut={(e) => e.currentTarget.style.background="transparent"}>Cancel</button>
+              <button onClick={confirmDelete} style={{ background: "#ef4444", color: "#fff", border: "none", padding: "8px 16px", borderRadius: "4px", cursor: "pointer", fontWeight: "bold", transition: "all 0.2s" }} onMouseOver={(e) => e.currentTarget.style.background="#dc2626"} onMouseOut={(e) => e.currentTarget.style.background="#ef4444"}>
+                Delete
               </button>
             </div>
           </div>

@@ -121,7 +121,7 @@ const EditUserModal = ({ isOpen, onClose, user, clubs, onSuccess }) => {
         >
           <form onSubmit={handleEditSubmit} className="space-y-8">
             {/* Visual Assets */}
-            {editFormData.registrationType !== "PC" && editFormData.registrationType !== "Public User" && (
+            {editFormData.registrationType !== "PS" && editFormData.registrationType !== "Public User" && (
               <div className="space-y-4">
                 <h3 className="font-body text-xs uppercase tracking-[0.2em] text-copper border-b border-white/10 pb-2 flex items-center gap-2">
                   <Camera size={14} /> Visual Assets
@@ -290,7 +290,7 @@ const EditUserModal = ({ isOpen, onClose, user, clubs, onSuccess }) => {
             </div>
 
             {/* Bike & License Info */}
-            {(editFormData.registrationType === "Rider" || editFormData.registrationType === "Student Rider" || editFormData.registrationType === "PC") && (
+            {(editFormData.registrationType === "Rider" || editFormData.registrationType === "Student Rider" || editFormData.registrationType === "PS") && (
               <div className="space-y-4">
                 <h3 className="font-body text-xs uppercase tracking-[0.2em] text-copper border-b border-white/10 pb-2 flex items-center gap-2">
                   <Bike size={14} /> Bike & License Information
@@ -333,7 +333,7 @@ const EditUserModal = ({ isOpen, onClose, user, clubs, onSuccess }) => {
             )}
 
             {/* Emergency Contact */}
-            {editFormData.registrationType !== "PC" && editFormData.registrationType !== "Public User" && (
+            {editFormData.registrationType !== "PS" && editFormData.registrationType !== "Public User" && (
               <div className="space-y-4">
                 <h3 className="font-body text-xs uppercase tracking-[0.2em] text-copper border-b border-white/10 pb-2 flex items-center gap-2">
                   <Shield size={14} /> Emergency Contact
@@ -352,7 +352,7 @@ const EditUserModal = ({ isOpen, onClose, user, clubs, onSuccess }) => {
             )}
 
             {/* Social Presence */}
-            {editFormData.registrationType !== "PC" && editFormData.registrationType !== "Public User" && (
+            {editFormData.registrationType !== "PS" && editFormData.registrationType !== "Public User" && (
               <div className="space-y-4">
                 <h3 className="font-body text-xs uppercase tracking-[0.2em] text-copper border-b border-white/10 pb-2 flex items-center gap-2">
                   <Shield size={14} /> Social Presence
