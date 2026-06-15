@@ -2,9 +2,38 @@ import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
 
 const userSchema = new mongoose.Schema({
+  bucId: {
+    type: String,
+    unique: true,
+    sparse: true
+  },
+  registrationType: {
+    type: String,
+    enum: ['PS', 'Public User', 'Rider', 'Student Rider', 'Student', 'Pillion'],
+    default: 'Rider'
+  },
+  tshirtSize: {
+    type: String,
+    enum: ['S', 'M', 'L', 'XL', 'XXL', 'XXXL'],
+    default: ''
+  },
+  clubId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Club',
+    default: null
+  },
+  collegeName: {
+    type: String,
+    default: ''
+  },
+  collegeIdNo: {
+    type: String,
+    default: ''
+  },
   email: {
     type: String,
-    required: true,
+    required: false,
+    sparse: true,
     unique: true,
     trim: true,
     lowercase: true
@@ -16,7 +45,7 @@ const userSchema = new mongoose.Schema({
   },
   password: {
     type: String,
-    required: true
+    required: false
   },
   fullName: {
     type: String,
@@ -26,6 +55,11 @@ const userSchema = new mongoose.Schema({
   dateOfBirth: {
     type: Date,
     default: null
+  },
+  gender: {
+    type: String,
+    enum: ['male', 'female', 'prefernottosay', ''],
+    default: ''
   },
   bloodGroup: {
     type: String,
@@ -67,6 +101,14 @@ const userSchema = new mongoose.Schema({
     type: String,
     default: ''
   },
+  riderPhone: {
+    type: String,
+    default: ''
+  },
+  riderRegistrationId: {
+    type: String,
+    default: ''
+  },
   // Social media links
   facebookUrl: {
     type: String,
@@ -103,12 +145,17 @@ const userSchema = new mongoose.Schema({
   licenseImagePublicId: {
     type: String,
     default: ''
+  },
+  clubId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Club',
+    default: null
   }
 }, { timestamps: true });
 
 // Hash password before saving
 userSchema.pre('save', async function() {
-  if (!this.isModified('password')) return;
+  if (!this.password || !this.isModified('password')) return;
   try {
     const salt = await bcrypt.genSalt(10);
     this.password = await bcrypt.hash(this.password, salt);

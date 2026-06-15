@@ -1,14 +1,18 @@
 import express from "express";
 import {
   getProfile,
+  getAllProfiles,
   userSignup,
   userLogin,
   updateUserProfile,
+  deleteUserProfile,
 } from "../controllers/profileController.js";
 import { profileUpload } from "../middleware/cloudinaryConfig.js";
+import { protect } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
+router.get("/all", getAllProfiles);
 router.get("/", getProfile);
 
 router.post(
@@ -30,5 +34,7 @@ router.put(
   ]),
   updateUserProfile,
 );
+
+router.delete("/:id", protect, deleteUserProfile);
 
 export default router;

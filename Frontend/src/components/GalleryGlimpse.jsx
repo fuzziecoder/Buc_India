@@ -2,8 +2,22 @@ import React, { useRef, useState } from "react";
 import { motion, useScroll, useTransform, useMotionValue, useSpring } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 
-// Hyper-Optimized Cloudinary Link (eco quality, fixed width for performance)
-const CLOUDINARY_URL = "https://res.cloudinary.com/dsryaajna/video/upload/f_auto,q_auto:eco,w_400/v1773413158/5803635-uhd_2160_3840_25fps_1_lgprev.mp4";
+// Safe Cloudinary optimisation — width cap + auto quality/format only
+const OPT = "w_480";
+const VIDEOS = [
+  // Biker riding through the desert
+  `https://res.cloudinary.com/dsryaajna/video/upload/q_auto/f_auto,${OPT}/v1776150382/mixkit-a-biker-riding-through-the-desert-43118-hd-ready_hu2i8m.mp4`,
+  // Close-up motorcyclist with helmet traveling
+  `https://res.cloudinary.com/dsryaajna/video/upload/q_auto/f_auto,${OPT}/v1776150381/mixkit-very-close-shot-of-a-motorcyclist-with-a-helmet-traveling-39933-hd-ready_q9pol5.mp4`,
+  // Row of motorcycles in a garage
+  `https://res.cloudinary.com/dsryaajna/video/upload/q_auto/f_auto,${OPT}/v1776150378/mixkit-row-of-motorcycles-in-a-garage-41947-hd-ready_khuqi4.mp4`,
+  // Motorcyclist going down road — front view
+  `https://res.cloudinary.com/dsryaajna/video/upload/q_auto/f_auto,${OPT}/v1776150377/mixkit-motorcyclist-going-down-a-road-seen-from-the-front-39930-hd-ready_n4g0bu.mp4`,
+  // Motocross bikes close-up shot
+  `https://res.cloudinary.com/dsryaajna/video/upload/q_auto/f_auto,${OPT}/v1776150375/mixkit-motocross-bikes-in-a-close-shot-41945-hd-ready_epfvlx.mp4`,
+  // BUC India hero ride footage
+  `https://res.cloudinary.com/dsryaajna/video/upload/q_auto/f_auto,${OPT}/v1773413158/5803635-uhd_2160_3840_25fps_1_lgprev.mp4`,
+];
 
 const CinematicVideo = ({ src, delay, speed = 0, className = "" }) => {
   const containerRef = useRef(null);
@@ -51,18 +65,14 @@ const CinematicVideo = ({ src, delay, speed = 0, className = "" }) => {
   return (
     <motion.div
       ref={containerRef}
-      style={{ 
-        perspective: 1000,
-        opacity,
-        scale,
-        boxShadow: glowShadow
-      }}
-      initial={{ opacity: 0 }}
-      whileInView={{ opacity: 1 }}
-      viewport={{ once: true }}
+      initial={{ opacity: 0, y: 30 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-60px" }}
+      transition={{ duration: 0.7, delay, ease: "easeOut" }}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
       className={`relative w-32 md:w-44 aspect-[9/16] overflow-hidden rounded-sm group ${className}`}
+      style={{ perspective: 1000, boxShadow: glowShadow }}
     >
       <motion.div
         style={{ rotateX, rotateY }}
@@ -142,32 +152,32 @@ const GalleryGlimpse = () => {
         <div className="relative flex flex-wrap justify-center items-start gap-8 md:gap-16">
           {/* Card 1: Elevated Left */}
           <div className="mt-0 md:-mt-12">
-            <CinematicVideo src={CLOUDINARY_URL} speed={20} delay={0.1} />
+            <CinematicVideo src={VIDEOS[0]} speed={20} delay={0.1} />
           </div>
           
           {/* Card 2: Deep Offset Center-Left */}
           <div className="mt-12 md:mt-40">
-            <CinematicVideo src={CLOUDINARY_URL} speed={-30} delay={0.2} />
+            <CinematicVideo src={VIDEOS[1]} speed={-30} delay={0.2} />
           </div>
 
           {/* Card 3: Extreme Drift Center */}
           <div className="mt-24 md:mt-64 hidden sm:block">
-            <CinematicVideo src={CLOUDINARY_URL} speed={50} delay={0.3} className="scale-90" />
+            <CinematicVideo src={VIDEOS[2]} speed={50} delay={0.3} className="scale-90" />
           </div>
 
           {/* Card 4: High Pinned Center-Right */}
           <div className="mt-8 md:-mt-24 lg:mt-12">
-            <CinematicVideo src={CLOUDINARY_URL} speed={-50} delay={0.4} />
+            <CinematicVideo src={VIDEOS[3]} speed={-50} delay={0.4} />
           </div>
 
           {/* Card 5: Low Drift Right */}
           <div className="mt-20 md:mt-52">
-            <CinematicVideo src={CLOUDINARY_URL} speed={10} delay={0.5} />
+            <CinematicVideo src={VIDEOS[4]} speed={10} delay={0.5} />
           </div>
           
           {/* Card 6: Shadow Drift (Hidden on mobile) */}
           <div className="hidden lg:block absolute -right-20 top-1/4 opacity-40">
-             <CinematicVideo src={CLOUDINARY_URL} speed={80} delay={0.6} className="w-32 blur-[2px]" />
+             <CinematicVideo src={VIDEOS[5]} speed={80} delay={0.6} className="w-32 blur-[2px]" />
           </div>
         </div>
       </div>

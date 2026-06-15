@@ -103,8 +103,8 @@ export const registrationService = {
     });
     return response.data;
   },
-  getAll: async (eventId) => {
-    const params = {};
+  getAll: async (eventId, filters = {}) => {
+    const params = { ...filters };
     if (eventId && eventId !== "all") {
       params.eventId = eventId;
     }
@@ -131,6 +131,10 @@ export const profileService = {
     const response = await api.get("/profile", { params });
     return response.data;
   },
+  getAllAdmin: async () => {
+    const response = await api.get("/profile/all");
+    return response.data;
+  },
   signup: async (formData) => {
     const response = await api.post("/profile/signup", formData, {
       headers: {
@@ -149,6 +153,13 @@ export const profileService = {
         "Content-Type": "multipart/form-data",
       },
     });
+    return response.data;
+  },
+  createOrUpdate: async (formData) => {
+    return profileService.update(formData);
+  },
+  delete: async (id) => {
+    const response = await api.delete(`/profile/${id}`);
     return response.data;
   },
 };
@@ -170,6 +181,10 @@ export const clubService = {
   },
   updateStatus: async (id, status) => {
     const response = await api.patch(`/clubs/${id}/status`, { status });
+    return response.data;
+  },
+  deleteAdmin: async (id) => {
+    const response = await api.delete(`/clubs/${id}`);
     return response.data;
   },
 };
@@ -235,4 +250,18 @@ export const certificateService = {
   },
 };
 
+export const talentService = {
+  submit: async (formData) => {
+    const response = await api.post("/talent", formData);
+    return response.data;
+  },
+  getAll: async () => {
+    const response = await api.get("/talent");
+    return response.data;
+  },
+  delete: async (id) => {
+    const response = await api.delete(`/talent/${id}`);
+    return response.data;
+  },
+};
 export default api;

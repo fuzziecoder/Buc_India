@@ -18,13 +18,16 @@ import {
   Menu, 
   ChevronLeft,
   User,
-  Bell
+  Bell,
+  Star
 } from "lucide-react";
 import DashboardHome from "../DashboardHome/DashboardHome";
 import EventManagement from "../EventManagement/EventManagement";
 import ViewRegistrations from "../ViewRegistrations/ViewRegistrations";
+import ViewUsers from "../ViewUsers/ViewUsers.jsx";
 import GalleryManagement from "../GalleryManagement.jsx";
 import ClubManagement from "../ClubManagement/ClubManagement.jsx";
+import ViewTalents from "../ViewTalents/ViewTalents.jsx";
 import { authService, profileService } from "../../services/api";
 
 const logo = "/logo copy copy.jpg";
@@ -67,8 +70,11 @@ const AdminDashboard = () => {
   const navItems = [
     { path: "/admin/dashboard", name: "Overview", icon: <LayoutDashboard size={20} />, end: true },
     { path: "/admin/events", name: "Events", icon: <Calendar size={20} /> },
-    { path: "/admin/registrations", name: "Registrations", icon: <FileText size={20} /> },
+    { path: "/admin/registrations", name: "Event Registrations", icon: <FileText size={20} /> },
+    { path: "/admin/users", name: "Users", icon: <User size={20} /> },
+    { path: "/admin/talents", name: "Talents", icon: <Star size={20} /> },
     { path: "/admin/gallery", name: "Gallery", icon: <ImageIcon size={20} /> },
+    { path: "/admin/cover-photo", name: "Cover Photo", icon: <ImageIcon size={20} /> },
     { path: "/admin/clubs", name: "Clubs", icon: <Bike size={20} /> },
   ];
 
@@ -233,7 +239,10 @@ const AdminDashboard = () => {
             <Route path="dashboard" element={<DashboardHome />} />
             <Route path="events" element={<EventManagement />} />
             <Route path="registrations" element={<ViewRegistrations />} />
+            <Route path="users" element={<ViewUsers />} />
+            <Route path="talents" element={<ViewTalents />} />
             <Route path="gallery" element={<GalleryManagement />} />
+            <Route path="cover-photo" element={<GalleryManagement isCoverOnly={true} />} />
             <Route path="clubs" element={<ClubManagement />} />
           </Routes>
         </main>
