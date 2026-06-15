@@ -71,7 +71,8 @@ export const userSignup = async (req, res) => {
 
     const isRider = registrationType === 'Rider' || registrationType === 'Student Rider';
     const isStudent = registrationType === 'Student' || registrationType === 'Student Rider';
-    const isPS = registrationType === 'PS' || registrationType === 'Public User';
+    const isPS = registrationType === 'PS';
+    const isPublicUser = registrationType === 'Public User';
     const isPillion = registrationType === 'Pillion';
 
     // Check if it's a detailed registration (e.g. from the registration forms in registration branch)
@@ -99,7 +100,7 @@ export const userSignup = async (req, res) => {
           message: "Email, Password, and OTP are required." 
         });
       }
-      if (isDetailed && (!emergencyContactName || !emergencyContactPhone)) {
+      if (isDetailed && !isPublicUser && (!emergencyContactName || !emergencyContactPhone)) {
         return res.status(400).json({ 
           message: "Emergency Contact details are required." 
         });
@@ -167,7 +168,7 @@ export const userSignup = async (req, res) => {
     const profileImageFile = req.files && req.files.profileImage ? req.files.profileImage[0] : null;
     const licenseImageFile = req.files && req.files.licenseImage ? req.files.licenseImage[0] : null;
 
-    if (isDetailed && !isPS && !profileImageFile) {
+    if (isDetailed && !isPS && !isPublicUser && !profileImageFile) {
       return res.status(400).json({ message: "Profile image upload is required." });
     }
 

@@ -21,7 +21,8 @@ import {
   Upload,
   X,
   GraduationCap,
-  Users
+  Users,
+  Plus
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { profileService, otpService, clubService } from "../services/api";
@@ -102,6 +103,27 @@ const USER_TERMS = [
   }
 ];
 
+const SOCIAL_PLATFORMS = [
+  { value: "whatsapp", label: "WhatsApp", placeholder: "e.g. https://wa.me/91XXXXXXXXXX" },
+  { value: "instagram", label: "Instagram", placeholder: "e.g. https://instagram.com/yourusername", field: "instagramUrl" },
+  { value: "twitter", label: "Twitter/X", placeholder: "e.g. https://x.com/yourusername", field: "twitterUrl" },
+  { value: "website", label: "Personal Website", placeholder: "e.g. https://yourwebsite.com", field: "websiteUrl" },
+];
+
+const getSocialPlaceholder = (platform) =>
+  SOCIAL_PLATFORMS.find((p) => p.value === platform)?.placeholder || "Enter profile link";
+
+const mapSocialProfilesToFields = (profiles) => {
+  const fields = { instagramUrl: "", twitterUrl: "", websiteUrl: "" };
+  profiles.forEach(({ platform, url }) => {
+    const trimmed = url.trim();
+    if (!trimmed) return;
+    const config = SOCIAL_PLATFORMS.find((p) => p.value === platform);
+    if (config?.field) fields[config.field] = trimmed;
+  });
+  return fields;
+};
+
 const UserRegistrationForm = () => {
   const [formData, setFormData] = useState({
     registrationType: "",
@@ -153,6 +175,7 @@ const UserRegistrationForm = () => {
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [showTermsModal, setShowTermsModal] = useState(false);
   const [clubs, setClubs] = useState([]);
+  const [socialProfiles, setSocialProfiles] = useState([{ platform: "whatsapp", url: "" }]);
 
   useEffect(() => {
     let timer;
@@ -264,17 +287,11 @@ const UserRegistrationForm = () => {
       }
     }
 
-    if (!isPS && !isPublicUser) {
+    if (!isPS) {
       if (!formData.email || !formData.password || !formData.otp) {
         return toast.error("Please fill Email, Password, and OTP.");
       }
       if (!otpSent) return toast.error("Please verify your email with OTP first");
-    }
-
-    if (isPublicUser) {
-      if (!formData.email) {
-        return toast.error("Please fill Email Address.");
-      }
     }
 
     if (formData.phone.length !== 10) return toast.error("Phone number must be exactly 10 digits");
@@ -336,12 +353,10 @@ const UserRegistrationForm = () => {
       data.append("phone", formData.phone);
       data.append("tshirtSize", formData.tshirtSize);
       data.append("gender", formData.gender);
-      if (!isPS && !isPublicUser) {
+      if (!isPS) {
         data.append("email", formData.email);
         data.append("password", formData.password);
         data.append("otp", formData.otp);
-      } else if (isPublicUser) {
-        data.append("email", formData.email);
       }
       data.append("address", formData.address);
       data.append("city", formData.city);
@@ -422,11 +437,11 @@ const UserRegistrationForm = () => {
           dateOfBirth: "", bloodGroup: "", address: "", city: "", state: "", pincode: "",
           bikeModel: "", bikeRegistrationNumber: "", licenseNumber: "", clubId: "",
           emergencyContactName: "", emergencyContactPhone: "",
-          facebookUrl: "", instagramUrl: "", twitterUrl: "", youtubeUrl: "", websiteUrl: "",
           collegeName: "", collegeIdNo: "", riderPhone: "", riderRegistrationId: ""
         });
         setProfileImage(null); setProfileImagePreview(null);
         setLicenseImage(null); setLicenseImagePreview(null);
+        setSocialProfiles([{ platform: "whatsapp", url: "" }]);
         setOtpSent(false);
         setTermsAccepted(false);
       }, 3000);
@@ -617,7 +632,7 @@ const UserRegistrationForm = () => {
                   </select>
                 </div>
 
-                {!isPS && !isPublicUser && (
+                {!isPS && (
                   <>
                     <div className="space-y-1">
                       <label className="font-body text-[10px] uppercase tracking-widest text-white font-semibold">Email Address <span className="text-red-500">*</span></label>
@@ -643,9 +658,6 @@ const UserRegistrationForm = () => {
                       </div>
                     </div>
                   </>
-                )}
-                {isPublicUser && (
-                  <InputField label="Email Address" name="email" icon={Mail} type="email" value={formData.email} onChange={handleInputChange} required />
                 )}
               </div>
             </div>
@@ -760,7 +772,7 @@ const UserRegistrationForm = () => {
             )}
 
             {/* Social Presence */}
-            {!isPS && !isPublicUser && (
+            {!isPS && (
               <div className="space-y-6">
                 <div className="flex flex-col gap-1 border-b border-white/10 pb-2">
                   <h3 className="font-body text-xs uppercase tracking-[0.2em] text-copper">Social Presence <span className="text-white/40 ml-1 text-[10px] normal-case tracking-normal">(Optional)</span></h3>
