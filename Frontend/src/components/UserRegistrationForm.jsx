@@ -129,6 +129,7 @@ const UserRegistrationForm = () => {
     twitterUrl: "",
     youtubeUrl: "",
     websiteUrl: "",
+    socialLinks: [],
     collegeName: "",
     collegeIdNo: "",
     riderPhone: "",
@@ -139,6 +140,9 @@ const UserRegistrationForm = () => {
   const [profileImagePreview, setProfileImagePreview] = useState(null);
   const [licenseImage, setLicenseImage] = useState(null);
   const [licenseImagePreview, setLicenseImagePreview] = useState(null);
+
+  const [socialPlatform, setSocialPlatform] = useState("");
+  const [socialUrl, setSocialUrl] = useState("");
 
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -188,6 +192,34 @@ const UserRegistrationForm = () => {
       reader.onloadend = () => setPreview(reader.result);
       reader.readAsDataURL(file);
     }
+  };
+
+  const handleAddSocialLink = () => {
+    if (!socialPlatform || !socialUrl) {
+      toast.error("Please select a platform and enter a URL");
+      return;
+    }
+    if (!socialUrl.startsWith("http://") && !socialUrl.startsWith("https://")) {
+      toast.error("URL must start with http:// or https://");
+      return;
+    }
+    if (formData.socialLinks.some(link => link.platform.toLowerCase() === socialPlatform.toLowerCase())) {
+      toast.error(`You have already added a link for ${socialPlatform}`);
+      return;
+    }
+    setFormData(prev => ({
+      ...prev,
+      socialLinks: [...prev.socialLinks, { platform: socialPlatform, url: socialUrl }]
+    }));
+    setSocialPlatform("");
+    setSocialUrl("");
+  };
+
+  const handleRemoveSocialLink = (index) => {
+    setFormData(prev => ({
+      ...prev,
+      socialLinks: prev.socialLinks.filter((_, idx) => idx !== index)
+    }));
   };
 
   const handleSendOtp = async () => {
@@ -323,11 +355,31 @@ const UserRegistrationForm = () => {
 
       // Social details & Profile image (Common to non-PS)
       if (!isPS && !isPublicUser) {
-        if (formData.facebookUrl) data.append("facebookUrl", formData.facebookUrl);
-        if (formData.instagramUrl) data.append("instagramUrl", formData.instagramUrl);
-        if (formData.twitterUrl) data.append("twitterUrl", formData.twitterUrl);
-        if (formData.youtubeUrl) data.append("youtubeUrl", formData.youtubeUrl);
-        if (formData.websiteUrl) data.append("websiteUrl", formData.websiteUrl);
+        let fbVal = formData.facebookUrl || "";
+        let instaVal = formData.instagramUrl || "";
+        let twVal = formData.twitterUrl || "";
+        let ytVal = formData.youtubeUrl || "";
+        let webVal = formData.websiteUrl || "";
+
+        if (formData.socialLinks) {
+          formData.socialLinks.forEach(link => {
+            if (link.platform && link.url) {
+              const p = link.platform.toLowerCase();
+              if (p === "facebook") fbVal = link.url;
+              else if (p === "instagram") instaVal = link.url;
+              else if (p === "twitter" || p === "x") twVal = link.url;
+              else if (p === "youtube") ytVal = link.url;
+              else if (p === "website") webVal = link.url;
+            }
+          });
+        }
+
+        if (fbVal) data.append("facebookUrl", fbVal);
+        if (instaVal) data.append("instagramUrl", instaVal);
+        if (twVal) data.append("twitterUrl", twVal);
+        if (ytVal) data.append("youtubeUrl", ytVal);
+        if (webVal) data.append("websiteUrl", webVal);
+        data.append("socialLinks", JSON.stringify(formData.socialLinks || []));
         if (profileImage) data.append("profileImage", profileImage);
       }
 
@@ -411,7 +463,7 @@ const UserRegistrationForm = () => {
     <div className="bg-carbon-light border border-white/5 text-white max-w-4xl mx-auto p-6 md:p-12">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-white/10 pb-8 mb-12 gap-6">
         <div className="flex items-center gap-4">
-          <img src="/logo.jpg" alt="BUC India Logo" className="w-16 h-16 rounded-full border border-copper/30 object-cover" />
+          <img src="/bucpng.png" alt="BUC India Logo" className="w-16 h-16 rounded-full border border-copper/30 object-contain p-1 bg-white" />
           <div>
             <h1 className="font-heading text-3xl uppercase tracking-wider text-white">BUC India</h1>
             <span className="text-copper font-body text-[10px] tracking-[0.2em] uppercase">Bikers Unity Calls</span>
@@ -710,13 +762,78 @@ const UserRegistrationForm = () => {
             {/* Social Presence */}
             {!isPS && !isPublicUser && (
               <div className="space-y-6">
-                <h3 className="font-body text-xs uppercase tracking-[0.2em] text-copper border-b border-white/10 pb-2">Social Presence</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <InputField label="Facebook" name="facebookUrl" value={formData.facebookUrl} onChange={handleInputChange} />
-                  <InputField label="Instagram" name="instagramUrl" value={formData.instagramUrl} onChange={handleInputChange} />
-                  <InputField label="Twitter / X" name="twitterUrl" value={formData.twitterUrl} onChange={handleInputChange} />
-                  <InputField label="YouTube" name="youtubeUrl" value={formData.youtubeUrl} onChange={handleInputChange} />
-                  <InputField label="Personal Website" name="websiteUrl" value={formData.websiteUrl} onChange={handleInputChange} />
+                <div className="flex flex-col gap-1 border-b border-white/10 pb-2">
+                  <h3 className="font-body text-xs uppercase tracking-[0.2em] text-copper">Social Presence <span className="text-white/40 ml-1 text-[10px] normal-case tracking-normal">(Optional)</span></h3>
+                  <p className="text-[10px] text-white/50 font-body">Add your social media profiles to help the community connect with you.</p>
+                </div>
+
+                {formData.socialLinks && formData.socialLinks.length > 0 && (
+                  <div className="space-y-2 mb-4">
+                    {formData.socialLinks.map((link, index) => (
+                      <div key={index} className="flex items-center justify-between bg-white/5 px-4 py-3 border border-white/10 shadow-inner group transition-colors hover:border-copper/30">
+                        <div className="flex items-center gap-3">
+                          <span className="uppercase text-[10px] font-bold px-2 py-1 bg-copper/20 text-copper font-body tracking-wider">
+                            {link.platform}
+                          </span>
+                          <a href={link.url} target="_blank" rel="noopener noreferrer" className="text-xs text-white/70 truncate hover:text-white transition-colors max-w-[150px] sm:max-w-[250px] font-body">
+                            {link.url}
+                          </a>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveSocialLink(index)}
+                          className="text-white/40 hover:text-red-400 p-1 transition-colors"
+                          title="Remove link"
+                        >
+                          <X size={16} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                <div className="flex flex-col md:flex-row gap-4">
+                  <div className="flex-1 md:max-w-[200px]">
+                    <div className="relative group">
+                      <select
+                        value={socialPlatform}
+                        onChange={(e) => setSocialPlatform(e.target.value)}
+                        className="w-full bg-carbon border border-white/20 hover:border-copper/50 px-4 py-4 font-body text-sm text-white outline-none focus:border-copper transition-all appearance-none cursor-pointer shadow-inner"
+                      >
+                        <option value="">Select Platform</option>
+                        <option value="Instagram">Instagram</option>
+                        <option value="Facebook">Facebook</option>
+                        <option value="Twitter">Twitter/X</option>
+                        <option value="YouTube">YouTube</option>
+                        <option value="Website">Website</option>
+                        <option value="LinkedIn">LinkedIn</option>
+                        <option value="Other">Other</option>
+                      </select>
+                      <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-steel-dim">
+                        ▼
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex-[2]">
+                    <div className="relative group">
+                      <input
+                        type="url"
+                        value={socialUrl}
+                        onChange={(e) => setSocialUrl(e.target.value)}
+                        placeholder="https://instagram.com/yourprofile"
+                        className="w-full bg-carbon border border-white/20 hover:border-copper/50 px-4 py-4 font-body text-sm text-white outline-none focus:border-copper transition-all placeholder:text-white/20 shadow-inner"
+                      />
+                    </div>
+                  </div>
+                  <div className="md:self-end">
+                    <button
+                      type="button"
+                      onClick={handleAddSocialLink}
+                      className="bg-white/10 hover:bg-copper hover:text-black text-white font-body text-xs uppercase tracking-widest font-semibold py-4 px-6 transition-all w-full md:w-auto shadow-inner border border-white/20 hover:border-copper"
+                    >
+                      Add Link
+                    </button>
+                  </div>
                 </div>
               </div>
             )}
