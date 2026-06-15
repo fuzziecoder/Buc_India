@@ -21,7 +21,8 @@ import {
   Upload,
   X,
   GraduationCap,
-  Users
+  Users,
+  Plus
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { profileService, otpService, clubService } from "../services/api";
@@ -102,6 +103,27 @@ const USER_TERMS = [
   }
 ];
 
+const SOCIAL_PLATFORMS = [
+  { value: "whatsapp", label: "WhatsApp", placeholder: "e.g. https://wa.me/91XXXXXXXXXX" },
+  { value: "instagram", label: "Instagram", placeholder: "e.g. https://instagram.com/yourusername", field: "instagramUrl" },
+  { value: "twitter", label: "Twitter/X", placeholder: "e.g. https://x.com/yourusername", field: "twitterUrl" },
+  { value: "website", label: "Personal Website", placeholder: "e.g. https://yourwebsite.com", field: "websiteUrl" },
+];
+
+const getSocialPlaceholder = (platform) =>
+  SOCIAL_PLATFORMS.find((p) => p.value === platform)?.placeholder || "Enter profile link";
+
+const mapSocialProfilesToFields = (profiles) => {
+  const fields = { instagramUrl: "", twitterUrl: "", websiteUrl: "" };
+  profiles.forEach(({ platform, url }) => {
+    const trimmed = url.trim();
+    if (!trimmed) return;
+    const config = SOCIAL_PLATFORMS.find((p) => p.value === platform);
+    if (config?.field) fields[config.field] = trimmed;
+  });
+  return fields;
+};
+
 const UserRegistrationForm = () => {
   const [formData, setFormData] = useState({
     registrationType: "",
@@ -124,11 +146,6 @@ const UserRegistrationForm = () => {
     clubId: "",
     emergencyContactName: "",
     emergencyContactPhone: "",
-    facebookUrl: "",
-    instagramUrl: "",
-    twitterUrl: "",
-    youtubeUrl: "",
-    websiteUrl: "",
     collegeName: "",
     collegeIdNo: "",
     riderPhone: "",
@@ -149,6 +166,7 @@ const UserRegistrationForm = () => {
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [showTermsModal, setShowTermsModal] = useState(false);
   const [clubs, setClubs] = useState([]);
+  const [socialProfiles, setSocialProfiles] = useState([{ platform: "whatsapp", url: "" }]);
 
   useEffect(() => {
     let timer;
@@ -188,6 +206,22 @@ const UserRegistrationForm = () => {
       reader.onloadend = () => setPreview(reader.result);
       reader.readAsDataURL(file);
     }
+  };
+
+  const handleSocialPlatformChange = (index, platform) => {
+    setSocialProfiles((prev) =>
+      prev.map((profile, i) => (i === index ? { ...profile, platform } : profile))
+    );
+  };
+
+  const handleSocialUrlChange = (index, url) => {
+    setSocialProfiles((prev) =>
+      prev.map((profile, i) => (i === index ? { ...profile, url } : profile))
+    );
+  };
+
+  const handleAddSocialProfile = () => {
+    setSocialProfiles((prev) => [...prev, { platform: "instagram", url: "" }]);
   };
 
   const handleSendOtp = async () => {
@@ -232,17 +266,11 @@ const UserRegistrationForm = () => {
       }
     }
 
-    if (!isPS && !isPublicUser) {
+    if (!isPS) {
       if (!formData.email || !formData.password || !formData.otp) {
         return toast.error("Please fill Email, Password, and OTP.");
       }
       if (!otpSent) return toast.error("Please verify your email with OTP first");
-    }
-
-    if (isPublicUser) {
-      if (!formData.email) {
-        return toast.error("Please fill Email Address.");
-      }
     }
 
     if (formData.phone.length !== 10) return toast.error("Phone number must be exactly 10 digits");
@@ -304,12 +332,10 @@ const UserRegistrationForm = () => {
       data.append("phone", formData.phone);
       data.append("tshirtSize", formData.tshirtSize);
       data.append("gender", formData.gender);
-      if (!isPS && !isPublicUser) {
+      if (!isPS) {
         data.append("email", formData.email);
         data.append("password", formData.password);
         data.append("otp", formData.otp);
-      } else if (isPublicUser) {
-        data.append("email", formData.email);
       }
       data.append("address", formData.address);
       data.append("city", formData.city);
@@ -322,13 +348,12 @@ const UserRegistrationForm = () => {
       }
 
       // Social details & Profile image (Common to non-PS)
-      if (!isPS && !isPublicUser) {
-        if (formData.facebookUrl) data.append("facebookUrl", formData.facebookUrl);
-        if (formData.instagramUrl) data.append("instagramUrl", formData.instagramUrl);
-        if (formData.twitterUrl) data.append("twitterUrl", formData.twitterUrl);
-        if (formData.youtubeUrl) data.append("youtubeUrl", formData.youtubeUrl);
-        if (formData.websiteUrl) data.append("websiteUrl", formData.websiteUrl);
-        if (profileImage) data.append("profileImage", profileImage);
+      if (!isPS) {
+        const socialFields = mapSocialProfilesToFields(socialProfiles);
+        if (socialFields.instagramUrl) data.append("instagramUrl", socialFields.instagramUrl);
+        if (socialFields.twitterUrl) data.append("twitterUrl", socialFields.twitterUrl);
+        if (socialFields.websiteUrl) data.append("websiteUrl", socialFields.websiteUrl);
+        if (!isPublicUser && profileImage) data.append("profileImage", profileImage);
       }
 
       // Conditionally append Rider details
@@ -370,11 +395,11 @@ const UserRegistrationForm = () => {
           dateOfBirth: "", bloodGroup: "", address: "", city: "", state: "", pincode: "",
           bikeModel: "", bikeRegistrationNumber: "", licenseNumber: "", clubId: "",
           emergencyContactName: "", emergencyContactPhone: "",
-          facebookUrl: "", instagramUrl: "", twitterUrl: "", youtubeUrl: "", websiteUrl: "",
           collegeName: "", collegeIdNo: "", riderPhone: "", riderRegistrationId: ""
         });
         setProfileImage(null); setProfileImagePreview(null);
         setLicenseImage(null); setLicenseImagePreview(null);
+        setSocialProfiles([{ platform: "whatsapp", url: "" }]);
         setOtpSent(false);
         setTermsAccepted(false);
       }, 3000);
@@ -565,7 +590,7 @@ const UserRegistrationForm = () => {
                   </select>
                 </div>
 
-                {!isPS && !isPublicUser && (
+                {!isPS && (
                   <>
                     <div className="space-y-1">
                       <label className="font-body text-[10px] uppercase tracking-widest text-white font-semibold">Email Address <span className="text-red-500">*</span></label>
@@ -591,9 +616,6 @@ const UserRegistrationForm = () => {
                       </div>
                     </div>
                   </>
-                )}
-                {isPublicUser && (
-                  <InputField label="Email Address" name="email" icon={Mail} type="email" value={formData.email} onChange={handleInputChange} required />
                 )}
               </div>
             </div>
@@ -708,15 +730,43 @@ const UserRegistrationForm = () => {
             )}
 
             {/* Social Presence */}
-            {!isPS && !isPublicUser && (
+            {!isPS && (
               <div className="space-y-6">
                 <h3 className="font-body text-xs uppercase tracking-[0.2em] text-copper border-b border-white/10 pb-2">Social Presence</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <InputField label="Facebook" name="facebookUrl" value={formData.facebookUrl} onChange={handleInputChange} />
-                  <InputField label="Instagram" name="instagramUrl" value={formData.instagramUrl} onChange={handleInputChange} />
-                  <InputField label="Twitter / X" name="twitterUrl" value={formData.twitterUrl} onChange={handleInputChange} />
-                  <InputField label="YouTube" name="youtubeUrl" value={formData.youtubeUrl} onChange={handleInputChange} />
-                  <InputField label="Personal Website" name="websiteUrl" value={formData.websiteUrl} onChange={handleInputChange} />
+                <div className="space-y-4">
+                  {socialProfiles.map((profile, index) => (
+                    <div key={index} className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="space-y-1">
+                        <label className="font-body text-[10px] uppercase tracking-widest text-white font-semibold">Platform</label>
+                        <select
+                          value={profile.platform}
+                          onChange={(e) => handleSocialPlatformChange(index, e.target.value)}
+                          className="w-full bg-carbon border border-white/10 px-6 py-4 font-body text-sm text-white outline-none focus:border-copper transition-colors appearance-none"
+                        >
+                          {SOCIAL_PLATFORMS.map((platform) => (
+                            <option key={platform.value} value={platform.value}>{platform.label}</option>
+                          ))}
+                        </select>
+                      </div>
+                      <div className="space-y-1">
+                        <label className="font-body text-[10px] uppercase tracking-widest text-white font-semibold">Profile Link</label>
+                        <input
+                          type="url"
+                          value={profile.url}
+                          onChange={(e) => handleSocialUrlChange(index, e.target.value)}
+                          placeholder={getSocialPlaceholder(profile.platform)}
+                          className="w-full bg-carbon border border-white/10 px-6 py-4 font-body text-xs text-white outline-none focus:border-copper transition-colors placeholder:text-white/30"
+                        />
+                      </div>
+                    </div>
+                  ))}
+                  <button
+                    type="button"
+                    onClick={handleAddSocialProfile}
+                    className="inline-flex items-center gap-2 px-4 py-3 bg-white/5 border border-white/10 font-body text-[10px] uppercase tracking-widest hover:bg-copper hover:text-carbon transition-all"
+                  >
+                    <Plus size={14} /> Add Another
+                  </button>
                 </div>
               </div>
             )}
